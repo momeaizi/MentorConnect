@@ -1,0 +1,13 @@
+FROM python:3.8-slim-buster
+
+WORKDIR /mc-api
+
+COPY requirements.txt requirements.txt
+RUN /usr/local/bin/python -m pip install --upgrade pip
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 5000
+
+ENTRYPOINT ["gunicorn", "application:app", "--bind", "0.0.0.0:5000"]
