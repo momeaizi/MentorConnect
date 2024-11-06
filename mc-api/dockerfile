@@ -6,8 +6,10 @@ COPY requirements.txt requirements.txt
 RUN /usr/local/bin/python -m pip install --upgrade pip
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+
+RUN pip3 install watchdog
+
 COPY . .
 
-EXPOSE 5000
-
-ENTRYPOINT ["gunicorn", "application:app", "--bind", "0.0.0.0:5000"]
+CMD ["watchmedo", "auto-restart", "--pattern=*.py", "--recursive", "--", \
+     "gunicorn", "application:app", "--bind", "0.0.0.0:5000", "--workers=4"]
