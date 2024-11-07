@@ -11,22 +11,36 @@ services:
   #   networks:
   #     - internal_network
 
-  mc-api:
-    container_name: mc-api
-    image: mc-api:latest
-    build: ./mc-api
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=mc-postgres
+  # mc-api:
+  #   container_name: mc-api
+  #   image: mc-api:latest
+  #   build: ./mc-api
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_HOST=mc-postgres
+  #   ports:
+  #     - "5000:5000"
+  #   # depends_on:
+  #   #   - mc-postgres
+  #   networks:
+  #     - internal_network
+  #   volumes:
+  #     - ./mc-api:/mc-api
+
+ front-end:
+    container_name: front-end
+    image: front-end:latest
+    build: ./front-end
     ports:
-      - "5000:5000"
+      - "3000:3000"
     # depends_on:
-    #   - mc-postgres
+    #   - mc-api
     networks:
       - internal_network
     volumes:
-      - ./mc-api:/mc-api
+      - ./front-end:/front-end
+      - ./.env:/front-end/.env
 
 networks:
   internal_network:
