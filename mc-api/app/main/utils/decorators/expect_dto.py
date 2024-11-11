@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import request, jsonify
-from app.utils.exceptions import ValidationError
+from app.main.utils.exceptions import ValidationError
 
 
 def expect_dto(dto_class):

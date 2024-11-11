@@ -1,4 +1,4 @@
-from app.utils.exceptions import ValidationError
+from app.main.utils.exceptions import ValidationError
 
 class RegisterUserDTO:
     def __init__(self, data):

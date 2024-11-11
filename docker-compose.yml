@@ -1,28 +1,30 @@
 services:
-  # mc-postgres:
-  #   container_name: mc-postgres
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_USER=${POSTGRES_USER}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - pgdata_vol:/var/lib/postgresql/data
-  #   networks:
-  #     - internal_network
+  mc-postgres:
+    container_name: mc-postgres
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata_vol:/var/lib/postgresql/data
+    networks:
+      - internal_network
 
   mc-api:
     container_name: mc-api
     image: mc-api:latest
     build: ./mc-api
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=mc-postgres
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
     ports:
       - "5000:5000"
-    # depends_on:
-    #   - mc-postgres
+    depends_on:
+      - mc-postgres
     networks:
       - internal_network
     volumes:
