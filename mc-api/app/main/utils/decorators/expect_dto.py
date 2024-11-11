@@ -3,7 +3,7 @@ from flask import request, jsonify
 from app.main.utils.exceptions import ValidationError
 
 
-def expect_dto(dto_class):
+def expect_dto(dto_class, validate=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -19,9 +19,10 @@ def expect_dto(dto_class):
 
                 data = request.json
                 dto_instance = dto_class(data)
-                
-                # Validate the DTO
-                dto_instance.validate()
+
+                if validate:
+                    dto_instance.validate()
+
             except ValidationError as e:
                 return jsonify({
                     "status": "error",

@@ -1,14 +1,23 @@
 from app.main.utils.exceptions import ValidationError
+from loguru import logger
+
 
 class RegisterUserDTO:
     def __init__(self, data):
-        self.username = data.get('username', None)
-        self.email = data.get('email', None)
+        fields = ['username', 'email']
+
+        fields_to_remove = [key for key in data if key not in fields]
+
+        for attribute in fields_to_remove:
+            del data[attribute]
+
+        self.data = data
+
 
     def validate(self):
-        if not self.username:
-            raise ValidationError("Username is required and must be at least 3 characters", "MISSING_USERNAME")
+        if not self.data.get('username', None):
+            raise ValidationError("username is required", "MISSING_USERNAME")
 
-        if not self.email:
+        if not self.data.get('email', None):
             raise ValidationError("A valid email is required", "MISSING_EMAIL")
 

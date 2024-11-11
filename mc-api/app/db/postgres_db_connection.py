@@ -1,9 +1,8 @@
 from psycopg2 import pool
-from .base_db_connection import BaseDBConnection
 from loguru import logger
 
 
-class PostgresDBConnection(BaseDBConnection):
+class PostgresDBConnection:
     _instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -27,7 +26,7 @@ class PostgresDBConnection(BaseDBConnection):
                 port=config.get('DB_PORT')
             )
             if self.connection_pool:
-                logger.error("Connection pool created successfully")
+                logger.info("Connection pool created successfully")
         except Exception as e:
             logger.error(f"Error creating connection pool: {str(e)}")
 

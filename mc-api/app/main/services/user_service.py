@@ -1,27 +1,44 @@
 import psycopg2.extras
 from app.db import PostgresDBConnection
 from loguru import logger
+from app.db import execute_query
 
 
-def get_user():
-    postgres_db_connection = PostgresDBConnection()
+def fetch_user(id):
+    select_query = "SELECT * FROM users WHERE id = %s"
+    users = execute_query(select_query, params=(id,) ,fetch_one=True)
+    return users
 
-    connection = postgres_db_connection.get_db_connection()
+def fetch_users():
+    select_query = "SELECT * FROM users"
+    users = execute_query(select_query,fetch_all=True)
+    return users
 
-    if connection:
-        try:
-            with connection.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
-                cursor.execute("SELECT * FROM users;")
-                users = cursor.fetchall()
+def create_user(data):
+    data["password_hash"] = 'nvkjnbkvnb'
+    insert_query = f"INSERT INTO users ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
+    new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
+    return new_user
 
-                logger.info(f"Fetched {len(users)} users")
 
-                return [dict(user) for user in users]
-        except Exception as e:
-            logger.error(f"Error executing query: {str(e)}")
-        finally:
-            postgres_db_connection.release_db_connection(connection)
-    else:
-        logger.error("Failed to get a database connection.")
-    
-    return []
+def update_user(id, data):
+    update_query = f"""
+    UPDATE users
+    SET
+        {', '.join([ f'{column} = %s' for column in data.keys()])}
+    WHERE id = %s
+    RETURNING *
+    """
+    logger.info(update_query)
+    updated_user = execute_query(update_query, params=(*data.values(), id), fetch_one=True)
+    return updated_user
+
+def remove_user(id):
+    delete_query = f"""
+    DELETE FROM users
+    WHERE id = %s
+    RETURNING *
+    """
+    logger.info(delete_query)
+    removed_user = execute_query(delete_query, params=(id,), fetch_one=True)
+    return removed_user
