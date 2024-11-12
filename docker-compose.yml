@@ -7,7 +7,6 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - DBNAE
     volumes:
       - pgdata_vol:/var/lib/postgresql/data
     networks:
@@ -32,6 +31,20 @@ services:
       - internal_network
     volumes:
       - ./mc-api:/mc-api
+
+  front-end:
+    container_name: front-end
+    image: front-end:latest
+    build: ./front-end
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mc-api
+    networks:
+      - internal_network
+    volumes:
+      - ./front-end:/front-end
+      - ./.env:/front-end/.env
 
 networks:
   internal_network:
