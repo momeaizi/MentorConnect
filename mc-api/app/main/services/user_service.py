@@ -58,6 +58,15 @@ def update_user(id, data):
         logger.info(update_query)
         updated_user = execute_query(update_query, params=(*data.values(), id), fetch_one=True)
         return jsonify(updated_user), 200
+    except UniqueConstraintError as e:
+        logger.error(f"Error updating user: {e}")
+        return jsonify({
+            "status": "error",
+            "error": {
+                "message": f"{e.field} already exists",
+                "code": e.code,
+            }
+        }), 409
     except Exception as e:
         logger.error(f"Error updating user: {e}")
         return jsonify({'status': 'error', 'message': 'Error updating user'}), 500
