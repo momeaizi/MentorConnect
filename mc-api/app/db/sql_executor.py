@@ -22,13 +22,10 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False):
                     result = {"count": cursor.rowcount}
     except psycopg2.IntegrityError as e:
         if 'unique constraint' in str(e).lower():
-            # Extract field causing violation if possible
             field = 'unknown'
             if hasattr(e, 'diag') and e.diag.constraint_name:
                 field = e.diag.constraint_name
 
-
-            # Raise custom exception with field in the message
             raise UniqueConstraintError(field=field)
         else:
             logger.error(f"Integrity error: {e}")
