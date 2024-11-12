@@ -30,7 +30,7 @@ def expect_dto(dto_class, validate=False):
                         "message": e.error,
                         "code": e.code
                     }
-                }), 400
+                }), 409
             except Exception as e:
                 return jsonify({"error": str(e)}), 400
 
