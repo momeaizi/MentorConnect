@@ -1,9 +1,9 @@
 from functools import wraps
 from flask import request, jsonify
-from app.utils.exceptions import ValidationError
+from app.main.utils.exceptions import ValidationError
 
 
-def expect_dto(dto_class):
+def expect_dto(dto_class, validate=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -19,9 +19,10 @@ def expect_dto(dto_class):
 
                 data = request.json
                 dto_instance = dto_class(data)
-                
-                # Validate the DTO
-                dto_instance.validate()
+
+                if validate:
+                    dto_instance.validate()
+
             except ValidationError as e:
                 return jsonify({
                     "status": "error",
@@ -29,7 +30,7 @@ def expect_dto(dto_class):
                         "message": e.error,
                         "code": e.code
                     }
-                }), 400
+                }), 409
             except Exception as e:
                 return jsonify({"error": str(e)}), 400
 
