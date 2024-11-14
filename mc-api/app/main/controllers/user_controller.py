@@ -2,12 +2,13 @@ from flask import Blueprint, request
 from app.main.services.user_service import fetch_users, fetch_user, create_user, update_user, remove_user
 from app.main.utils.decorators import expect_dto
 from app.main.utils.dtos import RegisterUserDTO
-
+from app.main.utils.decorators import token_required
 
 user_bp = Blueprint('user_bp', __name__)
 
 
 @user_bp.route('/')
+@token_required
 def get_users():
     return fetch_users()
 

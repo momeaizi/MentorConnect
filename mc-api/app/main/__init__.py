@@ -1,7 +1,6 @@
 from flask import Flask
 from app.main.config import config_by_name
 from loguru import logger
-from app.main.controllers import init_controllers
 from app.db import PostgresDBConnection
 from flask_bcrypt import Bcrypt
 
@@ -16,7 +15,8 @@ def create_app(config_name):
     app.config.from_object(config_by_name[config_name])
     
     postgres_db_connection.init_db(app.config)
-    init_controllers(app)
     bcrypt.init_app(app)
+    from app.main.controllers import init_controllers
+    init_controllers(app)
 
     return app

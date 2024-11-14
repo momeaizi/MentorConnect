@@ -30,6 +30,7 @@ def create_user(data):
     try:
         insert_query = f"INSERT INTO users ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
         new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
+        print(new_user)
         return jsonify(new_user), 201
     except UniqueConstraintError as e:
         logger.error(f"Error creating user: {e}")
