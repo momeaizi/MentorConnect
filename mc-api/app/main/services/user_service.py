@@ -28,7 +28,6 @@ def fetch_users():
 
 def create_user(data):
     try:
-        data["password_hash"] = 'nvkjnbkvnb'
         insert_query = f"INSERT INTO users ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
         new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
         return jsonify(new_user), 201

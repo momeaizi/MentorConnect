@@ -3,8 +3,11 @@ from app.main.config import config_by_name
 from loguru import logger
 from app.main.controllers import init_controllers
 from app.db import PostgresDBConnection
+from flask_bcrypt import Bcrypt
 
 postgres_db_connection = PostgresDBConnection()
+bcrypt = Bcrypt() 
+
 
 def create_app(config_name):
     logger.info("App is starting on : " + config_name + " mode")
@@ -13,7 +16,7 @@ def create_app(config_name):
     app.config.from_object(config_by_name[config_name])
     
     postgres_db_connection.init_db(app.config)
-
     init_controllers(app)
+    bcrypt.init_app(app)
 
     return app
