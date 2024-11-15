@@ -1,12 +1,10 @@
-from app.db import PostgresDBConnection
+from app.main import postgres_db_connection
 from app.main.utils.exceptions import UniqueConstraintError
 import psycopg2.extras
 from loguru import logger
 
 
 def execute_query(query, params=None, fetch_one=False, fetch_all=False):
-
-    postgres_db_connection = PostgresDBConnection()
     result = None
 
     try:
@@ -14,7 +12,8 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False):
             with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cursor:
                 cursor.execute(query, params)
                 if fetch_one:
-                    result = dict(cursor.fetchone())
+                    result = cursor.fetchone()
+                    result = dict(result) if result else None
                 elif fetch_all:
                     result = [dict(record) for record in cursor.fetchall()]
                 else:
@@ -30,8 +29,6 @@ def execute_query(query, params=None, fetch_one=False, fetch_all=False):
         else:
             logger.error(f"Integrity error: {e}")
             return {'status': 'error', 'message': 'Database integrity error'}, 500
-    except Exception as e:
-        logger.error(f"Error executing query: {e}")
     finally:
         postgres_db_connection.release_db_connection(conn)
     return result
