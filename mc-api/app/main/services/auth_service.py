@@ -60,3 +60,41 @@ def verify_email_service(token):
     except jwt.InvalidTokenError:
         return "Invalid token. Please request a new verification link."
 
+def forgot_password_service(email):
+    select_query = "SELECT * FROM users WHERE email = %s"
+    user = execute_query(select_query, params=(email,) ,fetch_one=True)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    token = serializer.dumps(email, salt='password-reset-salt')
+    reset_url = url_for('auth_bp.reset_password', token=token, _external=True)
+
+    try:
+        msg = Message("Password Reset Request", recipients=[email])
+        msg.body = f"Click the link to reset your password: {reset_url}"
+        mail.send(msg)
+    except Exception as e:
+        logger.error(f"Failed to send email: {e}")
+        return jsonify({"message": "Failed to send email"}), 500
+
+    return jsonify({"message": "Password reset link sent to your email"}), 200
+
+def update_password(email, new_password):
+    update_query = """UPDATE users SET password_hash = %s WHERE email = %s RETURNING *"""
+    updated_user = execute_query(update_query, params=(new_password, email), fetch_one=True)
+    return updated_user
+
+def reset_password_service(token, new_password):
+    try:
+        email = serializer.loads(token, salt='password-reset-salt', max_age=3600) #1h
+    except SignatureExpired:
+        return jsonify({"message": "The token has expired"}), 400
+    except BadSignature:
+        return jsonify({"message": "Invalid token"}), 400
+
+
+    password_hash = bcrypt.generate_password_hash(new_password).decode('utf-8')
+    if update_password(email, password_hash):
+        return jsonify({"message": "Password reset successfully"}), 200
+    else:
+        return jsonify({"message": "Failed to reset password"}), 500
