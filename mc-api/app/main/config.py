@@ -15,7 +15,7 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = 'mentorconnect682@gmail.com'
     MAIL_DEFAULT_SENDER = 'mentorconnect682@gmail.com'
-    MAIL_PASSWORD = 'ns%JfL8lUnQUv&Jc;+zeoLfX'
+    MAIL_PASSWORD = 'juhu nfbk ubul otdh'
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -24,3 +24,5 @@ class ProductionConfig(Config):
     DEBUG = False
 
 config_by_name = dict(dev=DevelopmentConfig, prod=ProductionConfig)
+
+
