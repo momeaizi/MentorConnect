@@ -10,6 +10,12 @@ class Config:
     DB_PORT = os.getenv('DB_PORT')
     JWT_PRIVATE_KEY = 'your-very-secret-private-key'
     JWT_ALGORITHM = 'HS256'
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 587
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = 'mentorconnect682@gmail.com'
+    MAIL_DEFAULT_SENDER = 'mentorconnect682@gmail.com'
+    MAIL_PASSWORD = 'ns%JfL8lUnQUv&Jc;+zeoLfX'
 
 class DevelopmentConfig(Config):
     DEBUG = True

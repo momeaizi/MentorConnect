@@ -1,6 +1,6 @@
-from app.main.utils.exceptions import UniqueConstraintError
 from app.main.utils.jwt import create_custom_access_token
 from flask import current_app as app
+from app.main.utils.exceptions import UniqueConstraintError
 from app.main import bcrypt
 from app.db import PostgresDBConnection
 from app.db import execute_query
@@ -9,9 +9,6 @@ from flask import jsonify
 import psycopg2.extras
 import hmac
 import hashlib
-
-
-
 
 def register_user(data):
     try:
@@ -39,7 +36,7 @@ def login_user(data):
                 "username": user.get('username', None),
             })
             return jsonify(access_token=access_token), 200
-        elif user and !user.get('validated',None):
+        elif user and user.get('validated',None) == False:
             return jsonify({'status': 'error', 'message': 'Validate Your Account'}), 401
         elif user:
             return jsonify({'status': 'error', 'message': 'Incorrect Password'}), 401
