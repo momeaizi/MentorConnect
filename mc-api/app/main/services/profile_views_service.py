@@ -1,4 +1,4 @@
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 from flask import jsonify
 from loguru import logger
 
@@ -7,6 +7,11 @@ class ProfileViewsService():
 
     def log_profile_view(self, viewer_id, profile_owner_id):
         try:
+            if viewer_id == profile_owner_id:
+                return jsonify({
+                    "status": "error",
+                    "message": "You cannot log a view for your own profile."
+                }), 400
             insert_query = "INSERT INTO profile_views (viewer_id, profile_owner_id) VALUES (%s, %s)"
             execute_query(insert_query, params=(viewer_id, profile_owner_id))
             return jsonify({"status": "success", "message": "Profile view logged successfully"}), 200

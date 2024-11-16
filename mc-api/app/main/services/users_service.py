@@ -84,32 +84,3 @@ class UserService:
         except Exception as e:
             logger.error(f"Error deleting user: {e}")
             return jsonify({'status': 'error', 'message': 'Error deleting user'}), 500
-
-
-    def like_user(self, liker_id, liked_profile_id):
-        try:
-            insert_query = "INSERT INTO profile_likes (liker_id, liked_profile_id) VALUES (%s, %s)"
-            execute_query(insert_query, params=(liker_id, liked_profile_id))
-            return jsonify({"status": "success", "message": "Profile liked successfully"}), 200
-        except UniqueConstraintError as e:
-            logger.error(f"Error liking user: {e}")
-            return jsonify({
-                "status": "error",
-                "message": "you already liked this profile"
-            }), 409
-        except Exception as e:
-            logger.error(f"Error liking user: {e}")
-            return jsonify({'status': 'error', 'message': 'Error liking user'}), 500
-
-
-    def unlike_user(self, unliker_id, unliked_profile_id):
-        try:
-            delete_query = """
-            DELETE FROM profile_likes
-            WHERE liker_id = %s AND liked_profile_id = %s
-            """
-            execute_query(delete_query, params=(unliker_id, unliked_profile_id))
-            return jsonify({"status": "success", "message": "Profile unliked successfully"}), 200
-        except Exception as e:
-            logger.error(f"Error unliking user: {e}")
-            return jsonify({'status': 'error', 'message': 'Error unliking user'}), 500

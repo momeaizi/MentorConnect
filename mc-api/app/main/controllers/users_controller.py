@@ -34,13 +34,3 @@ def patch_user(id):
 @user_bp.route('/<int:id>', methods=['DELETE'])
 def delete_user(id):
     return user_service.remove_user(id)
-
-
-@user_bp.route('/<int:id>/like', methods=['POST'])
-def like_user(id):
-    return user_service.like_user(1, 2)
-
-
-@user_bp.route('/<int:id>/like', methods=['DELETE'])
-def unlike_user(id):
-    return user_service.unlike_user(1, 2)
