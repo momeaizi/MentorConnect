@@ -88,7 +88,7 @@ class UserService:
 
     def like_user(self, liker_id, liked_profile_id):
         try:
-            insert_query = "INSERT INTO likes (liker_id, liked_profile_id) VALUES (%s, %s)"
+            insert_query = "INSERT INTO profile_likes (liker_id, liked_profile_id) VALUES (%s, %s)"
             execute_query(insert_query, params=(liker_id, liked_profile_id))
             return jsonify({"status": "success", "message": "Profile liked successfully"}), 200
         except UniqueConstraintError as e:
@@ -105,7 +105,7 @@ class UserService:
     def unlike_user(self, unliker_id, unliked_profile_id):
         try:
             delete_query = """
-            DELETE FROM likes
+            DELETE FROM profile_likes
             WHERE liker_id = %s AND liked_profile_id = %s
             """
             execute_query(delete_query, params=(unliker_id, unliked_profile_id))

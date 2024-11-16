@@ -7,7 +7,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE likes (
+CREATE TABLE profile_likes (
     id SERIAL PRIMARY KEY,
     liker_id INT NOT NULL,
     liked_profile_id INT NOT NULL,
