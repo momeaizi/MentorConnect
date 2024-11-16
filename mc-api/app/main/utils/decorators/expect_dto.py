@@ -23,6 +23,8 @@ def expect_dto(dto_class, validate=False):
                 if validate:
                     dto_instance.validate()
 
+                kwargs['data'] = dto_instance.data
+            
             except ValidationError as e:
                 return jsonify({
                     "status": "error",

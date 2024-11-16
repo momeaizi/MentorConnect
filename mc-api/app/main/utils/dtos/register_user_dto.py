@@ -21,3 +21,4 @@ class RegisterUserDTO:
         if not self.data.get('email', None):
             raise ValidationError("A valid email is required", "MISSING_EMAIL")
 
+
