@@ -1,1 +1,5 @@
-from app.main.utils.dtos.register_user_dto import RegisterUserDTO
+from app.main.utils.dtos.auth_dto import (
+    RegisterUserDTO, LoginUserDTO, 
+    ForgotPasswordDTO, ResetPasswordDTO,
+    VerifyAccountDTO
+    ) 

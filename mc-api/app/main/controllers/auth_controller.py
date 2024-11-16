@@ -1,48 +1,47 @@
-from flask import Blueprint, request, jsonify, url_for
+from flask import Blueprint, request, jsonify
 from loguru import logger
 from app.main import bcrypt
-from app.main import mail , Message
-from app.main.services.auth_service import register_user, login_user, verify_email_service, forgot_password_service, reset_password_service
-from app.db import execute_query
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from flask import current_app as app
+from app.main.services.auth_service import (
+    register_user, login_user, verify_email_service,
+    forgot_password_service, reset_password_service,
+    verify_acount_service
+)
+from app.main.utils.decorators import expect_dto
+from app.main.utils.exceptions import ValidationError
+from app.main.utils.dtos.auth_dto import (
+    RegisterUserDTO, LoginUserDTO, 
+    ForgotPasswordDTO, ResetPasswordDTO,
+    VerifyAccountDTO
+    )
 
 auth_bp = Blueprint('auth_bp', __name__)
 
-SECRET_KEY = "your-secret-key"
-serializer = URLSafeTimedSerializer(SECRET_KEY)
-
 @auth_bp.route('/register', methods=['POST'])
-def register():
-    data = {
-        "username" : request.json.get('username'),
-        "email" : request.json.get('email'),
-        "password_hash" : bcrypt.generate_password_hash(request.json.get('password')).decode('utf-8')
-    }
+@expect_dto(RegisterUserDTO, validate=True)
+def register(data):
+    data['password_hash'] = bcrypt.generate_password_hash(data.pop('password')).decode('utf-8')
     return register_user(data)
 
+@auth_bp.route('/verify_account', methods=['POST'])
+@expect_dto(VerifyAccountDTO, validate=True)
+def verify_acount(data):
+    return verify_acount_service(data)
 
 @auth_bp.route('/login', methods=['POST'])
-def login():
-    data = {
-        "username" : request.json.get('username'),
-        "password" : request.json.get('password')
-    }
+@expect_dto(LoginUserDTO, validate=True)
+def login(data):
     return login_user(data)
 
-@auth_bp.route('/verify/<token>')
+@auth_bp.route('/verify/<token>', methods=['GET'])
 def verify_email(token):
     return verify_email_service(token)
 
-
 @auth_bp.route('/forgot-password', methods=['POST'])
-def forgot_password():
-    email = request.json.get('email')
-    return forgot_password_service(email)
-    
+@expect_dto(ForgotPasswordDTO, validate=True)
+def forgot_password(data):
+    return forgot_password_service(data['email'])
+
 @auth_bp.route('/reset-password/<token>', methods=['POST'])
-def reset_password(token):    
-    new_password = request.json.get('new_password', None)
-    if not new_password:
-        return jsonify({"message": "New password is required"}), 400
-    return reset_password_service(token, new_password)
+@expect_dto(ResetPasswordDTO, validate=True)
+def reset_password(token, data):
+    return reset_password_service(token, data['new_password'])
