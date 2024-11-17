@@ -1,11 +1,7 @@
 from flask import Blueprint, request
 from app.main.services.users_service import UserService
 from app.main.utils.decorators import expect_dto
-from app.main.utils.dtos.auth_dto import (
-    RegisterUserDTO, LoginUserDTO, 
-    ForgotPasswordDTO, ResetPasswordDTO,
-    VerifyAccountDTO
-    )
+from app.main.utils.dtos.auth_dto import RegisterUserDTO
 from app.main.utils.decorators import token_required
 from loguru import logger
 

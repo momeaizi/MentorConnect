@@ -41,7 +41,6 @@ def token_required(f):
             }, 500
 
         kwargs['user'] = current_user
-        logger.info(f"""------------------->{current_user}""")
         return f(*args, **kwargs)
 
     return decorated
