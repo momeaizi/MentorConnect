@@ -16,6 +16,7 @@ services:
     container_name: mc-api
     image: mc-api:latest
     build: ./mc-api
+    restart: always
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DB_USER=${DB_USER}
