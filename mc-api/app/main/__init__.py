@@ -4,11 +4,13 @@ from loguru import logger
 from app.db.postgres_db_connection import PostgresDBConnection
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
+from flask_socketio import SocketIO
 
 
 postgres_db_connection = PostgresDBConnection()
 bcrypt = Bcrypt() 
 mail = Mail()
+socketio = SocketIO()
 
 
 def create_app(config_name):
@@ -20,6 +22,7 @@ def create_app(config_name):
     postgres_db_connection.init_db(app.config)
     bcrypt.init_app(app)
     mail.init_app(app)
+    socketio.init_app(app)
 
     
     from app.main.controllers import init_controllers
