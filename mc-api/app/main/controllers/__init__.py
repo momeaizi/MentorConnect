@@ -1,6 +1,7 @@
 from app.main.controllers.users_controller import user_bp
 from app.main.controllers.profiles_controller import profile_bp
 from app.main.controllers.auth_controller import auth_bp
+from app.main.controllers.socket_event_controller import *
 
 
 def init_controllers(app):
