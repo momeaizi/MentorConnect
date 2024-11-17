@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app.main.services.user_service import fetch_users, fetch_user, create_user, update_user, remove_user
+from app.main.services.user_service import fetch_users, fetch_user, update_user, remove_user
 from app.main.utils.decorators import expect_dto
 from app.main.utils.dtos.auth_dto import (
     RegisterUserDTO, LoginUserDTO, 

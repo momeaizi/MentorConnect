@@ -7,3 +7,14 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    notified_user_id INT NOT NULL,
+    actor_id INT NOT NULL,
+    notification_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_seen BOOLEAN DEFAULT FALSE,
+    type VARCHAR(100) NOT NULL,
+    FOREIGN KEY (notified_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE
+);

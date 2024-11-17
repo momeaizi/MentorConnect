@@ -5,13 +5,9 @@ from app.main.utils.mail import send_verification_email
 from app.main.utils.password import update_password
 from itsdangerous import URLSafeTimedSerializer
 from app.main import bcrypt, mail, Message
-from app.db import PostgresDBConnection
 from app.db import execute_query
 from loguru import logger
 from flask import jsonify, url_for
-import psycopg2.extras
-import hmac
-import hashlib
 import jwt
 
 serializer = URLSafeTimedSerializer("secret_key")
