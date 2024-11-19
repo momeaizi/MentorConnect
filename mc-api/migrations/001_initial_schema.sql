@@ -13,18 +13,31 @@ CREATE TABLE users (
     fame_rate INT DEFAULT 0,
     is_online BOOLEAN DEFAULT FALSE,
     last_connection TIMESTAMP,
-    profile_pic BYTEA,
-    pictures BYTEA[],
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- CREATE TABLE  user_tags(
---     id SERIAL PRIMARY KEY,
---     user_id INT REFERENCES users(id) ON DELETE CASCADE,
---     tag VARCHAR(100) NOT NULL
--- );
+CREATE TABLE  tags(
+    id SERIAL PRIMARY KEY,
+    tag VARCHAR(100) UNIQUE NOT NULL
+);
 
+
+CREATE TABLE  user_tags(
+    id SERIAL PRIMARY KEY,
+    tag_id INT NOT NULL,
+    user_id INT NOT NULL,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE pictures (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    file_name VARCHAR(100) NOT NULL,
+    is_profile BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
 
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,

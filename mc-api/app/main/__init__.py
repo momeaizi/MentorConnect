@@ -10,7 +10,6 @@ postgres_db_connection = PostgresDBConnection()
 bcrypt = Bcrypt() 
 mail = Mail()
 
-
 def create_app(config_name):
     logger.info("App is starting on : " + config_name + " mode")
     app = Flask(__name__)

@@ -16,6 +16,7 @@ class Config:
     MAIL_USERNAME = 'mentorconnect682@gmail.com'
     MAIL_DEFAULT_SENDER = 'mentorconnect682@gmail.com'
     MAIL_PASSWORD = 'juhu nfbk ubul otdh'
+    UPLOAD_FOLDER = '/uploads'
 
 class DevelopmentConfig(Config):
     DEBUG = True
