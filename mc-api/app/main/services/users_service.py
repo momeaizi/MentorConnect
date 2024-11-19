@@ -33,7 +33,7 @@ class UserService:
             new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
             return jsonify(new_user), 201
         except UniqueConstraintError as e:
-            logger.error(f"Error creating user: {e}")
+            logger.error(f"warning creating user: {e}")
             return jsonify({
                 "status": "error",
                 "error": {
@@ -59,7 +59,7 @@ class UserService:
             updated_user = execute_query(update_query, params=(*data.values(), id), fetch_one=True)
             return jsonify(updated_user), 200
         except UniqueConstraintError as e:
-            logger.error(f"Error updating user: {e}")
+            logger.error(f"warning updating user: {e}")
             return jsonify({
                 "status": "error",
                 "error": {

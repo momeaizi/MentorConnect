@@ -18,7 +18,7 @@ class ProfilelikesService():
             execute_query(insert_query, params=(liker_id, liked_profile_id))
             return jsonify({"status": "success", "message": "Profile liked successfully"}), 200
         except UniqueConstraintError as e:
-            logger.error(f"Error liking user: {e}")
+            logger.error(f"warning liking user: {e}")
             return jsonify({
                 "status": "error",
                 "message": "you already liked this profile"
