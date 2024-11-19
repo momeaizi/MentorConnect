@@ -13,7 +13,7 @@ class UserService:
             return jsonify(users), 200
         except Exception as e:
             logger.error(f"Error fetching user: {e}")
-            return jsonify({'status': 'error', 'message': 'Error registering user'}), 500
+            return jsonify({'status': 'error', 'message': 'Error fetching user'}), 500
 
 
     def fetch_users(self, ):

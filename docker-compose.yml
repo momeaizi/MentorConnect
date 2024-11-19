@@ -12,23 +12,11 @@ services:
     networks:
       - internal_network
 
+
   mc-redis:
     container_name: mc-redis
     image: redis:latest
     restart: always
-    networks:
-      - internal_network
-
-  nginx:
-    container_name: nginx
-    image: nginx:latest
-    restart: always
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    ports:
-      - "5000:80"
-    depends_on:
-      - mc-api
     networks:
       - internal_network
 
@@ -46,8 +34,8 @@ services:
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - REDIS_URL=${REDIS_URL}
-    # ports:
-    #   - "5000:5000"
+    ports:
+      - "5000:5000"
     depends_on:
       - mc-postgres
       - mc-redis
@@ -55,6 +43,21 @@ services:
       - internal_network
     volumes:
       - ./mc-api:/mc-api
+
+
+  # nginx:
+  #   container_name: nginx
+  #   image: nginx:latest
+  #   restart: always
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   ports:
+  #     - "5000:80"
+  #   depends_on:
+  #     - mc-api
+  #   networks:
+  #     - internal_network
+
 
   # front-end:
   #   container_name: front-end
