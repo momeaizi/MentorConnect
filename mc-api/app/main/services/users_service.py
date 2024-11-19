@@ -3,6 +3,7 @@ from app.main.utils.exceptions import UniqueConstraintError
 from loguru import logger
 from app.db.sql_executor import execute_query
 from flask import jsonify
+from datetime import datetime
 
 class UserService:
     def fetch_user(self, id):
@@ -12,7 +13,7 @@ class UserService:
             return jsonify(users), 200
         except Exception as e:
             logger.error(f"Error fetching user: {e}")
-            return jsonify({'status': 'error', 'message': 'Error registering user'}), 500
+            return jsonify({'status': 'error', 'message': 'Error fetching user'}), 500
 
 
     def fetch_users(self, ):
@@ -84,3 +85,27 @@ class UserService:
         except Exception as e:
             logger.error(f"Error deleting user: {e}")
             return jsonify({'status': 'error', 'message': 'Error deleting user'}), 500
+
+
+    def set_user_logged_in(self, user_id):
+        update_query = """
+        UPDATE users
+        SET
+            is_logged_in = %s
+        WHERE id = %s
+        RETURNING *
+        """
+        execute_query(update_query, params=(True, user_id))
+
+
+    def set_user_logged_out(self, user_id):
+        current_utc_timestamp = datetime.utcnow()
+        update_query = """
+        UPDATE users
+        SET
+            is_logged_in = %s,
+            last_logged_in = %s
+        WHERE id = %s
+        RETURNING *
+        """
+        execute_query(update_query, params=(False, current_utc_timestamp, user_id))
