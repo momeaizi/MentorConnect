@@ -9,8 +9,8 @@ user_bp = Blueprint('user_bp', __name__)
 user_service = UserService()
 
 @user_bp.route('/')
-@token_required
-def get_users(user):
+# @token_required
+def get_users():
     return user_service.fetch_users()
 
 

@@ -8,6 +8,7 @@ class Config:
     DB_USER = os.getenv('DB_USER')
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_PORT = os.getenv('DB_PORT')
+    REDIS_URL = os.getenv('REDIS_URL')
     JWT_PRIVATE_KEY = 'your-very-secret-private-key'
     JWT_ALGORITHM = 'HS256'
     MAIL_SERVER = 'smtp.gmail.com'

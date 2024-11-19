@@ -10,4 +10,4 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY . .
 
 CMD ["watchmedo", "auto-restart", "--pattern=*.py", "--recursive", "--", \
-     "gunicorn", "application:app", "--bind", "0.0.0.0:5000", "--workers=4"]
+     "gunicorn", "application:app", "--bind", "0.0.0.0:5000", "--workers=4", "-k", "eventlet"]

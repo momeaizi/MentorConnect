@@ -6,5 +6,7 @@ Flask-Bcrypt==1.0.1
 PyJWT==2.6.0
 Flask-Mail==0.9.1
 Flask-SocketIO==5.3.3
+redis==4.3.5
+eventlet==0.30.2
 loguru
 watchdog
