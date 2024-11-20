@@ -10,6 +10,40 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    notified_user_id INT NOT NULL,
+    actor_id INT NOT NULL,
+    notification_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_seen BOOLEAN DEFAULT FALSE,
+    type VARCHAR(100) NOT NULL,
+    FOREIGN KEY (notified_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE conversations (
+    id SERIAL PRIMARY KEY,
+    user_id_1 INT NOT NULL,
+    user_id_2 INT NOT NULL,
+    see BOOLEAN DEFAULT FALSE,
+    last_message_id INT,
+    FOREIGN KEY (user_id_1) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    conversation_id INT NOT NULL, 
+    user_id INT NOT NULL,     
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ALTER TABLE conversations ADD CONSTRAINT fk_last_message FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE CASCADE;
+
 CREATE TABLE profile_views (
     id SERIAL PRIMARY KEY,
     viewer_id INTEGER NOT NULL,
