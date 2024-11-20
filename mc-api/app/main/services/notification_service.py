@@ -1,6 +1,6 @@
 from flask import jsonify, request
 from loguru import logger
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 
 #{ notified_user_id, actor_id, type}
 def create_notif_service(data):

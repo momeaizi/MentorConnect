@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from loguru import logger
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 from app.main.utils.decorators import expect_dto, token_required
 from app.main.utils.exceptions import ValidationError
 from app.main.services.chat_service import (
