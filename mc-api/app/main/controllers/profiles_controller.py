@@ -29,13 +29,21 @@ def get_viewed_profiles(user):
     return profile_views_service.get_viewed_profiles(user['id'])
 
 
+@profile_bp.route('/liked')
+@token_required
+def liked_profiles(user, liked_profile_id):
+    return profile_likes_service.liked_profiles(user.get('id'))
+
+
+
+
 @profile_bp.route('/<int:liked_profile_id>/like', methods=['POST'])
 @token_required
-def like_user(user, liked_profile_id):
-    return profile_likes_service.like_user(user['id'], liked_profile_id)
+def like_profile(user, liked_profile_id):
+    return profile_likes_service.like_profile(user['id'], liked_profile_id)
 
 
 @profile_bp.route('/<int:unliked_profile_id>/like', methods=['DELETE'])
 @token_required
-def unlike_user(user, unliked_profile_id):
-    return profile_likes_service.unlike_user(user['id'], unliked_profile_id)
+def unlike_profile(user, unliked_profile_id):
+    return profile_likes_service.unlike_profile(user['id'], unliked_profile_id)

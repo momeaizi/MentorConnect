@@ -7,7 +7,17 @@ from loguru import logger
 class ProfilelikesService():
 
 
-    def like_user(self, liker_id, liked_profile_id):
+    def liked_profiles(self, user_id):
+        try:
+            select_query = "SELECT * FROM profile_likes WHERE liker_id = %s"
+            users = execute_query(select_query, params=(user_id, ),fetch_all=True)
+            return jsonify(users), 200
+        except Exception as e:
+            logger.error(f"Error fetching liked users: {e}")
+            return jsonify({'status': 'error', 'message': 'Error fetching liked users'}), 500
+    
+
+    def like_profile(self, liker_id, liked_profile_id):
         try:
             if liker_id == liked_profile_id:
                 return jsonify({
@@ -28,7 +38,7 @@ class ProfilelikesService():
             return jsonify({'status': 'error', 'message': 'Error liking user'}), 500
 
 
-    def unlike_user(self, unliker_id, unliked_profile_id):
+    def unlike_profile(self, unliker_id, unliked_profile_id):
         try:
             if unliker_id == unliked_profile_id:
                 return jsonify({
