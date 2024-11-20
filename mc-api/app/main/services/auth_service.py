@@ -8,9 +8,6 @@ from app.main import bcrypt, mail, Message
 from app.db.sql_executor import execute_query
 from loguru import logger
 from flask import jsonify, url_for
-import psycopg2.extras
-import hmac
-import hashlib
 import jwt
 
 serializer = URLSafeTimedSerializer("secret_key")
