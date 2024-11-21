@@ -18,7 +18,31 @@ class UserService:
 
     def fetch_users(self, ):
         try:
-            select_query = "SELECT * FROM users"
+            select_query = """
+                SELECT 
+                    u.id AS user_id,
+                    u.username,
+                    u.email,
+                    u.validate,
+                    u.is_logged_in,
+                    u.last_logged_in,
+                    u.created_at,
+                    u.updated_at,
+                    COALESCE(
+                        JSON_AGG(
+                            JSON_BUILD_OBJECT('id', t.id, 'name', t.name)
+                        ) FILTER (WHERE t.id IS NOT NULL), 
+                        '[]'
+                    ) AS tags
+                FROM 
+                    users u
+                LEFT JOIN 
+                    user_tags ut ON u.id = ut.user_id
+                LEFT JOIN 
+                    tags t ON ut.tag_id = t.id
+                GROUP BY 
+                    u.id
+            """
             users = execute_query(select_query,fetch_all=True)
             return jsonify(users), 200
         except Exception as e:

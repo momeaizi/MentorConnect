@@ -13,7 +13,7 @@ DB_PARAMS = {
     'port': 5432
 }
 
-bcrypt = Bcrypt() 
+bcrypt = Bcrypt()
 hashed_password = bcrypt.generate_password_hash("taha").decode('utf-8')
 
 # Sample data for the tables
@@ -41,6 +41,23 @@ profile_likes_data = [
     (5, 1, datetime(2024, 11, 5, 13, 10, 0))
 ]
 
+tags_data = [
+    ("gamer",),
+    ("traveler",),
+    ("foodie",),
+    ("coder",),
+    ("artist",)
+]
+
+user_tags_data = [
+    (1, 1),  # Alice -> gamer
+    (1, 2),  # Alice -> traveler
+    (2, 3),  # Bob -> foodie
+    (3, 4),  # Charlie -> coder
+    (4, 5),  # Dave -> artist
+    (5, 1)   # Eve -> gamer
+]
+
 # Function to insert data into the database
 def seed_data():
     try:
@@ -65,6 +82,18 @@ def seed_data():
             INSERT INTO profile_likes (liker_id, liked_profile_id, liked_at)
             VALUES (%s, %s, %s)
         """, profile_likes_data)
+
+        # Insert data into tags table
+        cur.executemany("""
+            INSERT INTO tags (name)
+            VALUES (%s)
+        """, tags_data)
+
+        # Insert data into user_tags table
+        cur.executemany("""
+            INSERT INTO user_tags (user_id, tag_id)
+            VALUES (%s, %s)
+        """, user_tags_data)
 
         # Commit the transaction
         conn.commit()
