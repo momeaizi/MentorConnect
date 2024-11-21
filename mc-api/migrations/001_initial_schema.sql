@@ -37,7 +37,7 @@ CREATE TABLE pictures (
     file_name VARCHAR(100) NOT NULL,
     is_profile BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-)
+);
 
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,

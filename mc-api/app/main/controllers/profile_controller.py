@@ -5,14 +5,17 @@ from app.main.utils.decorators import expect_dto, token_required
 from app.main.utils.exceptions import ValidationError
 from werkzeug.utils import secure_filename
 from app.main.services.profile_service import (
-    get_profile_service, update_profile_service
+    get_profile_service, update_profile_service,
+    handle_profile_picture_service, handle_other_pictures_service,
+    get_image_service
 )
 import os
 from flask import current_app as app
+import uuid
+from flask import send_file
 
 
 profile_bp = Blueprint('profile_bp', __name__)
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 #? Get Profile
 @profile_bp.route('/conversation', methods=['POST'])
@@ -30,20 +33,23 @@ def update_profile(user):
     return update_profile_service(data)
 
 
+#? Upload or Update profile image
+@profile_bp.route('/picture', methods=['POST'])
+@token_required
+def handle_profile_picture(user):
+    profile_file = request.files.get('profile')
+    return handle_profile_picture_service(user, profile_file)
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@profile_bp.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#? Upload or Update images
+@profile_bp.route('/pictures', methods=['POST'])
+@token_required
+def handle_other_pictures(user):
+    request_file = request.files
+    return handle_other_pictures_service(user, request_file)
+
+#? Get Image With Name
+@profile_bp.route('/get_image/<filename>', methods=['GET'])
+@token_required
+def get_image(user, filename):
+    return get_image_service(user, filename)
