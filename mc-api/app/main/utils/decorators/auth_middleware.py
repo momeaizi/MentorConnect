@@ -1,5 +1,5 @@
 from flask import current_app as app
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 from flask import request, abort
 from functools import wraps
 from loguru import logger
@@ -41,7 +41,6 @@ def token_required(f):
             }, 500
 
         kwargs['user'] = current_user
-        logger.info(f"""------------------->{current_user}""")
         return f(*args, **kwargs)
 
     return decorated

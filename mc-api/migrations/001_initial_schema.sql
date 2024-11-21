@@ -13,6 +13,8 @@ CREATE TABLE users (
     fame_rate INT DEFAULT 0,
     is_online BOOLEAN DEFAULT FALSE,
     last_connection TIMESTAMP,
+    is_logged_in BOOLEAN DEFAULT FALSE,
+    last_logged_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -72,3 +74,68 @@ CREATE TABLE messages (
 );
 
 ALTER TABLE conversations ADD CONSTRAINT fk_last_message FOREIGN KEY (last_message_id) REFERENCES messages(id) ON DELETE CASCADE;
+
+CREATE TABLE profile_views (
+    id SERIAL PRIMARY KEY,
+    viewer_id INTEGER NOT NULL,
+    profile_owner_id INTEGER NOT NULL,
+    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_viewer
+        FOREIGN KEY(viewer_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_profile_owner
+        FOREIGN KEY(profile_owner_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE profile_likes (
+    id SERIAL PRIMARY KEY,
+    liker_id INT NOT NULL,
+    liked_profile_id INT NOT NULL,
+    liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(liker_id, liked_profile_id),
+    CONSTRAINT fk_liker
+        FOREIGN KEY(liker_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_liked_profile
+        FOREIGN KEY(liked_profile_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE blocked_users (
+    id SERIAL PRIMARY KEY,
+    blocker_id INT NOT NULL,
+    blocked_id INT NOT NULL,
+    blocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(blocker_id, blocked_id),
+    CONSTRAINT fk_blocker
+        FOREIGN KEY(blocker_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_blocked
+        FOREIGN KEY(blocked_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE reported_users (
+    id SERIAL PRIMARY KEY,
+    reporter_id INT NOT NULL,
+    reported_id INT NOT NULL,
+    reported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(reporter_id, reported_id),
+    CONSTRAINT fk_reporter
+        FOREIGN KEY(reporter_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_reported
+        FOREIGN KEY(reported_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);

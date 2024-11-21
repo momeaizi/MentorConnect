@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, request, jsonify
 from loguru import logger
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 from app.main.utils.decorators import expect_dto, token_required
 from app.main.utils.exceptions import ValidationError
 from flask import send_file
@@ -20,6 +20,7 @@ def get_profile_service(user_id):
     except Exception as e:
         return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
     
+#TODO CHANGE VALUES TO ALL DATA
 def update_profile_service(data):
     try:
         update_query = f"UPDATE users  ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"

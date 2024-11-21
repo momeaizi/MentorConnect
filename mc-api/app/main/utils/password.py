@@ -1,4 +1,4 @@
-from app.db import execute_query
+from app.db.sql_executor import execute_query
 
 def update_password(email, new_password):
     update_query = """UPDATE users SET password_hash = %s WHERE email = %s RETURNING *"""

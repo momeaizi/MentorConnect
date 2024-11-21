@@ -15,7 +15,7 @@ def apply_migration(file_path):
             with conn.cursor() as cursor:
                 with open(file_path, 'r') as file:
                     cursor.execute(file.read())
-                logger.info(f"Applied migration: {file_path}")
+                logger.success(f"Applied migration: {file_path}")
     except Exception as e:
         logger.error(f"Error applying migration {file_path}: {e}")
     finally:
