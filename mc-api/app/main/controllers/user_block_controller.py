@@ -10,8 +10,7 @@ user_block_service = UserBlockService()
 
 
 @user_block_bp.route('/<int:id>/block', methods=['POST'])
-# @token_required
-def block_user(id):
-    user = {'id': 5}
-    return user_block_service.block_user(user.get('id'), id)
+@token_required
+def block_user(user, id):
+    return user_block_service.block_user(user.get('id', None), id)
 

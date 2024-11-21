@@ -12,6 +12,7 @@ from app.main.services.chat_service import (
 chat_bp = Blueprint('chat_bp', __name__)
 
 # data: { user_id_1,user_id_2}
+# TODO ADD DTO
 #? CREATE NEW CONVERSATION
 @chat_bp.route('/conversation', methods=['POST'])
 @token_required

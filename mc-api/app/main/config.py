@@ -17,6 +17,8 @@ class Config:
     MAIL_USERNAME = 'mentorconnect682@gmail.com'
     MAIL_DEFAULT_SENDER = 'mentorconnect682@gmail.com'
     MAIL_PASSWORD = 'juhu nfbk ubul otdh'
+    UPLOAD_FOLDER = os.path.abspath('./uploads')
+    ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 class DevelopmentConfig(Config):
     DEBUG = True
