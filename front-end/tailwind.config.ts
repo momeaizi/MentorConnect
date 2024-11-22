@@ -12,8 +12,14 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      // backgroundImage: {
+      //   'hero-pattern': "url('/public/dark_background.jpg')",
+      //   'footer-texture': "url('/public/dark_background.jpg')",
+      // },
     },
   },
   plugins: [],
 };
 export default config;
+
+
