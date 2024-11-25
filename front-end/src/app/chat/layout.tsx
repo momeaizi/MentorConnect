@@ -13,11 +13,11 @@ export default function ChatLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className='chat-page h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr]'>
-        <Navbar />
-        <main className="p-0 h-full w-screen">
-            {children}
-        </main>
+    <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+      <Navbar />
+      <div className='p-0 h-full w-screen overflow-hidden'>
+        {children}
+      </div>
     </div>
   );
 }

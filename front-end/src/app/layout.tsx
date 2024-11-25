@@ -30,9 +30,21 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ConfigProvider
-          theme={{
-            algorithm: theme.darkAlgorithm,
-          }}
+            theme={{
+              token: {
+                colorBgBase: '#1a1a1a',
+                colorTextBase: '#ffffff',
+                colorBorder: '#323333',
+                colorPrimary: '#1677ff',
+                colorBgHover: '#333333',
+                colorBorderHover: '#555555',
+                colorBgActive: '#444444',
+                colorBorderActive: '#777777',
+                colorPrimaryHover: '#3c9eff',
+                colorPrimaryActive: '#0e5adb',
+                colorSecondary: '#ff6f61',
+              },
+            }}
         >
           {children}
         </ConfigProvider>
