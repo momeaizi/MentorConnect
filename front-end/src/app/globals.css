@@ -26,7 +26,41 @@ body {
   font-weight: 600;
 }
 
+.cell-user-name {
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
 
-.top-navbar {
-    height: 54px;
+.cell-last-message {
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #888888;
+}
+
+.cell-last-message-time {
+  display: flex;
+  color: #838383;
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.cell-no-viewd-message-icon {
+  background-color: rgb(106, 106, 240);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+:hover::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  box-shadow: inset 0 0 5px white;
+  border-radius: 10px;
 }

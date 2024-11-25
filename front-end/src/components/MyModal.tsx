@@ -1,3 +1,4 @@
+'use client'
 import { Modal } from 'antd';
 
 export default function MyModal({children, openModal, setOpenModal} : any) {
