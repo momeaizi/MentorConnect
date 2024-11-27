@@ -32,7 +32,7 @@ export default function RootLayout({
         <ConfigProvider
             theme={{
               token: {
-                colorBgBase: '#1a1a1a',
+                colorBgBase: '#021428',
                 colorTextBase: '#ffffff',
                 colorBorder: '#323333',
                 colorPrimary: '#1677ff',
