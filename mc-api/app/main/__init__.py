@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 from flask_socketio import SocketIO
 import redis
+from flask_cors import CORS
 
 
 postgres_db_connection = PostgresDBConnection()
@@ -20,8 +21,12 @@ def create_app(config_name):
     global redis_client
 
 
+
+
     logger.info("App is starting on : " + config_name + " mode")
     app = Flask(__name__)
+
+    CORS(app)
 
     app.config.from_object(config_by_name[config_name])
 

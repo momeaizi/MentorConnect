@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { ConfigProvider } from 'antd';
 import "./globals.css";
 
 const geistSans = localFont({
@@ -26,9 +27,24 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
       >
-        {children}
+        <ConfigProvider
+          theme={{
+            token: {
+              colorText: "#FAFAFA",
+              colorTextPlaceholder: "#70707B",
+              colorPrimary: '#ec4899',
+              colorSecondary: '#ef4444',
+              colorBgBase: '#1a1b27',
+              colorBorder: "#70707B",
+              colorBorderSecondary:"#3F3F46",
+              colorIcon: '#70707B'
+            },
+          }}
+        >
+          {children}
+        </ConfigProvider>
       </body>
     </html>
   );
