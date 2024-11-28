@@ -4,12 +4,13 @@ export default function MyModal({children, openModal, setOpenModal} : any) {
   return (
       <Modal
         centered
-        closable={false}
+        // closable={false}
         footer={null}
         open={openModal}
         onCancel={() => setOpenModal(false)}
+        className="max-w-[415px]"
       >
-        {children} 
+        {children}
       </Modal>
   );
 };

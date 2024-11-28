@@ -1,6 +1,5 @@
 'use client';
-import React,  { FC, useState } from 'react';
-import Image from 'next/image';
+import React,  { FC, useState, ReactNode } from 'react';
 import MyModal from '@/components/MyModal';
 import Button from '@/components/Button';
 import Login from '@/utils/Login'
@@ -8,28 +7,25 @@ import CreateAccount from '@/utils/CreateAccount'
 import "@/app/globals.css"
 
 export default function LandingPage() {
-  const [openModal, setOpenModal] = useState<Boolean>(false);
-  const [modalChildren, setModalChildren] = useState<FC>();
+  const [openModal, setOpenModal] = useState<boolean>(false);
+  const [modalChildren, setModalChildren] = useState<ReactNode>(null);
 
 
   const handleClickLogin = () => {
     setOpenModal(true);
-    setModalChildren(()=><Login/>);
-    console.log("FAfddsf")
+    setModalChildren(<Login/>);
   }
   
   const handleClickCreateAccount = () =>{
     setOpenModal(true);
-    setModalChildren(()=><CreateAccount/>);
-    console.log("FAfddsf")
+    setModalChildren(<CreateAccount/>);
   }
 
   return (
     <>
       <MyModal children={modalChildren} openModal={openModal} setOpenModal={setOpenModal}/>
       <div
-        className="h-screen bg-cover bg-center grid grid-cols-1 grid-rows-[72px_1fr] gap-0"
-        style={{ backgroundImage: "url('/dark_background.jpg')" }}
+        className="bg-[url('/11.png')] h-screen bg-cover bg-center grid grid-cols-1 grid-rows-[72px_1fr] gap-0"
       >
         <div className="flex flex-row justify-between	items-center	px-8">
 
@@ -47,7 +43,7 @@ export default function LandingPage() {
           </h1>
           
           <Button
-            text="Log in"
+            text="Login"
             className="log_in_button cursor-pointer	flex justify-center items-center text-xl box-border bg-white text-black rounded-3xl w-32 h-11 px-5 py-2 font-mono"
             onclick={handleClickLogin}
           />
@@ -69,7 +65,7 @@ export default function LandingPage() {
           </p>
           <Button
             text="Create account"
-            className="log_in_button cursor-pointer	 flex justify-center gap-0 items-center text-xl box-border bg-white text-white rounded-3xl w-48/1 h-12 px-3 py-6 font-mono bg-gradient-to-r from-pink-500 to-red-500"
+            className="px-5 log_in_button cursor-pointer	 flex justify-center gap-0 items-center text-xl box-border bg-white text-white rounded-3xl w-48/1 h-12 px-3 py-6 font-mono bg-gradient-to-r from-pink-500 to-red-500"
             onclick={handleClickCreateAccount}
           />
           <p 

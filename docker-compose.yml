@@ -1,48 +1,48 @@
 services:
-  # mc-postgres:
-  #   container_name: mc-postgres
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_DB=${DB_NAME}
-  #     - POSTGRES_USER=${DB_USER}
-  #     - POSTGRES_PASSWORD=${DB_PASSWORD}
-  #   volumes:
-  #     - pgdata_vol:/var/lib/postgresql/data
-  #   networks:
-  #     - internal_network
+  mc-postgres:
+    container_name: mc-postgres
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata_vol:/var/lib/postgresql/data
+    networks:
+      - internal_network
 
 
-  # mc-redis:
-  #   container_name: mc-redis
-  #   image: redis:latest
-  #   restart: always
-  #   networks:
-  #     - internal_network
+  mc-redis:
+    container_name: mc-redis
+    image: redis:latest
+    restart: always
+    networks:
+      - internal_network
 
 
-  # mc-api:
-  #   container_name: mc-api
-  #   image: mc-api:latest
-  #   build: ./mc-api
-  #   restart: always
-  #   environment:
-  #     - SECRET_KEY=${SECRET_KEY}
-  #     - DB_USER=${DB_USER}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PORT=${DB_PORT}
-  #     - DB_NAME=${DB_NAME}
-  #     - REDIS_URL=${REDIS_URL}
-  #   ports:
-  #     - "5000:5000"
-  #   depends_on:
-  #     - mc-postgres
-  #     - mc-redis
-  #   networks:
-  #     - internal_network
-  #   volumes:
-  #     - ./mc-api:/mc-api
+  mc-api:
+    container_name: mc-api
+    image: mc-api:latest
+    build: ./mc-api
+    restart: always
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - REDIS_URL=${REDIS_URL}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mc-postgres
+      - mc-redis
+    networks:
+      - internal_network
+    volumes:
+      - ./mc-api:/mc-api
 
 
   # nginx:
@@ -64,8 +64,8 @@ services:
     build: ./front-end
     ports:
       - "3000:3000"
-    # depends_on:
-      # - mc-api
+    depends_on:
+      - mc-api
     networks:
       - internal_network
     volumes:
