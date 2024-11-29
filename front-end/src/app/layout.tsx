@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { ConfigProvider } from 'antd';
 import "./globals.css";
-import { ConfigProvider, theme } from 'antd';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,28 +27,37 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
       >
         <ConfigProvider
             theme={{
               token: {
-                colorBgBase: '#021428',
+                // colorBgBase: '#021428',
+                // colorPrimary: '#232735', //1677ff
+                // colorSecondary: '#ff6f61',
+                // colorBorder: '#323333',
                 colorTextBase: '#ffffff',
-                colorBorder: '#323333',
-                colorPrimary: '#232735', //1677ff
                 colorBgHover: '#333333',
                 colorBorderHover: '#555555',
                 colorBgActive: '#444444',
                 colorBorderActive: '#777777',
                 colorPrimaryHover: '#777777',
                 colorPrimaryActive: '#0e5adb',
-                colorSecondary: '#ff6f61',
                 colorErrorBg: '#021428',
                 colorErrorBorder: '#ff4d4f',
                 colorErrorText: '#ff4d4f',
-                hoverBg: '#444444'
+                hoverBg: '#444444',
+                // taha
+                colorText: "#FAFAFA",
+                colorTextPlaceholder: "#70707B",
+                colorPrimary: '#ec4899',
+                colorSecondary: '#ef4444',
+                colorBgBase: '#1a1b27',
+                colorBorder: "#70707B",
+                colorBorderSecondary:"#3F3F46",
+                colorIcon: '#70707B'
               },
-            }}
+          }}
         >
           {children}
         </ConfigProvider>

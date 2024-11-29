@@ -53,7 +53,7 @@ def verify_acount_service(data):
 def login_user(data):
     try:
         select_query = "SELECT * FROM users WHERE username = %s"
-        user = execute_query(select_query, params=(data.get('username',None),) ,fetch_one=True)
+        user = execute_query(select_query, params=(data.get('username', None),) ,fetch_one=True)
 
         if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password',None)):
             access_token = create_custom_access_token(identity={
