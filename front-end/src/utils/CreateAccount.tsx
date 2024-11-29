@@ -6,11 +6,19 @@ import {
 } from 'antd';
 
 
+interface CreateAccountFormValues {
+  username: string;
+  email: string;
+  password: string;
+  confirm: string;
+}
+
+
 
 const CreateAccountForm: React.FC = () => {
   const [form] = Form.useForm();
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: CreateAccountFormValues) => {
     console.log('Received values of form: ', values);
   };
 

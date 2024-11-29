@@ -9,6 +9,12 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface JwtPayload {
+  exp?: number;
+  iat?: number;
+  // [key: string]: any;
+}
+
 interface UserPayload extends JwtPayload {
   email?: string;
   name?: string;
@@ -24,7 +30,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (access_token) {
       try {
         const decoded : UserPayload = jwtDecode(access_token);
-        console.log(decoded)
         setUser(decoded);
         if (decoded.exp && decoded.exp * 1000 > Date.now()) {
           setUser(decoded);

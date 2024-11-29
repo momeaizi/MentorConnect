@@ -11,16 +11,18 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user } = useAuth();
   const router = useRouter();
-
+  
   useEffect(() => {
+    console.log(user)
     if (!user) {
       router.push('/');
     }
+    else {
+      router.push('/viewers');
+    }
   }, [user, router]);
 
-  if (!user) {
-    return null;
-  }
+  if (!user || router.pathname !== '/') return null;
 
   return <>{children}</>;
 };

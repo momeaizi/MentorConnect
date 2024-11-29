@@ -1,6 +1,6 @@
 'use client';
-import React, { useState } from 'react';
-import { Avatar, List, Radio, Space } from 'antd';
+import React from 'react';
+import { Avatar, List } from 'antd';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 
@@ -139,7 +139,7 @@ const data = [
 
 export default function ViewersPage() {
   return (
-    <ProtectedRoute>
+    // <ProtectedRoute>
       <List
         pagination={{ position:'bottom', align:'center' }}
         dataSource={data}
@@ -153,6 +153,6 @@ export default function ViewersPage() {
           </List.Item>
         )}
       />
-      </ProtectedRoute>
+      // </ProtectedRoute>
   );
 };

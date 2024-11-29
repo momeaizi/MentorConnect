@@ -1,11 +1,15 @@
 import React, { FC } from 'react';
 import type { FormProps } from 'antd';
 import { Form, Input, Button } from 'antd';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 type FieldType = {
   username?: string;
   password?: string;
+};
+
+const isAxiosError = (error: unknown): error is AxiosError => {
+  return axios.isAxiosError(error);
 };
 
 const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
@@ -26,7 +30,11 @@ const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
 
     window.location.href = '/viewers';
   } catch (error) {
-    console.error('Login failed:', error.response?.data || error.message);
+    if (isAxiosError(error)) {
+      console.error('Login failed:', error.response?.data || error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+    }
   }
 };
 
@@ -62,7 +70,7 @@ const LoginForm: FC = () => {
 
       <div className="flex justify-between">
         <div className="text-base text-[#D1D1D6] mb-2">Password</div>
-        <div className="text-base text-[#70707B] hover:text-[#ec4899] mb-2 cursor-pointer " onClick={() => {console.log('clicked')}}>Forgot ?</div>
+        <div className="text-base text-[#70707B] hover:text-[#ec4899] mb-2 cursor-pointer " onClick={() => { console.log('clicked') }}>Forgot ?</div>
       </div>
       <Form.Item<FieldType>
         name="password"
@@ -104,7 +112,7 @@ const LoginForm: FC = () => {
 
 
 
-const Login  = () => {
+const Login = () => {
   return (
 
     <div className="flex flex-col justify-center items-center">
