@@ -35,14 +35,18 @@ export default function RootLayout({
                 colorBgBase: '#021428',
                 colorTextBase: '#ffffff',
                 colorBorder: '#323333',
-                colorPrimary: '#1677ff',
+                colorPrimary: '#232735', //1677ff
                 colorBgHover: '#333333',
                 colorBorderHover: '#555555',
                 colorBgActive: '#444444',
                 colorBorderActive: '#777777',
-                colorPrimaryHover: '#3c9eff',
+                colorPrimaryHover: '#777777',
                 colorPrimaryActive: '#0e5adb',
                 colorSecondary: '#ff6f61',
+                colorErrorBg: '#021428',
+                colorErrorBorder: '#ff4d4f',
+                colorErrorText: '#ff4d4f',
+                hoverBg: '#444444'
               },
             }}
         >

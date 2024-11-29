@@ -1,63 +1,272 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { BellOutlined } from "@ant-design/icons";
+import { Avatar } from 'antd';
 
-function NotificationMobile() {
-  return <div></div>;
-}
-
-const notifications = [
-  { id: 1, message: "You have a new message", time: "2 mins ago" },
-  { id: 2, message: "Your order has been shipped", time: "1 hour ago" },
-  { id: 3, message: "New comment on your post", time: "3 hours ago" },
+export const notificationsData = [
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
+    username: 'JohnDoe123',
+    type: 'like',
+    time: '2 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
+    username: 'JaneSmith88',
+    type: 'viewed',
+    time: '10 mins',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
+    username: 'CoolGuy99',
+    type: 'message',
+    time: '30 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
+    username: 'SarahConnor',
+    type: 'match',
+    time: '1 hour',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
+    username: 'MaxRider',
+    type: 'unliked',
+    time: '2 hours',
+    isUnread: false,
+  },
+  // _______
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
+    username: 'JohnDoe123',
+    type: 'like',
+    time: '2 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
+    username: 'JaneSmith88',
+    type: 'viewed',
+    time: '10 mins',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
+    username: 'CoolGuy99',
+    type: 'message',
+    time: '30 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
+    username: 'SarahConnor',
+    type: 'match',
+    time: '1 hour',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
+    username: 'MaxRider',
+    type: 'unliked',
+    time: '2 hours',
+    isUnread: false,
+  },  {
+    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
+    username: 'JohnDoe123',
+    type: 'like',
+    time: '2 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
+    username: 'JaneSmith88',
+    type: 'viewed',
+    time: '10 mins',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
+    username: 'CoolGuy99',
+    type: 'message',
+    time: '30 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
+    username: 'SarahConnor',
+    type: 'match',
+    time: '1 hour',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
+    username: 'MaxRider',
+    type: 'unliked',
+    time: '2 hours',
+    isUnread: false,
+  },  {
+    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
+    username: 'JohnDoe123',
+    type: 'like',
+    time: '2 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
+    username: 'JaneSmith88',
+    type: 'viewed',
+    time: '10 mins',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
+    username: 'CoolGuy99',
+    type: 'message',
+    time: '30 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
+    username: 'SarahConnor',
+    type: 'match',
+    time: '1 hour',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
+    username: 'MaxRider',
+    type: 'unliked',
+    time: '2 hours',
+    isUnread: false,
+  },  {
+    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
+    username: 'JohnDoe123',
+    type: 'like',
+    time: '2 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
+    username: 'JaneSmith88',
+    type: 'viewed',
+    time: '10 mins',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
+    username: 'CoolGuy99',
+    type: 'message',
+    time: '30 mins',
+    isUnread: true,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
+    username: 'SarahConnor',
+    type: 'match',
+    time: '1 hour',
+    isUnread: false,
+  },
+  {
+    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
+    username: 'MaxRider',
+    type: 'unliked',
+    time: '2 hours',
+    isUnread: false,
+  },
+ 
 ];
-function Notifications() {
+
+const notificationMap = {
+  like: {
+    title: "you've got a new like!",
+    subtitle: "Someone appreciates your profile—check it out!"
+  },
+  viewed: {
+    title: "your profile was just viewed!",
+    subtitle: "Curious eyes are on you—find out who!"
+  },
+  message: {
+    title: "you’ve received a new message!",
+    subtitle: "Someone has something to say—read it now!"
+  },
+  match: {
+    title: "it's a match!",
+    subtitle: "The feeling is mutual—start a conversation!"
+  },
+  unliked: {
+    title: "a connection changed.",
+    subtitle: "One connection has been updated—see what's new."
+  },
+  unread: {
+    title: "you have unread notifications—check now!",
+    subtitle: "Don't miss out—check your notifications!"
+  }
+};
+
+
+const NotificationCard = ({ notification }: any) => {
+  const [mobileNotif, setMobileNotif] = useState<boolean>(false);
+  const { userPicture, username, type, time, isUnread } = notification;
+  const title = notificationMap[type]?.title;
+  const subtitle = notificationMap[type]?.subtitle;
+  
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 560) {
+        setMobileNotif(true);
+      } else {
+        setMobileNotif(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); 
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileNotif, setMobileNotif]);
+
+
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Notifications</h1>
-      <div className="space-y-4">
-        {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className="bg-white p-4 rounded-lg shadow-md hover:bg-gray-50 transition"
-          >
-            <p className="text-gray-700">{notification.message}</p>
-            <span className="text-sm text-gray-500">{notification.time}</span>
-          </div>
+    <div className={`grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${isUnread && "bg-sky-900"}`}>
+      <div className="w-12 h-12 md:w-15 md:h-15 ">
+        <img src={userPicture} alt="Image" className="w-full h-full object-cover rounded-lg" />
+      </div>
+    
+      <div className="h-full w-full flex flex-col">
+        <div className="font-bold sm:text-xl">
+          {username} {!mobileNotif && `, ${title}`}
+        </div>
+        <div className={`${isUnread? "text-gray-400" : "text-gray-600"} text-sm md:text-base`}>
+          {mobileNotif? title : subtitle}
+        </div>
+      </div>
+    
+      <div className="h-full w-fit text-sm md:text-base text-gray-500">
+        {time}
+      </div>
+    
+    </div>
+    
+  );
+};
+
+
+
+const NotificationPage = () => {
+  return (
+    <div className="w-screen h-full p-[12px_0_0_0] md:p-[12px_2em_0_2em] flex items-center justify-center box-border overflow-x-scroll bg-[#232735]">
+      <div className="w-full  h-full flex flex-col items-center gap-2 ">
+        {notificationsData.map((notif, index) => (
+          <NotificationCard key={index} notification={notif} />
         ))}
       </div>
     </div>
   );
-}
+};
 
-export default function NotificationPage() {
-  return (
-    <div>
-      <div className="min-h-screen bg-gray-100 p-4 sm:p-6 md:p-8">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4">
-          Notifications
-        </h1>
-        <div className="space-y-4">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className="bg-white p-3 sm:p-4 rounded-lg shadow-md 
-                        hover:bg-gray-50 transition md:flex md:justify-between"
-            >
-              <div className="flex items-center">
-                <BellOutlined className="h-6 w-6 text-blue-500 mr-3" />
-                <p className="text-gray-700 md:text-lg">
-                  {notification.message}
-                </p>
-              </div>
-
-              <span className="text-xs sm:text-sm text-gray-500 md:text-right">
-                {notification.time}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+export default NotificationPage;
