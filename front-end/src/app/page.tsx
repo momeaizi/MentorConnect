@@ -68,15 +68,6 @@ export default function LandingPage() {
             className="px-5 log_in_button cursor-pointer	 flex justify-center gap-0 items-center text-xl box-border bg-white text-white rounded-3xl w-48/1 h-12 px-3 py-6 font-mono bg-gradient-to-r from-pink-500 to-red-500"
             onclick={handleClickCreateAccount}
           />
-          <p 
-            className=""
-            style={{
-              fontFamily: '"Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif',
-              fontSize: '20px',
-              fontWeight: '600',
-            }}>
-              
-            </p>
         </div>
       </div>
     </>
