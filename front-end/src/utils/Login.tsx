@@ -24,7 +24,7 @@ const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
 
     }
 
-    window.location.href = '/home';
+    window.location.href = '/viewers';
   } catch (error) {
     console.error('Login failed:', error.response?.data || error.message);
   }
