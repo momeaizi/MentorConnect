@@ -1,10 +1,11 @@
 'use client';
-import React,  { FC, useState, ReactNode } from 'react';
+import React,  { useState, ReactNode } from 'react';
 import MyModal from '@/components/MyModal';
 import Button from '@/components/Button';
 import Login from '@/utils/Login'
 import CreateAccount from '@/utils/CreateAccount'
 import "@/app/globals.css"
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -21,9 +22,13 @@ export default function LandingPage() {
     setModalChildren(<CreateAccount/>);
   }
 
+  const router = useRouter();
+
   return (
     <>
-      <MyModal children={modalChildren} openModal={openModal} setOpenModal={setOpenModal}/>
+      <MyModal openModal={openModal} setOpenModal={setOpenModal}>
+        {modalChildren}
+      </MyModal>
       <div
         className="bg-[url('/11.png')] h-screen bg-cover bg-center grid grid-cols-1 grid-rows-[72px_1fr] gap-0"
       >
@@ -61,7 +66,7 @@ export default function LandingPage() {
           No boss here, change it
           </p>
           <p className="text-xl text-gray-300">
-          He who has no skill should return to his mother's teaching
+          He who has no skill should return to his mother teaching
           </p>
           <Button
             text="Create account"

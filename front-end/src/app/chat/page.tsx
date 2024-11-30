@@ -35,7 +35,7 @@ function ChatCell({ isSelected, onClick }:any) {
         <div className='cell-last-message-time'>
           3:54AM
         </div>
-        <div class="bg-gradient-to-r from-pink-500 to-red-500 w-2.5 h-2.5 rounded-full"></div>
+        <div className="bg-gradient-to-r from-pink-500 to-red-500 w-2.5 h-2.5 rounded-full"></div>
       </div>
     </div>
   )
