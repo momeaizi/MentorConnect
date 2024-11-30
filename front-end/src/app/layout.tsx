@@ -32,17 +32,33 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
       >
         <ConfigProvider
-          theme={{
-            token: {
-              colorText: "#FAFAFA",
-              colorTextPlaceholder: "#70707B",
-              colorPrimary: '#ec4899',
-              colorTextSecondary: '#ef4444',
-              colorBgBase: '#1a1b27',
-              colorBorder: "#70707B",
-              colorBorderSecondary: "#3F3F46",
-              colorIcon: '#70707B'
-            },
+            theme={{
+              token: {
+                // colorBgBase: '#021428',
+                // colorPrimary: '#232735', //1677ff
+                // colorSecondary: '#ff6f61',
+                // colorBorder: '#323333',
+                colorTextBase: '#ffffff',
+                colorBgHover: '#333333',
+                colorBorderHover: '#555555',
+                colorBgActive: '#444444',
+                colorBorderActive: '#777777',
+                colorPrimaryHover: '#777777',
+                colorPrimaryActive: '#0e5adb',
+                colorErrorBg: '#021428',
+                colorErrorBorder: '#ff4d4f',
+                colorErrorText: '#ff4d4f',
+                hoverBg: '#444444',
+                // taha
+                colorText: "#FAFAFA",
+                colorTextPlaceholder: "#70707B",
+                colorPrimary: '#ec4899',
+                colorSecondary: '#ef4444',
+                colorBgBase: '#1a1b27',
+                colorBorder: "#70707B",
+                colorBorderSecondary:"#3F3F46",
+                colorIcon: '#70707B'
+              },
           }}
         >
           <AuthProvider>

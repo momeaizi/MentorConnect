@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.top-navbar {
+    width: 100%;
+    height: 72px;
+    justify-content: space-between;
+}
+
+.menu-item-top-navbar {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-weight: 700 !important;
+    color: white !important;
+}
+
+.menu-item-top-navbar-pages {
+    display: flex !important;
+    font-weight: 700 !important;
+    color: white !important;
+    font-size:  large !important;
+    height: 40px !important;
+}
+
+.antd-icon {
+    font-size: 20px !important;
+    font-weight: bold !important;
+}
+
+.ant-menu-title-content{
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.logo-navbar-fire-icon {
+    padding: 0;
+    margin: 0;
+    font-size: xx-large !important; /* Sets the font size */
+    height: 40px !important;       /* Adjusts the height */
+    background: linear-gradient(to right, #ec4899, #ef4444) !important; /* Gradient background */
+    -webkit-background-clip: text !important; /* Clips background to text */
+    -webkit-text-fill-color: transparent !important; /* Makes text transparent to show gradient */
+}
+
+
+.menu-outlined-navbar {
+    font-size: x-large !important;
+    height: 40px !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+
+.ant-menu-item-selected {
+    background-color: transparent !important;
+}
+
+

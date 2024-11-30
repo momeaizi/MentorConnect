@@ -6,133 +6,133 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 
 const data = [
   {
-    title: 'Ant Design Title 1',
+    title: 'Ahmed Hmaidi 1',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
   {
-    title: 'Ant Design Title 2',
+    title: 'Ahmed Hmaidi 2',
   },
   {
-    title: 'Ant Design Title 3',
+    title: 'Ahmed Hmaidi 3',
   },
   {
-    title: 'Ant Design Title 4',
+    title: 'Ahmed Hmaidi 4',
   },
 ];
 
@@ -147,8 +147,8 @@ export default function ViewersPage() {
           <List.Item>
             <List.Item.Meta
               avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
-              title={<a href="https://ant.design">{item.title}</a>}
-              description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+              title={<div><a href="https://ant.design">{item.title}</a><div>viewed your profile</div></div>}
+              description="November 7, 2024, 2:30 PM"
             />
           </List.Item>
         )}
