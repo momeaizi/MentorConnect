@@ -34,10 +34,10 @@ export default function RootLayout({
         <ConfigProvider
             theme={{
               token: {
-                // colorBgBase: '#021428',
-                // colorPrimary: '#232735', //1677ff
-                // colorSecondary: '#ff6f61',
-                // colorBorder: '#323333',
+                colorBgBase: '#021428',
+                colorPrimary: '#232735', //1677ff
+                colorSecondary: '#ff6f61',
+                colorBorder: '#323333',
                 colorTextBase: '#ffffff',
                 colorBgHover: '#333333',
                 colorBorderHover: '#555555',
@@ -50,12 +50,12 @@ export default function RootLayout({
                 colorErrorText: '#ff4d4f',
                 hoverBg: '#444444',
                 // taha
+                // colorPrimary: '#ec4899',
+                // colorSecondary: '#ef4444',
+                // colorBgBase: '#1a1b27',
+                // colorBorder: "#70707B",
                 colorText: "#FAFAFA",
                 colorTextPlaceholder: "#70707B",
-                colorPrimary: '#ec4899',
-                colorSecondary: '#ef4444',
-                colorBgBase: '#1a1b27',
-                colorBorder: "#70707B",
                 colorBorderSecondary:"#3F3F46",
                 colorIcon: '#70707B'
               },
