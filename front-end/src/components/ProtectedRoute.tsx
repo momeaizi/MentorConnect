@@ -1,9 +1,7 @@
 'use client';
-
 import { useAuth } from '../context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
-import { Spin } from 'antd';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -12,31 +10,26 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading) {
       if (!user) {
         router.push('/');
       }
-      if (router.pathname === '/') {
+      else if (pathname === '/') {
         router.push('/viewers');
       }
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, pathname]);
 
   if (loading) {
     return (
-      <Spin
-        size="large"
-        tip="Authenticating..."
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-        }}
-      />
+      <div className="w-screen h-screen flex flex-col justify-center items-center">Loading...</div>
     );
+  }
+  else if ((!user && pathname !== '/') || (user && pathname === '/')) {
+    return null;
   }
 
   return <>{children}</>;

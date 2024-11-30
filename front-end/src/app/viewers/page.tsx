@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { Avatar, List } from 'antd';
-import ProtectedRoute from '@/components/ProtectedRoute';
 
 
 const data = [
@@ -139,7 +138,6 @@ const data = [
 
 export default function ViewersPage() {
   return (
-    // <ProtectedRoute>
       <List
         pagination={{ position:'bottom', align:'center' }}
         dataSource={data}
@@ -153,6 +151,5 @@ export default function ViewersPage() {
           </List.Item>
         )}
       />
-      // </ProtectedRoute>
   );
 };

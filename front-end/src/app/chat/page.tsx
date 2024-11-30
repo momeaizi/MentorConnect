@@ -4,11 +4,16 @@ import '@/app/globals.css'
 import { Input } from 'antd';
 import useStore from '@/lib/store';
 import {
-  SearchOutlined, SendOutlined,
+  SearchOutlined,
   ArrowLeftOutlined
  } from '@ant-design/icons';
 
-function ChatCell({ isSelected, onClick }:any) {
+interface ButtonProps {
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+function ChatCell({ isSelected, onClick }: ButtonProps) {
   return (
     <div 
       onClick={onClick}
@@ -126,7 +131,7 @@ function ReceiveMessage({message}:string) {
 }
 
 function ConversationWindow() {
-  const [returnToSide, setReturnToSide] = useState<Boolean>(false)
+  const [returnToSide, setReturnToSide] = useState<boolean>(false)
   const {setSelectedIndex} = useStore();
 
   
@@ -207,7 +212,7 @@ function ConversationWindow() {
 
 export default function ChatPage() {
   const {messagePages, setMessagePages} = useStore();
-  const [lodding, setLodding] = useState<Boolean>(false);
+  const [lodding, setLodding] = useState<boolean>(false);
   const {selectedIndex} = useStore();
 
   useEffect(() => {

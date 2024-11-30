@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { BellOutlined } from "@ant-design/icons";
-import { Avatar } from 'antd';
 
 export const notificationsData = [
   {

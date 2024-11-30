@@ -5,7 +5,6 @@ import Button from '@/components/Button';
 import Login from '@/utils/Login'
 import CreateAccount from '@/utils/CreateAccount'
 import "@/app/globals.css"
-import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -22,7 +21,6 @@ export default function LandingPage() {
     setModalChildren(<CreateAccount/>);
   }
 
-  const router = useRouter();
 
   return (
     <>

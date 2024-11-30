@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {
   DatePicker, Form, Input,
   Radio, Upload, Skeleton
-  ,notification, Modal
+  ,notification
 } from "antd";
 import { PlusOutlined,CloudUploadOutlined,
     CloseCircleOutlined
@@ -13,7 +13,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvents} from 'react-leafl
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const { RangePicker } = DatePicker;
 
 const normFile = (e: any) => {
     if (Array.isArray(e)) {
