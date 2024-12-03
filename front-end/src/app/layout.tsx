@@ -31,7 +31,8 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
       >
-        <ConfigProvider
+        <AuthProvider>
+          <ConfigProvider
             theme={{
               token: {
                 // colorBgBase: '#021428',
@@ -56,17 +57,16 @@ export default function RootLayout({
                 colorSecondary: '#ef4444',
                 colorBgBase: '#1a1b27',
                 colorBorder: "#70707B",
-                colorBorderSecondary:"#3F3F46",
+                colorBorderSecondary: "#3F3F46",
                 colorIcon: '#70707B'
               },
-          }}
-        >
-          <AuthProvider>
+            }}
+          >
             <ProtectedRoute>
               {children}
             </ProtectedRoute>
-          </AuthProvider>
-        </ConfigProvider>
+          </ConfigProvider>
+        </AuthProvider>
       </body>
     </html>
   );

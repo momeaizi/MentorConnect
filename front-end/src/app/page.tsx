@@ -13,12 +13,12 @@ export default function LandingPage() {
 
   const handleClickLogin = () => {
     setOpenModal(true);
-    setModalChildren(<Login/>);
+    setModalChildren(<Login closeModal={() => setOpenModal(false)}/>);
   }
   
   const handleClickCreateAccount = () =>{
     setOpenModal(true);
-    setModalChildren(<CreateAccount/>);
+    setModalChildren(<CreateAccount closeModal={() => {setOpenModal(false);}}/>);
   }
 
 

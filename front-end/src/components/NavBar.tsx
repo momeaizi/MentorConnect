@@ -60,7 +60,7 @@ function MobileNavBar() {
     setDropdownVisible(!dropdownVisible); // Toggle visibility
   };
 
-  const handleDropdownVisibleChange = (visible) => {
+  const handleDropdownVisibleChange = (visible : boolean) => {
     setDropdownVisible(visible); // Sync visibility state with Dropdown
   };
 

@@ -56,6 +56,8 @@ def login_user(data):
         user = execute_query(select_query, params=(data.get('username', None),) ,fetch_one=True)
 
         if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password',None)):
+            if user.get('validated', None):
+                return jsonify({'status': 'error', 'message': 'Validate Your Account'}), 401
             access_token = create_custom_access_token(identity={
                 "id": user.get('id', None),
                 "email": user.get('email', None),
@@ -63,15 +65,11 @@ def login_user(data):
                 "validate": user.get('validate',None),
             })
             return jsonify(access_token=access_token), 200
-        elif user and user.get('validated',None) == False:
-            return jsonify({'status': 'error', 'message': 'Validate Your Account'}), 401
-        elif user:
-            return jsonify({'status': 'error', 'message': 'Incorrect Password'}), 401
         else:
-            return jsonify({'status': 'error', 'message': f"user {data['username']} doesn't exist"}), 401
+            return jsonify({'status': 'error', 'message': 'Incorrect username or password'}), 401
     except Exception as e:
         logger.error(f"Error fetching user: {e}")
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+        return jsonify({'status': 'error', 'message': 'An unexpected error occurred'}), 500
 
 def verify_email_service(token):
     try:

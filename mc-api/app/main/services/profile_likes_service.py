@@ -1,5 +1,6 @@
 from app.db.sql_executor import execute_query
 from app.main.utils.exceptions import UniqueConstraintError
+from app.main.services.notification_service import create_notif_service
 from flask import jsonify
 from loguru import logger
 
@@ -26,6 +27,11 @@ class ProfilelikesService():
                 }), 400
             insert_query = "INSERT INTO profile_likes (liker_id, liked_profile_id) VALUES (%s, %s)"
             execute_query(insert_query, params=(liker_id, liked_profile_id))
+            select_query = "SELECT EXISTS ( SELECT 1 FROM profile_likes WHERE liker_id = %s AND liked_profile_id = %s)"
+            liked_before =execute_query(select_query, params=(liked_profile_id, liker_id), fetch_one=True)
+
+            create_notif_service({"notified_user_id": liked_profile_id, "actor_id": liker_id, "type": 'macth' if (liked_before) else 'like'})
+
             return jsonify({"status": "success", "message": "Profile liked successfully"}), 200
         except UniqueConstraintError as e:
             logger.error(f"warning liking user: {e}")
@@ -50,6 +56,7 @@ class ProfilelikesService():
             WHERE liker_id = %s AND liked_profile_id = %s
             """
             execute_query(delete_query, params=(unliker_id, unliked_profile_id))
+            create_notif_service({"notified_user_id": unliked_profile_id, "actor_id": unliker_id, "type": 'unlike'})
             return jsonify({"status": "success", "message": "Profile unliked successfully"}), 200
         except Exception as e:
             logger.error(f"Error unliking user: {e}")

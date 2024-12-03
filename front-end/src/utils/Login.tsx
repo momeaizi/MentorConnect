@@ -1,7 +1,9 @@
-import React, { FC } from 'react';
+'use client';
+import React, { FC, useState } from 'react';
 import type { FormProps } from 'antd';
 import { Form, Input, Button } from 'antd';
 import axios, { AxiosError } from 'axios';
+import { useRouter } from 'next/navigation';
 
 type FieldType = {
   username?: string;
@@ -12,44 +14,42 @@ const isAxiosError = (error: unknown): error is AxiosError => {
   return axios.isAxiosError(error);
 };
 
-const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
-  try {
-    const res = await axios.post('http://localhost:5000/api/auth/login', {
-      username: values.username,
-      password: values.password,
-    });
+const LoginForm: FC = ({ closeModal }: LoginProps) => {
+  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    const { access_token } = res.data;
-    console.log('Login successful:', access_token);
+  const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/login', {
+        username: values.username,
+        password: values.password,
+      });
 
-    if (typeof window !== 'undefined') {
+      const { access_token } = res.data;
+      console.log('Login successful:', access_token);
 
-      localStorage.setItem('access_token', access_token);
-
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('access_token', access_token);
+      }
+      closeModal();
+      setTimeout(() => router.push('/viewers'), 300);
+    } catch (error) {
+      console.log(error)
+      if (isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.message);
+      } else {
+        setErrorMessage('An unexpected error occurred. Please try again.');
+      }
     }
+  };
 
-    window.location.href = '/viewers';
-  } catch (error) {
-    if (isAxiosError(error)) {
-      console.error('Login failed:', error.response?.data || error.message);
-    } else {
-      console.error('An unexpected error occurred:', error);
-    }
-  }
-};
 
-const onFinishFailed: FormProps<FieldType>['onFinishFailed'] = (errorInfo) => {
-  console.log('Failed:', errorInfo);
-};
-
-const LoginForm: FC = () => {
   return (
     <Form
       name="login"
       layout="vertical"
       style={{ width: '100%', maxWidth: 315 }}
       onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
       autoComplete="off"
       requiredMark={false}
     >
@@ -86,6 +86,7 @@ const LoginForm: FC = () => {
         />
       </Form.Item>
 
+      {errorMessage && <div className="mb-[16px] text-base text-red-400">{errorMessage}</div>}
 
       <Form.Item>
         <Button
@@ -108,11 +109,13 @@ const LoginForm: FC = () => {
 };
 
 
+interface LoginProps {
+  closeModal: () => void;
+}
 
 
 
-
-const Login = () => {
+const Login = ({ closeModal }: LoginProps) => {
   return (
 
     <div className="flex flex-col justify-center items-center">
@@ -120,7 +123,7 @@ const Login = () => {
         <span className="italic text-3xl font-extrabold	font-sans bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">Matcha</span>
       </h1>
       <p className="text-2xl mb-6">Login to your account</p>
-      <LoginForm />
+      <LoginForm closeModal={closeModal}/>
     </div>
   );
 }

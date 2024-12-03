@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { jwtDecode } from "jwt-decode"; // Ensure you're using jwt-decode correctly
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 interface AuthContextType {
@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserPayload | null>(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           localStorage.removeItem('access_token');
         }
       }
-      setLoading(false); // Set loading to false after initialization
+      setLoading(false);
     };
 
     initializeAuth();
@@ -57,8 +57,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  const value = React.useMemo(
+    () => ({ user, loading, setUser, logout }),
+    [user, loading]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

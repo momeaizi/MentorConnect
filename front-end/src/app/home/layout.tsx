@@ -1,27 +1,23 @@
 import React from 'react';
 import Navbar from '@/components/NavBar';
-import ProtectedRoute from '@/components/ProtectedRoute';
 import '@/app/globals.css'
 
 export const metadata = {
-  title: 'viewers',
-  description: 'Welcome to your Chat',
+  title: 'home',
+  description: 'Welcome to your home',
 };
 
-export default function ViewersLayout({
+export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <ProtectedRoute>
-
     <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
       <Navbar />
-        <div className="w-full flex flex-col justify-center items-center">
-            {children}
-        </div>
+      <div className='p-0 h-full w-screen overflow-hidden'>
+        {children}
+      </div>
     </div>
-    </ProtectedRoute>
   );
 }
