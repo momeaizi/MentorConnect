@@ -1,5 +1,5 @@
 'use client';
-import React,  { useState, ReactNode } from 'react';
+import React,  { useState, ReactNode, useEffect } from 'react';
 import MyModal from '@/components/MyModal';
 import Button from '@/components/Button';
 import Login from '@/utils/Login'
@@ -7,11 +7,12 @@ import CreateAccount from '@/utils/CreateAccount'
 import "@/app/globals.css"
 import { useRouter } from 'next/navigation';
 
+
+
 export default function LandingPage() {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [modalChildren, setModalChildren] = useState<ReactNode>(null);
-
-
+  const router = useRouter();
   const handleClickLogin = () => {
     setOpenModal(true);
     setModalChildren(<Login/>);
@@ -21,8 +22,6 @@ export default function LandingPage() {
     setOpenModal(true);
     setModalChildren(<CreateAccount/>);
   }
-
-  const router = useRouter();
 
   return (
     <>
