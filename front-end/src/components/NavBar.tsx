@@ -11,14 +11,36 @@ import {
  } from '@ant-design/icons';
 import useStore from '@/lib/store';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+
+function fetchData(): Promise<Notification[]> {
+  return  axios.get('http://localhost:5000/api/notif/number')
+      .then((response: any) => {
+        return response.data;
+      })
+      .catch((error: any) => {
+          console.error('Error fetching data:', error);
+          throw error;
+      });
+}
 
 function FullScreen() {
-  const {numberOfNotif} = useStore();
+  const {numberOfNotif, setNumberOfNotif} = useStore();
   const router = useRouter();
 
   const handleNavigation = (to:string) => {
     router.push(to);
   }
+
+  useEffect(()=>{
+    const notif = async () => {
+      try {await fetchData();
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+    setNumberOfNotif(notif)
+  },[])
 
   return (
     <div className=' flex items-center justify-between w-full'>

@@ -22,4 +22,10 @@ def get_notif_by_user(user):
 @notification_bp.route('/see')
 @token_required
 def see_notification(user):
-    return see_notification_service(user)
+    user_id = user.get('id', None)
+    return see_notification_service(user_id)
+
+@notification_bp.route('/number')
+@token_required
+def number_of_notification(user):
+    return number_of_notification(user)

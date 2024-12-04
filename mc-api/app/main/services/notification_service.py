@@ -104,3 +104,21 @@ def see_notification_service(user_id):
         logger.error(f"Error marking notification(s) as seen: {str(e)}")
         return jsonify({'status': 'error', 'message': 'Failed to update notifications.'}), 500
 
+def number_of_notification(user):
+    user_id = user.get('id', None)
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
+
+    try:
+        select_query = "SELECT COUNT(*) FROM notifications WHERE notified_user_id = %s"
+        result = execute_query(select_query, params=(user_id,), fetch_all=True)
+        
+        notification_count = result[0][0] if result else 0
+
+        return jsonify({'status': 'success', 'data': {'number': notification_count}}), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving notifications: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to fetch notifications. Please try again later.'}), 500
+

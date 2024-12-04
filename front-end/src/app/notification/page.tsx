@@ -41,7 +41,6 @@ const notificationMap = {
   }
 };
 
-
 const NotificationCard = ({ notification }: { notification: Notification }) => {
   const [mobileNotif, setMobileNotif] = useState<boolean>(false);
   const { userPicture, username, type, time, isUnread } = notification;
