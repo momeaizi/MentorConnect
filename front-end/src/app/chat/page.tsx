@@ -1,19 +1,34 @@
 'use client'
 import React, {useState, useEffect} from 'react';
 import '@/app/globals.css'
-import { Input } from 'antd';
+import { Input, Empty } from 'antd';
 import useStore from '@/lib/store';
+import axios from 'axios';
 import {
   SearchOutlined,
   ArrowLeftOutlined
  } from '@ant-design/icons';
+import { useAuth } from '@/context/AuthContext';
+
+
+interface CellData {
+  image:string;
+  name: string;
+  lastMessage: string;
+  time: string;
+  isSeen: boolean;
+  id: number
+}
 
 interface ButtonProps {
   isSelected: boolean;
   onClick: () => void;
+  cellData: CellData;
 }
 
-function ChatCell({ isSelected, onClick }: ButtonProps) {
+// ? side nav chat 
+
+function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
   return (
     <div 
       onClick={onClick}
@@ -24,33 +39,72 @@ function ChatCell({ isSelected, onClick }: ButtonProps) {
         <img
           className='rounded-[50px]'
           width={50}
-          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+          src={cellData.image}
           // preview={false}
         />
       </div>
       <div className=' pl-2 flex flex-col g-0'>
         <div className='cell-user-name'>
-          abdelmounaim skerba
+          {cellData.name}
         </div>
         <div className='cell-last-message'>
-          Hello agains!
+          {cellData.lastMessage}
         </div>
       </div>
       <div className='flex flex-col items-end gap-2'>
         <div className='cell-last-message-time'>
-          3:54AM
+          {cellData.time}
         </div>
-        <div className="bg-gradient-to-r from-pink-500 to-red-500 w-2.5 h-2.5 rounded-full"></div>
+        { !cellData.isSeen && <div className="bg-gradient-to-r from-pink-500 to-red-500 w-2.5 h-2.5 rounded-full"></div>}
       </div>
     </div>
   )
 }
 
-function SideNavChat() {
-  const {selectedIndex, setSelectedIndex} = useStore();
+// const cellData = {
+//   image:"https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+//   name: "Abdelmounim Skerba",
+//   lastMessage: "hello agains!",
+//   time: "3:54AM",
+//   isSeen: false,
+//   id: 1
+// }
 
-  const handleChatCellClick = (index:any) => {
+function fetchData(id=''): Promise<Notification[]> {
+  return  axios.get(`http://localhost:5000/api/chat/conversation${id != '' ? `/${id}`: ''}`)
+      .then((response: any) => {
+        return response.data;
+      })
+      .catch((error: any) => {
+          console.error('Error fetching data:', error);
+          throw error;
+      });
+}
+
+
+function SideNavChat() {
+  const {selectedIndex, setSelectedIndex, setSelectedConv} = useStore();
+  const [cellData, setCellData] = useState<CellData[]>([])
+
+
+
+  useEffect(() => {
+    const getChatCell = async () => {
+      try {
+        const chatCells = await fetchData();
+        setCellData(chatCells?.data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    getChatCell();
+  }, []);
+  
+
+  const handleChatCellClick = (index:number, id:number) => {
     setSelectedIndex(index);
+    setSelectedConv(id);
   };
 
   useEffect(()=>{
@@ -59,6 +113,7 @@ function SideNavChat() {
 
   return (
     <div className='flex flex-col h-full w-1/3 min-w-96 bg-[#1E2025] md:w-1/3 w-full'>
+
       {/* Search in Conversations */}
       <div className='flex justify-center items-center w-full h-fit p-[0.5em]'>
 
@@ -76,13 +131,15 @@ function SideNavChat() {
         </form>
 
       </div>
+
       {/* Cell navbar */}
       <div className='overflow-scroll flex flex-col h-full p-[12px]'>
-        {Array.from({ length: 40 }, (_, index) => (
+        {cellData.map((cell:CellData, index:number) => (
           <ChatCell
             key={index}
             isSelected={selectedIndex === index}
-            onClick={() => handleChatCellClick(index)}
+            onClick={() => handleChatCellClick(index, cell.id)}
+            cellData={cell}
           />
         ))}
       </div>
@@ -90,9 +147,12 @@ function SideNavChat() {
   );
 }
 
+// ? conversation window
+
+
 const CustomSendIcon = () => (
   <svg
-    className="svg-custom-send-icon"
+    className="svg-custom-send-icon cursor-pointer"
     width="18"
     height="18"
     viewBox="0 0 20 20"
@@ -112,7 +172,7 @@ const CustomSendIcon = () => (
   </svg>
 );
 
-function SenderMessage({message}:string) {
+function SenderMessage({message}:{message: string}) {
   return (
     <div className='bg-[#4C4F59] p-4 rounded-[16px_16px_16px_0] self-start max-w-[60%] overflow-wrap text-ellipsis'
       style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
@@ -121,7 +181,7 @@ function SenderMessage({message}:string) {
   );
 }
 
-function ReceiveMessage({message}:string) {
+function ReceiveMessage({message}:{message: string}) {
   return (
     <div className='bg-gradient-to-r from-pink-500 to-red-500 p-4 rounded-[16px_16px_0_16px] h-fit self-end max-w-[60%]'
       style={{ wordWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
@@ -130,11 +190,57 @@ function ReceiveMessage({message}:string) {
   );
 }
 
+const header = {
+  image: "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+  name: 'Abdelmounim Skerba',
+  is_online: true
+
+}
+
+
 function ConversationWindow() {
   const [returnToSide, setReturnToSide] = useState<boolean>(false)
-  const {setSelectedIndex} = useStore();
+  const [chatHeader, setChatHeader] = useState(null)
+  const [chatMessages, setChatMessages] = useState([])
+  const [loadding, setLodding] = useState<boolean>(false)
+  const {socket, setSelectedIndex, setSelectedConv, selectedConv} = useStore();
+  const [newMessage, setNewMessage] = useState('');
+  const { user } = useAuth();
 
+  const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(event.target.value);
+  };
+
+  useEffect(() => {
+    socket.on('new_message', (data:any) => {
+      console.log('---->', data);
+      setChatMessages((prevMessages:any) => [...prevMessages, data]);
+    });
+
+    return () => {
+      socket.off('new_message');
+    };
+  }, []);
+
+  const sendMessage = async () => {
+    const trimmedMessage = newMessage.trim();
+    if (trimmedMessage.length) {
+      const ret = await axios.post('http://localhost:5000/api/chat/message', {
+        conversation_id: chatHeader.id,
+        user_id: 1,
+        message: trimmedMessage, 
+      });
+      console.log(ret);
+    }
   
+    setNewMessage('');
+  }
+  
+
+  const handleKeyDown = (event:any) => {
+    if (event.key === 'Enter')
+      sendMessage();
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -151,64 +257,99 @@ function ConversationWindow() {
     return () => window.removeEventListener('resize', handleResize);
   }, [returnToSide, setReturnToSide]);
 
-
+  useEffect(() => {
+    const getChatWindow = async () => {
+      try {
+        const retData = await fetchData(selectedConv);
+        setChatHeader(retData?.data.conversation);
+        setChatMessages(retData?.data.messages);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+    
+    setLodding(false)
+    
+    if (selectedConv !== null) {
+      getChatWindow();
+      setLodding(true);
+    }
+  }, [selectedConv]);
 
   const handleReturnClick = () => {
     setSelectedIndex(null);
+    setSelectedConv(null)
   }
 
   return(
-    <div className='h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
+    <>
+      {
+        (loadding) ?
+        <div className='h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
 
+              <div className='box-border flex gap-4 items-center w-full h-fit p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
 
-      <div className='box-border flex gap-4 items-center w-full h-fit p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
+                {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
+                  <ArrowLeftOutlined className='w-[30px] font-extrabold font-[10px]'/> 
+                </div>}
+                <img
+                  className='rounded-[50px]'
+                  width={40}
+                  src={chatHeader?.image}
+                  // preview={false}
+                />
+                <div className='flex flex-col gap-0'>
+                  <div className='font-bold	'>
+                    {chatHeader?.name}
+                  </div>
+                  <div className='text-gray-400 text-sm'>
+                    {(chatHeader?.is_online)?"Online":"Offline"}
+                  </div>
+                </div>
 
-        {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
-          <ArrowLeftOutlined className='w-[30px] font-extrabold font-[10px]'/> 
-        </div>}
-        <img
-          className='rounded-[50px]'
-          width={40}
-          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-          // preview={false}
-        />
-        <div className='flex flex-col gap-0'>
-          <div className='font-bold	'>
-            Abdelmounim Skerba
-          </div>
-          <div className='text-gray-400 text-sm'>
-            Online
-          </div>
+              </div>
+
+              <div className='w-full h-full p-[0_4em] pt-4 flex flex-col justify-end  gap-3 overflow-y-scroll overflow-x-hidden grow'>
+
+                {chatMessages.map((data:any, index:number) => (
+                  (data.id === chatHeader.id)?
+                    <SenderMessage message={data.message}/>
+                    :
+                    <ReceiveMessage message={data.message}/>
+                ))}
+        
+
+              </div>
+
+              <div className='flex justify-center items-center w-full h-fit p-[0.5em_4em]'>
+                <Input
+
+                  value={newMessage}
+                  onChange={handleMessageChange}
+                  onKeyDown={handleKeyDown}
+                  size="larg"
+                  placeholder='typeMessage'
+                  className="h-[3em] rounded-xl"
+                  suffix={<div className="custom-send-icon">
+                              <div className='custom-send-icon-parent' onClick={sendMessage}>
+                                  <CustomSendIcon />
+                              </div>
+                          </div>}
+                />
+
+              </div>
         </div>
-
-      </div>
-
-      <div className='w-full h-full p-[0_4em] pt-4 flex flex-col justify-start  gap-3 overflow-x-hidden'>
-
-        <SenderMessage message="hello"/>
-        <ReceiveMessage message="hello again"/>
- 
-
-      </div>
-
-      <div className='flex justify-center items-center w-full h-fit p-[0.5em_4em]'>
-        <Input
-          size="larg"
-          placeholder='typeMessage'
-          className="h-[3em] rounded-xl"
-          suffix={<div className="custom-send-icon">
-                      <div className='custom-send-icon-parent'>
-                          <CustomSendIcon  />
-                      </div>
-                  </div>}
-        />
-
-      </div>
-
-    </div>
+        :
+        <div className='w-full h-full flex justify-center items-center bg-[#232736]'>
+          <Empty description={false} />
+        </div>
+      }
+    </>
   )
 
 }
+
+// ? Chat Page
 
 export default function ChatPage() {
   const {messagePages, setMessagePages} = useStore();

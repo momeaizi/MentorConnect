@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Menu, Dropdown } from 'antd';
+import { Menu, Dropdown, Badge } from 'antd';
 import "@/styles/navBar.css";
 import {
   HomeOutlined, MessageOutlined,
@@ -9,8 +9,39 @@ import {
   UserOutlined, LogoutOutlined,
   MenuOutlined
  } from '@ant-design/icons';
+import useStore from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+
+function fetchData(): Promise<Notification[]> {
+  return  axios.get('http://localhost:5000/api/notif/number')
+      .then((response: any) => {
+        return response.data;
+      })
+      .catch((error: any) => {
+          console.error('Error fetching data:', error);
+          throw error;
+      });
+}
 
 function FullScreen() {
+  const {numberOfNotif, setNumberOfNotif} = useStore();
+  const router = useRouter();
+
+  const handleNavigation = (to:string) => {
+    router.push(to);
+  }
+
+  useEffect(()=>{
+    const notif = async () => {
+      try {await fetchData();
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+    setNumberOfNotif(notif)
+  },[])
+
   return (
     <div className=' flex items-center justify-between w-full'>
       <Menu.Item className='menu-item-top-navbar' icon={<FireFilled style={{color:"#eb2f96"}} className='logo-navbar-fire-icon'/>} key="logo" >
@@ -23,7 +54,7 @@ function FullScreen() {
           Home
         </Menu.Item>
 
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<MessageOutlined className='antd-icon'/>} key="chat">
+        <Menu.Item onClick={() => handleNavigation('/chat')} className='menu-item-top-navbar-pages' icon={<MessageOutlined className='antd-icon'/>} key="chat">
           Chat
         </Menu.Item>
         <Menu.Item className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
@@ -34,14 +65,14 @@ function FullScreen() {
         </Menu.Item>
       </div>
       <div className='flex gap-0'>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<BellOutlined className='antd-icon'/>} key="notif">
+        <Menu.Item onClick={() => handleNavigation('/notification')} className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">
         </Menu.Item>
         <Menu.SubMenu 
         className='menu-item-top-navbar-pages' 
         key="profile"  
         icon={<UserOutlined className='antd-icon' />}
         >
-          <Menu.Item className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
+          <Menu.Item onClick={() => handleNavigation('/profile')} className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
             View Profile
           </Menu.Item>
           <Menu.Item className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
@@ -55,6 +86,8 @@ function FullScreen() {
 
 function MobileNavBar() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const {numberOfNotif} = useStore();
+
 
   const handleMenuClick = () => {
     setDropdownVisible(!dropdownVisible); // Toggle visibility
@@ -81,7 +114,7 @@ function MobileNavBar() {
         <Menu.Item className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
           Favories
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<BellOutlined className='antd-icon'/>} key="notif">
+        <Menu.Item className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">
           Notification
         </Menu.Item>
         <Menu.Item className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
