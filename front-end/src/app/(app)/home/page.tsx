@@ -1,3 +1,4 @@
+'use client';
 import ProfileList from '@/components/ProfileList'
 
 export default function ProfilesPage() {

@@ -1,78 +1,26 @@
-'use client';
-import React, { createContext, useState, useEffect, useContext, ReactNode } from 'react';
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import React, { createContext, useContext } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AuthContextType {
-  user: UserPayload | null;
-  loading: boolean;
-  setUser: (user: UserPayload | null) => void;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-}
-
-interface JwtPayload {
-  exp?: number;
-  iat?: number;
-}
-
-interface UserPayload extends JwtPayload {
-  email?: string;
-  name?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserPayload | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const auth = useAuth();
 
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const access_token = localStorage.getItem('access_token');
-      if (access_token) {
-        try {
-          const decoded: UserPayload = jwtDecode(access_token);
-          setUser(decoded);
-          if (decoded.exp && decoded.exp * 1000 > Date.now()) {
-            axios.defaults.headers.common["Authorization"] = "Bearer " + access_token;
-          } else {
-            delete axios.defaults.headers.common["Authorization"];
-            localStorage.removeItem('access_token');
-          }
-        } catch (error) {
-          delete axios.defaults.headers.common["Authorization"];
-          console.error('Invalid token:', error);
-          localStorage.removeItem('access_token');
-        }
-      }
-      setLoading(false);
-    };
-
-    initializeAuth();
-  }, []);
-
-  const logout = () => {
-    localStorage.removeItem('access_token');
-    delete axios.defaults.headers.common["Authorization"];
-    setUser(null);
-  };
-
-  const value = React.useMemo(
-    () => ({ user, loading, setUser, logout }),
-    [user, loading]
-  );
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 };
+

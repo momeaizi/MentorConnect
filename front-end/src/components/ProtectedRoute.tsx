@@ -1,21 +1,26 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { useProtectedRoute } from '@/hooks/useProtectedRoute';
+import { ReactNode, useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isLoading } = useProtectedRoute();
+  const { isAuthenticated, token } = useAuthContext();
+  const router = useRouter();
 
-  if (isLoading) {
-    return (
-      <div className="w-screen h-screen flex flex-col justify-center items-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+  useEffect(() => {
+    console.log(isAuthenticated, token)
+    if (!isAuthenticated) {
+      router.push('/');
+    }
+  }, []);
+
+  if (!isAuthenticated) {
+    return null;
   }
 
   return <>{children}</>;
