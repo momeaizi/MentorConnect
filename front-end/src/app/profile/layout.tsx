@@ -1,11 +1,12 @@
+'use client'
 import React from 'react';
 import Navbar from '@/components/NavBar';
 import '@/app/globals.css'
 
-export const metadata = {
-  title: 'Profile',
-  description: 'Welcome to your profile',
-};
+// export const metadata = {
+//   title: 'Profile',
+//   description: 'Welcome to your profile',
+// };
 
 export default function ProfileLayout({
   children,
