@@ -1,9 +1,12 @@
+
 import React, { createContext, useContext } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AuthContextType {
-  token: string | null;
+  user: string | null;
   isAuthenticated: boolean;
+  isVerified: boolean;
+  isProfileComplete: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }

@@ -1,64 +1,42 @@
-'use client';
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { ConfigProvider } from 'antd';
-import "./globals.css";
+"use client"
+import { Inter } from 'next/font/google'
+import { ConfigProvider } from 'antd'
+import "./globals.css"
+import { AuthProvider } from "@/context/AuthContext"
+import ProtectedRoute from '@/components/ProtectedRoute'
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
-
+const inter = Inter({ subsets: ['latin'] })
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
-      >
+      <body className={`${inter.className} bg-background text-foreground`}>
+        <AuthProvider>
           <ConfigProvider
             theme={{
               token: {
-                // colorBgBase: '#021428',
-                // colorPrimary: '#232735', //1677ff
-                // colorSecondary: '#ff6f61',
-                // colorBorder: '#323333',
-                colorTextBase: '#ffffff',
-                colorBgHover: '#333333',
-                colorBorderHover: '#555555',
-                colorBgActive: '#444444',
-                colorBorderActive: '#777777',
-                colorPrimaryHover: '#777777',
-                colorPrimaryActive: '#0e5adb',
-                colorErrorBg: '#021428',
-                colorErrorBorder: '#ff4d4f',
-                colorErrorText: '#ff4d4f',
-                hoverBg: '#444444',
-                // taha
-                colorText: "#FAFAFA",
-                colorTextPlaceholder: "#70707B",
                 colorPrimary: '#ec4899',
-                colorSecondary: '#ef4444',
                 colorBgBase: '#1a1b27',
+                colorText: "#FAFAFA",
+                colorTextBase: '#ffffff',
                 colorBorder: "#70707B",
                 colorBorderSecondary: "#3F3F46",
-                colorIcon: '#70707B'
+                borderRadius: 8,
               },
             }}
           >
-              {children}
+
+        {/* <ProtectedRoute> */}
+            {children}
+        {/* </ProtectedRoute> */}
           </ConfigProvider>
+        </AuthProvider>
       </body>
     </html>
-  );
+  )
 }
+

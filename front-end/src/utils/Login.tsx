@@ -1,9 +1,11 @@
-'use client';
+
 import React, { FC, useState } from 'react';
 import type { FormProps } from 'antd';
 import { Form, Input, Button } from 'antd';
 import axios, { AxiosError } from 'axios';
+import api from '@/apis/api';
 import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/context/AuthContext';
 
 type FieldType = {
   username?: string;
@@ -16,25 +18,22 @@ const isAxiosError = (error: unknown): error is AxiosError => {
 
 const LoginForm: FC = ({ closeModal }: LoginProps) => {
   const router = useRouter();
+  const { login } = useAuthContext();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await api.post('/auth/login', {
         username: values.username,
         password: values.password,
       });
 
       const { access_token } = res.data;
-      console.log('Login successful:', access_token);
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('access_token', access_token);
-      }
       closeModal();
-      setTimeout(() => router.push('/viewers'), 300);
+      login(access_token);
+      setTimeout(() => router.push('/home'), 400);
     } catch (error) {
-      console.log(error)
       if (isAxiosError(error)) {
         setErrorMessage(error.response?.data?.message);
       } else {

@@ -50,7 +50,7 @@ def seed_data():
 
         # Insert data into users table
         cur.executemany("""
-            INSERT INTO users (username, email, password_hash, validate)
+            INSERT INTO users (username, email, password_hash, is_verified)
             VALUES (%s, %s, %s, %s)
         """, users_data)
 

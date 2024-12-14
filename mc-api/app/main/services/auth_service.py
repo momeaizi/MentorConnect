@@ -21,7 +21,8 @@ def register_user(data):
             "id": new_user.get('id', None),
             "email": new_user.get('email', None),
             "username": new_user.get('username', None),
-            "validate": new_user.get('validate',None),
+            "is_verified": new_user.get('is_verified', None),
+            "is_profile_complete": False,
         })
         return jsonify(access_token=access_token), 200
     except UniqueConstraintError as e:
@@ -38,7 +39,7 @@ def verify_acount_service(data):
         user = execute_query(select_query, params=(data.get('username',None),) ,fetch_one=True)
         if not user:
             return jsonify({"message": "User not found"}), 404
-        if user.get('validate', None):
+        if user.get('is_verified', None):
             return jsonify({"message": "This Account Is Verify"}), 200
         send_verification_email(user.get('email', None), user.get('id', None))
         return jsonify({'message': 'Send Verification Email'}), 201
@@ -54,15 +55,17 @@ def login_user(data):
     try:
         select_query = "SELECT * FROM users WHERE username = %s"
         user = execute_query(select_query, params=(data.get('username', None),) ,fetch_one=True)
-
+        logger.info(user)
         if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password',None)):
-            if user.get('validated', None):
-                return jsonify({'status': 'error', 'message': 'Validate Your Account'}), 401
+            # TODO remove this
+            # if user.get('is_verified', None):
+            #     return jsonify({'status': 'error', 'message': 'Verify Your Email'}), 401
             access_token = create_custom_access_token(identity={
                 "id": user.get('id', None),
                 "email": user.get('email', None),
                 "username": user.get('username', None),
-                "validate": user.get('validate',None),
+                "is_verified": user.get('is_verified',None),
+                "is_profile_complete": True, # TODO remove this
             })
             return jsonify(access_token=access_token), 200
         else:
@@ -73,15 +76,16 @@ def login_user(data):
 
 def verify_email_service(token):
     try:
-        decoded = jwt.decode(token, app.config['JWT_PRIVATE_KEY'], algorithms=app.config['JWT_ALGORITHM'])
+        decoded = jwt.decode(token, app.config['JWT_PUBLIC_KEY'], algorithms=app.config['JWT_ALGORITHM'])
         id = decoded["id"]
-        update_query = f"""UPDATE users SET validate = TRUE WHERE id = %s RETURNING *"""
+        update_query = f"""UPDATE users SET is_verified = TRUE WHERE id = %s RETURNING *"""
         updated_user = execute_query(update_query, params=(str(id)), fetch_one=True)
         access_token = create_custom_access_token(identity={
             "id": updated_user.get('id', None),
             "email": updated_user.get('email', None),
             "username": updated_user.get('username', None),
-            "validate": updated_user.get('validate',None),
+            "is_verified": updated_user.get('is_verified',None),
+            "is_profile_complete": True, #TODO remove this
         })
         return jsonify(access_token=access_token), 200
     except jwt.ExpiredSignatureError:

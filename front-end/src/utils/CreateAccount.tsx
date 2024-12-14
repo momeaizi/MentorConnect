@@ -1,3 +1,4 @@
+
 import React, { useState, FC } from 'react';
 import {
   Form,
@@ -5,7 +6,9 @@ import {
   Button
 } from 'antd';
 import axios, { AxiosError } from 'axios';
+import api from '@/apis/api';
 import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/context/AuthContext';
 
 
 interface CreateAccountFormValues {
@@ -25,29 +28,26 @@ const CreateAccountForm: FC = ({ closeModal }: CreateAccountProps) => {
   const [form] = Form.useForm();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
+  const { login } = useAuthContext();
 
   const onFinish = async (values: CreateAccountFormValues) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const res = await api.post('/auth/register', {
         username: values.username,
         email: values.email,
         password: values.password,
       });
 
       const { access_token } = res.data;
-      console.log('Login successful:', access_token);
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('access_token', access_token);
-      }
       closeModal();
-      setTimeout(() => router.push('/viewers'), 300);
+      login(access_token);
+      setTimeout(() => router.push('/home'), 400);
     } catch (error) {
-      console.log(error)
       if (isAxiosError(error)) {
         setErrorMessage(error.response?.data?.message);
       } else {
-        setErrorMessage('An unexpected error occurred. Please try again.');
+        setErrorMessage(setErrorMessage(error.response?.data?.message));
       }
     }
   };

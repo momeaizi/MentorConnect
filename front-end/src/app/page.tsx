@@ -1,4 +1,4 @@
-'use client';
+"use client"
 import React,  { useState, ReactNode } from 'react';
 import MyModal from '@/components/MyModal';
 import Button from '@/components/Button';

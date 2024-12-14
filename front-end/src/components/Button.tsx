@@ -1,4 +1,4 @@
-'use client'
+
 interface ButtonProps {
     text: string;
     className?: string;

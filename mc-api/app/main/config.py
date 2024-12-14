@@ -1,5 +1,5 @@
 import os
-
+from loguru import logger
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
@@ -9,8 +9,6 @@ class Config:
     DB_PASSWORD = os.getenv('DB_PASSWORD')
     DB_PORT = os.getenv('DB_PORT')
     REDIS_URL = os.getenv('REDIS_URL')
-    JWT_PRIVATE_KEY = 'your-very-secret-private-key'
-    JWT_ALGORITHM = 'HS256'
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
@@ -19,6 +17,11 @@ class Config:
     MAIL_PASSWORD = 'juhu nfbk ubul otdh'
     UPLOAD_FOLDER = os.path.abspath('./uploads')
     ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+    JWT_PRIVATE_KEY =  os.getenv('JWT_PRIVATE_KEY')
+    JWT_PUBLIC_KEY =  os.getenv('JWT_PUBLIC_KEY')
+    JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
+
+    logger.info(os.getenv('JWT_PUBLIC_KEY'))
 
 class DevelopmentConfig(Config):
     DEBUG = True

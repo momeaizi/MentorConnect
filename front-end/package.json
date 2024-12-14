@@ -10,14 +10,15 @@
   },
   "dependencies": {
     "antd": "^5.22.2",
+    "axios": "^1.4.0",
+    "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.468.0",
     "next": "^14.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-leaflet": "^4.2.1",
-    "zustand": "^5.0.1",
-    "axios": "^1.4.0",
-    "jwt-decode": "^4.0.0"
+    "zustand": "^5.0.1"
   },
   "devDependencies": {
     "@types/jwt-decode": "^2.2.1",
