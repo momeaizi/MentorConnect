@@ -1,181 +1,17 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useAuth } from "@/context/AuthContext";
+import Toast from "@/components/Toast";
+import useStore from "@/lib/store";
 
-export const notificationsData = [
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'JohnDoe123',
-    type: 'like',
-    time: '2 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
-    username: 'JaneSmith88',
-    type: 'viewed',
-    time: '10 mins',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
-    username: 'CoolGuy99',
-    type: 'message',
-    time: '30 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
-    username: 'SarahConnor',
-    type: 'match',
-    time: '1 hour',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
-    username: 'MaxRider',
-    type: 'unliked',
-    time: '2 hours',
-    isUnread: false,
-  },
-  // _______
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'JohnDoe123',
-    type: 'like',
-    time: '2 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
-    username: 'JaneSmith88',
-    type: 'viewed',
-    time: '10 mins',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
-    username: 'CoolGuy99',
-    type: 'message',
-    time: '30 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
-    username: 'SarahConnor',
-    type: 'match',
-    time: '1 hour',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
-    username: 'MaxRider',
-    type: 'unliked',
-    time: '2 hours',
-    isUnread: false,
-  },  {
-    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'JohnDoe123',
-    type: 'like',
-    time: '2 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
-    username: 'JaneSmith88',
-    type: 'viewed',
-    time: '10 mins',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
-    username: 'CoolGuy99',
-    type: 'message',
-    time: '30 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
-    username: 'SarahConnor',
-    type: 'match',
-    time: '1 hour',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
-    username: 'MaxRider',
-    type: 'unliked',
-    time: '2 hours',
-    isUnread: false,
-  },  {
-    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'JohnDoe123',
-    type: 'like',
-    time: '2 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
-    username: 'JaneSmith88',
-    type: 'viewed',
-    time: '10 mins',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
-    username: 'CoolGuy99',
-    type: 'message',
-    time: '30 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
-    username: 'SarahConnor',
-    type: 'match',
-    time: '1 hour',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
-    username: 'MaxRider',
-    type: 'unliked',
-    time: '2 hours',
-    isUnread: false,
-  },  {
-    userPicture: 'https://randomuser.me/api/portraits/men/32.jpg',
-    username: 'JohnDoe123',
-    type: 'like',
-    time: '2 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/44.jpg',
-    username: 'JaneSmith88',
-    type: 'viewed',
-    time: '10 mins',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/45.jpg',
-    username: 'CoolGuy99',
-    type: 'message',
-    time: '30 mins',
-    isUnread: true,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/women/33.jpg',
-    username: 'SarahConnor',
-    type: 'match',
-    time: '1 hour',
-    isUnread: false,
-  },
-  {
-    userPicture: 'https://randomuser.me/api/portraits/men/22.jpg',
-    username: 'MaxRider',
-    type: 'unliked',
-    time: '2 hours',
-    isUnread: false,
-  },
- 
-];
+
+interface Notification {
+  userPicture: string;
+  username: string;
+  type: string;
+  time: string;
+  isUnread: boolean;
+}
 
 const notificationMap = {
   like: {
@@ -204,8 +40,7 @@ const notificationMap = {
   }
 };
 
-
-const NotificationCard = ({ notification }: any) => {
+const NotificationCard = ({ notification }: { notification: Notification }) => {
   const [mobileNotif, setMobileNotif] = useState<boolean>(false);
   const { userPicture, username, type, time, isUnread } = notification;
   const title = notificationMap[type]?.title;
@@ -229,7 +64,7 @@ const NotificationCard = ({ notification }: any) => {
 
 
   return (
-    <div className={`grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${isUnread && "bg-sky-900"}`}>
+    <div className={`grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${!isUnread && "bg-sky-900"}`}>
       <div className="w-12 h-12 md:w-15 md:h-15 ">
         <img src={userPicture} alt="Image" className="w-full h-full object-cover rounded-lg" />
       </div>
@@ -252,9 +87,60 @@ const NotificationCard = ({ notification }: any) => {
   );
 };
 
-
+function fetchData(see:Boolean): Promise<Notification[]> {
+  return  axios.get(`http://localhost:5000/api/notif/${see?'see' : ''}`)
+      .then((response: any) => {
+        return response.data;
+      })
+      .catch((error: any) => {
+          console.error('Error fetching data:', error);
+          throw error;
+      });
+}
 
 const NotificationPage = () => {
+  const {setNumberOfNotif, newNotif, setNewNotif} = useStore();
+  const [notificationsData, setNotificationsData] = useState<Notification[]>([]);
+  const { user, loading } = useAuth();
+  useEffect(() => {
+    const getNotifications = async () => {
+      if (loading || !user) return;
+      try {
+        const notification = await fetchData(false);
+        setNotificationsData(notification.data);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    getNotifications();
+  }, [user, loading]);
+  
+  useEffect(()=>{
+    setNumberOfNotif(0);
+  },[])
+
+  useEffect(()=>{
+    const seeNotification = async () => {
+      try {await fetchData(true);
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    if (newNotif) {
+
+      seeNotification();
+      setNotificationsData((prevNotifications:Notification[]) => [
+        newNotif,
+        ...prevNotifications,
+      ]);
+    }
+    setNewNotif(null)
+    setNumberOfNotif(0)
+  },[newNotif])
+  
+
   return (
     <div className="w-screen h-full p-[12px_0_0_0] md:p-[12px_2em_0_2em] flex items-center justify-center box-border overflow-x-scroll bg-[#232735]">
       <div className="w-full  h-full flex flex-col items-center gap-2 ">
@@ -265,5 +151,6 @@ const NotificationPage = () => {
     </div>
   );
 };
+{/* <Toast toastType="info" notifType="notification" /> */}
 
 export default NotificationPage;

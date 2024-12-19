@@ -2,6 +2,7 @@ from flask import request
 from flask_socketio import emit, join_room
 from app.main import redis_client
 from app.main.services.users_service import UserService
+from datetime import datetime
 from loguru import logger
 
 
@@ -26,7 +27,12 @@ class SocketService:
         emit('status', {"user_id": 1, "is_online": True, "count": int(count)}, broadcast=True)
 
 
+    def handle_new_notification(self, notification_data):
+        if isinstance(notification_data.get('notification_time'), datetime):
+            notification_data['notification_time'] = notification_data['notification_time'].isoformat()
 
+        emit('new_notification', notification_data, namespace='/', broadcast=True)
+    
     def handle_disconnect(self, user):
         logger.info(f"disconnected: {request.sid}")
 

@@ -13,6 +13,15 @@ profile_bp = Blueprint('profile_bp', __name__)
 profile_views_service = ProfileViewsService()
 profile_likes_service = ProfilelikesService()
 
+#! (remove)  method post
+#? Get Profile
+@profile_bp.route('/', methods=['GET'])
+# @token_required
+def get_profile():#user
+    user_id = 1#user.get('id', None)
+    return get_profile_service(user_id)
+
+#*********************************
 
 @profile_bp.route('/<int:profile_owner_id>/view', methods=['POST'])
 @token_required
@@ -54,13 +63,6 @@ def unlike_profile(user, unliked_profile_id):
 
 #*****************************************************
 
-#! (remove)  method post
-#? Get Profile
-@profile_bp.route('/', methods=['POST'])
-@token_required
-def get_profile(user):
-    user_id = user.get('id', None)
-    return get_profile_service(user_id)
 
 # TODO ADD DTO
 #? Update Profile

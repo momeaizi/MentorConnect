@@ -1,5 +1,3 @@
-
-
 import { ReactNode, useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';

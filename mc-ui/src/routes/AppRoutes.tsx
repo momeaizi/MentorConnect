@@ -3,6 +3,7 @@ import PrivateRoute from './PrivateRoute';
 import SendVerificationEmail from '../pages/SendVerificationEmail';
 import EmailVerification from '../pages/EmailVerification';
 import Home from '../pages/Home';
+import Navbar from '../components/NavBar/NavBar';
 
 const AppRoutes = () => {
   return (
@@ -28,9 +29,11 @@ const AppRoutes = () => {
       <Route
         path="/profile"
         element={
-          <PrivateRoute>
-            <div>PROFILE</div>
-          </PrivateRoute>
+          // <PrivateRoute>
+          <div>
+              <Navbar/>  
+          </div>
+          // </PrivateRoute>
         }
       />
     </Routes>
