@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, Dropdown, Badge } from 'antd';
 import "./navbar.css";
 import { useNavigate } from 'react-router-dom';
@@ -9,11 +9,11 @@ import {
   UserOutlined, LogoutOutlined,
   MenuOutlined
  } from '@ant-design/icons';
-import useStore from '@/lib/store';
-import axios from 'axios';
+import useStore from '../../lib/store';
+import api from '../../services/api';
 
-function fetchData(): Promise<Notification[]> {
-  return  axios.get('http://localhost:5000/api/notif/number')
+function fetchData() {
+  return  api.get('notif/number')
       .then((response: any) => {
         return response.data;
       })
@@ -26,20 +26,21 @@ function fetchData(): Promise<Notification[]> {
 function FullScreen() {
   const {numberOfNotif, setNumberOfNotif} = useStore();
   const navigteTo = useNavigate();
-//   const router = useRouter();
 
   const handleNavigation = (to:string) => {
     navigteTo(to);
   }
 
   useEffect(()=>{
-    const notif = async () => {
-      try {await fetchData();
+    async function notif() {
+      try {
+        const number  = await fetchData();
+        setNumberOfNotif(number?.number)
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       }
     };
-    setNumberOfNotif(notif)
+    notif()
   },[])
 
   return (
@@ -87,7 +88,11 @@ function FullScreen() {
 function MobileNavBar() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const {numberOfNotif} = useStore();
+  const navigteTo = useNavigate();
 
+  const handleNavigation = (to:string) => {
+    navigteTo(to);
+  }
 
   const handleMenuClick = () => {
     setDropdownVisible(!dropdownVisible); // Toggle visibility
@@ -101,20 +106,20 @@ function MobileNavBar() {
     <Menu className="flex flex-col justify-center  gap-2 w-[200px]"
       theme="dark"
     >
-      <Menu.Item className='menu-item-top-navbar-pages' icon={<HomeOutlined className='antd-icon'/>} key="home">
+      <Menu.Item onClick={() => handleNavigation('/')}  className='menu-item-top-navbar-pages' icon={<HomeOutlined className='antd-icon'/>} key="home">
           Home
         </Menu.Item>
 
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<MessageOutlined className='antd-icon'/>} key="chat">
+        <Menu.Item onClick={() => handleNavigation('/chat')} className='menu-item-top-navbar-pages' icon={<MessageOutlined className='antd-icon'/>} key="chat">
           Chat
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
+        <Menu.Item onClick={() => handleNavigation('/history')}  className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
           History
         </Menu.Item>
         <Menu.Item className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
           Favories
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">
+        <Menu.Item onClick={() => handleNavigation('/notification')}  className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">
           Notification
         </Menu.Item>
         <Menu.Item className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
@@ -128,7 +133,6 @@ function MobileNavBar() {
 
   return (
     <div className="w-full p-9 grid grid-cols-[40px_1fr] grid-rows-1 gap-4">
-        fasdfad
       <Dropdown
         overlay={menu}
         placement="bottomRight"

@@ -3,7 +3,7 @@ import { jwtDecode } from "jwt-decode";
 import { useRouter } from 'next/navigation';
 
 const api = axios.create({
-  baseURL: 'https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 api.interceptors.request.use(

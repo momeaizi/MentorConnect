@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 

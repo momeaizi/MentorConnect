@@ -20,7 +20,6 @@ class Config:
     JWT_PRIVATE_KEY =  os.getenv('JWT_PRIVATE_KEY')
     JWT_PUBLIC_KEY =  os.getenv('JWT_PUBLIC_KEY')
     JWT_ALGORITHM = os.getenv('JWT_ALGORITHM')
-
     logger.info(os.getenv('JWT_PUBLIC_KEY'))
 
 class DevelopmentConfig(Config):

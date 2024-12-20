@@ -29,11 +29,9 @@ const AppRoutes = () => {
       <Route
         path="/profile"
         element={
-          // <PrivateRoute>
-          <div>
-              <Navbar/>  
-          </div>
-          // </PrivateRoute>
+          <PrivateRoute>
+            <Navbar/> 
+          </PrivateRoute>
         }
       />
     </Routes>

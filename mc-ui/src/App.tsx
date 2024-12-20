@@ -2,6 +2,7 @@ import { AuthProvider } from './providers/AuthProvider';
 import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from "./routes/AppRoutes"
 import { ConfigProvider } from 'antd';
+import './App.css';
 
 function App() {
 

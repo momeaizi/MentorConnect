@@ -25,7 +25,7 @@ const SendVerificationEmail: React.FC = () => {
 
     setLoading(true);
     try {
-      const res = await api.post('/auth/verify_account', { email });
+      await api.post('/auth/verify_account', { email });
 
       // In a real application, you would make an API call here
       // const response = await api.sendVerificationEmail(email);
