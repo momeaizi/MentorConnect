@@ -4,6 +4,7 @@ import SendVerificationEmail from '../pages/SendVerificationEmail';
 import EmailVerification from '../pages/EmailVerification';
 import Home from '../pages/Home';
 import Navbar from '../components/NavBar/NavBar';
+import NotificationPage from '../pages/Notification';
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,19 @@ const AppRoutes = () => {
         element={
           <PrivateRoute>
             <Navbar/> 
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/notification"
+        element={
+          <PrivateRoute>
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-hidden'>
+              <NotificationPage/> 
+              </div>
+            </div>
           </PrivateRoute>
         }
       />

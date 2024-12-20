@@ -6,7 +6,7 @@ interface Notification {
     username: string;
     type: string;
     time: string;
-    isUnread: boolean;
+    isRead: boolean;
 }
 
 const useStore = create((set:any) => ({

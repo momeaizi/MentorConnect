@@ -43,6 +43,10 @@ function FullScreen() {
     notif()
   },[])
 
+  useEffect(()=>{
+    console.log("**********************", numberOfNotif )
+  },[numberOfNotif])
+
   return (
     <div className=' flex items-center justify-between w-full'>
       <Menu.Item className='menu-item-top-navbar' icon={<FireFilled style={{color:"#eb2f96"}} className='logo-navbar-fire-icon'/>} key="logo" >
@@ -51,7 +55,7 @@ function FullScreen() {
         </h1>
       </Menu.Item>
       <div className='flex'>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<HomeOutlined  className='antd-icon'/>} key="home">
+        <Menu.Item onClick={() => handleNavigation('/')}  className='menu-item-top-navbar-pages' icon={<HomeOutlined  className='antd-icon'/>} key="home">
           Home
         </Menu.Item>
 

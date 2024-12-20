@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from 'axios';
-import { useAuth } from "@/context/AuthContext";
-import Toast from "@/components/Toast";
-import useStore from "@/lib/store";
+import useStore from "../lib/store";
+import { useAuth } from "../providers/AuthProvider";
+import api from "../services/api";
 
 
 interface Notification {
@@ -88,7 +87,7 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
 };
 
 function fetchData(see:Boolean): Promise<Notification[]> {
-  return  axios.get(`http://localhost:5000/api/notif/${see?'see' : ''}`)
+  return  api.get(`/notif/${see?'see' : ''}`)
       .then((response: any) => {
         return response.data;
       })
@@ -101,10 +100,11 @@ function fetchData(see:Boolean): Promise<Notification[]> {
 const NotificationPage = () => {
   const {setNumberOfNotif, newNotif, setNewNotif} = useStore();
   const [notificationsData, setNotificationsData] = useState<Notification[]>([]);
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  
   useEffect(() => {
     const getNotifications = async () => {
-      if (loading || !user) return;
+      if (!user) return;
       try {
         const notification = await fetchData(false);
         setNotificationsData(notification.data);
@@ -114,7 +114,7 @@ const NotificationPage = () => {
     };
 
     getNotifications();
-  }, [user, loading]);
+  }, [user]);
   
   useEffect(()=>{
     setNumberOfNotif(0);
