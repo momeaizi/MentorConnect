@@ -17,8 +17,8 @@ def create_notif():
 
 
 @notification_bp.route('/', methods=['GET'])
-# @token_required
-def get_notif_by_user(user={'id':1}):
+@token_required
+def get_notif_by_user(user):
     return get_notif_by_user_service(user)
 
 @notification_bp.route('/see')
@@ -28,6 +28,6 @@ def see_notification(user):
     return see_notification_service(user_id)
 
 @notification_bp.route('/number')
-# @token_required
-def number_of_notification(user={'id':1}):
+@token_required
+def number_of_notification(user):
     return number_of_notification_service(user)

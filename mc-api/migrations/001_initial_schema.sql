@@ -57,8 +57,9 @@ CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
     user_id_1 INT NOT NULL,
     user_id_2 INT NOT NULL,
-    see BOOLEAN DEFAULT FALSE,
+    see BOOLEAN DEFAULT TRUE,
     last_message_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id_1) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE
 );

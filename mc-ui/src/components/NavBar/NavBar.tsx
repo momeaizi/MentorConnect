@@ -11,6 +11,7 @@ import {
  } from '@ant-design/icons';
 import useStore from '../../lib/store';
 import api from '../../services/api';
+import { useAuth } from '../../providers/AuthProvider';
 
 function fetchData() {
   return  api.get('notif/number')
@@ -25,6 +26,7 @@ function fetchData() {
 
 function FullScreen() {
   const {numberOfNotif, setNumberOfNotif} = useStore();
+  const {logout} = useAuth()
   const navigteTo = useNavigate();
 
   const handleNavigation = (to:string) => {
@@ -46,6 +48,11 @@ function FullScreen() {
   useEffect(()=>{
     console.log("**********************", numberOfNotif )
   },[numberOfNotif])
+
+  const handleLogout = () => {
+    logout();
+    handleNavigation('/');
+  }
 
   return (
     <div className=' flex items-center justify-between w-full'>
@@ -80,7 +87,7 @@ function FullScreen() {
           <Menu.Item onClick={() => handleNavigation('/profile')} className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
             View Profile
           </Menu.Item>
-          <Menu.Item className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
+          <Menu.Item onClick={handleLogout} className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
             Logout
           </Menu.Item>
         </Menu.SubMenu>

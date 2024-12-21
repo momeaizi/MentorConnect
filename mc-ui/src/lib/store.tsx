@@ -18,6 +18,7 @@ const useStore = create((set:any) => ({
     socket: null,
     newNotif: null,
     numberOfNotif: 0,
+    newMessageSocket:null,
 
 
     // Define actions,
@@ -27,7 +28,8 @@ const useStore = create((set:any) => ({
     setNumberOfNotif: (numberOfNotif:number) => set({ numberOfNotif }),
     setMessagePages: (messagePages:string)=>set({messagePages}),
     setSelectedIndex: (selectedIndex:number)=>set({selectedIndex}),
-    setSelectedConv: (selectedConv:number)=>set({selectedConv})
+    setSelectedConv: (selectedConv:number)=>set({selectedConv}),
+    setNewMessageSocket: (newMessageSocket:any)=>set({newMessageSocket}),
 }));
 
 export default useStore;

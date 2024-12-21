@@ -1,15 +1,15 @@
-import { AuthProvider } from './providers/AuthProvider';
-import { BrowserRouter } from 'react-router-dom';
 import AppRoutes from "./routes/AppRoutes"
 import { ConfigProvider, notification } from 'antd';
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
 import useStore from './lib/store';
 import './App.css';
+// import { useAuth } from './providers/AuthProvider';
 
 function App() {
-  const {setNumberOfNotif, setNewNotif, numberOfNotif, setSocket} = useStore();
+  const {setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket} = useStore();
   const [api, contextHolder] = notification.useNotification();
+  // const {user} = useAuth()
 
   const openNotification = (message:string) => {
     api.success({
@@ -26,6 +26,11 @@ function App() {
       useStore.getState().setSocket(socket);
     });
 
+    socket.on('new_message', (data:any) => {
+      setNewMessageSocket(data);
+      openNotification("You've a new Message!");
+    });
+  
     socket.on('new_notification', (data:any) => {
       setNumberOfNotif(1);
       openNotification("You've a new Notification!");
@@ -58,12 +63,9 @@ function App() {
         },
       }}
     >
-      <BrowserRouter>
-        <AuthProvider>
           {contextHolder}
           <AppRoutes></AppRoutes>
-        </AuthProvider>
-      </BrowserRouter>
+      {/* </BrowserRouter> */}
     </ConfigProvider>
   )
 }
