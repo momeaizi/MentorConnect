@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import useStore from "../lib/store";
 import { useAuth } from "../providers/AuthProvider";
 import api from "../services/api";
@@ -12,7 +12,7 @@ interface Notification {
   isRead: boolean;
 }
 
-const notificationMap = {
+const notificationMap:any = {
   like: {
     title: "you've got a new like!",
     subtitle: "Someone appreciates your profile—check it out!"
@@ -89,7 +89,9 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
 function fetchData(see:Boolean): Promise<Notification[]> {
   return  api.get(`/notif/${see?'see' : ''}`)
       .then((response: any) => {
-        return response.data;
+        if (!see)
+          return response.data?.data;
+        return []
       })
       .catch((error: any) => {
           console.error('Error fetching data:', error);
@@ -107,7 +109,7 @@ const NotificationPage = () => {
       if (!user) return;
       try {
         const notification = await fetchData(false);
-        setNotificationsData(notification.data);
+        setNotificationsData(notification);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       }
@@ -122,7 +124,8 @@ const NotificationPage = () => {
 
   useEffect(()=>{
     const seeNotification = async () => {
-      try {await fetchData(true);
+      try {
+        await fetchData(true);
       } catch (error) {
         console.error('Failed to fetch notifications:', error);
       }

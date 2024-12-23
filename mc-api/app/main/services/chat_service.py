@@ -63,9 +63,6 @@ def get_conv_with_user_id_service(user_id):
 
         conversations = execute_query(query, params=(user_id, user_id, user_id), fetch_all=True)
 
-        logger.info("******************************************************")
-        logger.info(conversations)
-        logger.info("******************************************************")
         result = [
             {
                 "id": conv["conversation_id"],
@@ -183,3 +180,23 @@ def create_message_service(data):
     except Exception as e:
         logger.error()
         return jsonify({'status': 'error', 'message': f"Failed to create conversation: {str(e)}"}), 500
+    
+
+def number_of_chat_service(user):
+    user_id = user.get('id', None)
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
+
+    try:
+        select_query = "SELECT COUNT(*) FROM conversations WHERE user_id_1 = %s OR user_id_2 = %s AND see =  FALSE"
+        result = execute_query(select_query, params=(user_id,user_id,), fetch_all=True)
+        
+        chat_count = result[0].get('count', None) if result else 0
+
+        return jsonify({'status': 'success', 'number': chat_count, 'message': result}), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving chat: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to fetch chat. Please try again later.'}), 500
+

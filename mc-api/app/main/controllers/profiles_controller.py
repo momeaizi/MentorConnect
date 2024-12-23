@@ -28,19 +28,19 @@ def get_profile():#user
 def log_profile_view(user, profile_owner_id):
     return profile_views_service.log_profile_view(user['id'], profile_owner_id)
 
-
 @profile_bp.route('/viewers')
 @token_required
 def get_profile_views(user):
     return profile_views_service.get_profile_views(user['id'])
 
 
+#?????
 @profile_bp.route('/viewed')
 @token_required
 def get_viewed_profiles(user):
     return profile_views_service.get_viewed_profiles(user['id'])
 
-
+#?????
 @profile_bp.route('/liked')
 @token_required
 def liked_profiles(user, liked_profile_id):

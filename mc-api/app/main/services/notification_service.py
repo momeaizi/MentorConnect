@@ -75,7 +75,7 @@ def get_notif_by_user_service(user):
                 'isRead': notif['is_seen']
             })
 
-
+        # logger.info(formatted_notifications)
         return jsonify({'status': 'success', 'data': formatted_notifications}), 200
 
     except Exception as e:

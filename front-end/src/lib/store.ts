@@ -18,6 +18,7 @@ const useStore = create((set:any) => ({
     socket: null,
     newNotif: null,
     numberOfNotif: 0,
+    numberOfMessage: 0,
 
 
     // Define actions,
@@ -25,6 +26,7 @@ const useStore = create((set:any) => ({
     setUser: (user:any) => set({ user }),
     setNewNotif: (newNotif:Notification) => set({ newNotif }),
     setNumberOfNotif: (numberOfNotif:number) => set({ numberOfNotif }),
+    setNumberOfMessage: (numberOfMessage:number) => set({ numberOfMessage }),
     setMessagePages: (messagePages:string)=>set({messagePages}),
     setSelectedIndex: (selectedIndex:number)=>set({selectedIndex}),
     setSelectedConv: (selectedConv:number)=>set({selectedConv})

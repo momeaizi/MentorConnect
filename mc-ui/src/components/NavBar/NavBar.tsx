@@ -13,8 +13,8 @@ import useStore from '../../lib/store';
 import api from '../../services/api';
 import { useAuth } from '../../providers/AuthProvider';
 
-function fetchData() {
-  return  api.get('notif/number')
+function fetchData(route:string) {//notif
+  return  api.get(`${route}/number`)
       .then((response: any) => {
         return response.data;
       })
@@ -25,7 +25,7 @@ function fetchData() {
 }
 
 function FullScreen() {
-  const {numberOfNotif, setNumberOfNotif} = useStore();
+  const {numberOfNotif, setNumberOfNotif, numberOfMessage, setNumberOfMessage, selectedIndex, selectedConv} = useStore();
   const {logout} = useAuth()
   const navigteTo = useNavigate();
 
@@ -36,18 +36,31 @@ function FullScreen() {
   useEffect(()=>{
     async function notif() {
       try {
-        const number  = await fetchData();
+        const number  = await fetchData('notif');
+
         setNumberOfNotif(number?.number)
       } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+        console.error('Failed to fetch notifications number:', error);
+      }
+    };
+
+    async function chat() {
+      try {
+        const number  = await fetchData('chat');
+
+        setNumberOfMessage(number?.number);
+      } catch (error) {
+        console.error('Failed to fetch chat number:', error);
       }
     };
     notif()
-  },[])
+    chat()
+  },[selectedIndex, selectedConv])
 
   useEffect(()=>{
-    console.log("**********************", numberOfNotif )
   },[numberOfNotif])
+  useEffect(()=>{
+},[numberOfMessage])
 
   const handleLogout = () => {
     logout();
@@ -66,7 +79,7 @@ function FullScreen() {
           Home
         </Menu.Item>
 
-        <Menu.Item onClick={() => handleNavigation('/chat')} className='menu-item-top-navbar-pages' icon={<MessageOutlined className='antd-icon'/>} key="chat">
+        <Menu.Item onClick={() => handleNavigation('/chat')} className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfMessage} dot><MessageOutlined className='antd-icon' /></Badge></div>} key="chat">
           Chat
         </Menu.Item>
         <Menu.Item className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">

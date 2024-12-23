@@ -6,7 +6,7 @@ from app.main.utils.exceptions import ValidationError
 from app.main.services.chat_service import (
     create_conversation_service, get_conv_with_user_id_service,
     get_conv_with_conv_id_service, delete_conversation_service,
-    create_message_service
+    create_message_service, number_of_chat_service
 )
 
 chat_bp = Blueprint('chat_bp', __name__)
@@ -77,3 +77,9 @@ def update_conversation(conv_id, user):
 def create_message():
     data = request.json
     return create_message_service(data)
+
+
+@chat_bp.route('/number')
+@token_required
+def number_of_chat(user):
+    return number_of_chat_service(user)

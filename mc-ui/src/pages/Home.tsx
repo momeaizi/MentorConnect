@@ -7,7 +7,7 @@ import Navbar from '../components/NavBar/NavBar';
 
 
 const Home: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   // console.log("isAuthenticated: ", isAuthenticated, user);
 

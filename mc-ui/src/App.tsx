@@ -3,18 +3,19 @@ import { ConfigProvider, notification } from 'antd';
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
 import useStore from './lib/store';
+import { MailOutlined, SoundOutlined } from '@ant-design/icons';
 import './App.css';
 // import { useAuth } from './providers/AuthProvider';
 
 function App() {
-  const {setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket} = useStore();
+  const {setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket, setNumberOfMessage} = useStore();
   const [api, contextHolder] = notification.useNotification();
   // const {user} = useAuth()
 
-  const openNotification = (message:string) => {
-    api.success({
+  const openNotification = (message:string, icons:any) => {
+    api.open({
       message: message,
-      placement: 'topRight',
+      icon: icons
     });
   };
 
@@ -28,12 +29,12 @@ function App() {
 
     socket.on('new_message', (data:any) => {
       setNewMessageSocket(data);
-      openNotification("You've a new Message!");
+      setNumberOfMessage(1);
+      openNotification("You've a new Message!", <MailOutlined style={{ color: '#ef4444' }}/>);
     });
-  
     socket.on('new_notification', (data:any) => {
       setNumberOfNotif(1);
-      openNotification("You've a new Notification!");
+      openNotification("You've a new Notification!", <SoundOutlined style={{ color: '#ef4444' }} />);
       setNewNotif(data);
 
     });

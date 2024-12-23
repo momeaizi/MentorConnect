@@ -18,12 +18,21 @@ interface CellData {
   time: string;
   isSeen: boolean;
   id: number
+  user_id: number;
 }
 
 interface ButtonProps {
   isSelected: boolean;
   onClick: () => void;
   cellData: CellData;
+}
+
+interface HeaderTypes{
+  image: string;
+  name: string;
+  is_online: boolean;
+  id: number;
+
 }
 
 // ? side nav chat 
@@ -64,7 +73,7 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
   )
 }
 
-function fetchData(id=''): Promise<Notification[]> {
+function fetchData(id:string|number='') {
   return  api.get(`/chat/conversation${id != '' ? `/${id}`: ''}`)
       .then((response: any) => {
         return response.data;
@@ -77,13 +86,12 @@ function fetchData(id=''): Promise<Notification[]> {
 
 
 function SideNavChat() {
-  const {selectedIndex, setSelectedIndex, setSelectedConv, newMessageSocket} = useStore();
+  const {selectedIndex, setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket} = useStore();
   const [cellData, setCellData] = useState<CellData[]>([])
 
 
 
   useEffect(() => {
-    console.log("-->")
     const getChatCell = async () => {
       try {
         const chatCells = await fetchData();
@@ -94,7 +102,7 @@ function SideNavChat() {
     };
 
     getChatCell();
-  }, [newMessageSocket, selectedIndex]);
+  }, [newMessageSocket, selectedIndex, selectedConv]);
   
 
   const handleChatCellClick = (index:number, id:number) => {
@@ -103,7 +111,7 @@ function SideNavChat() {
   };
 
   useEffect(()=>{
-    console.log("sedenav", selectedIndex);
+    // console.log("sedenav", selectedIndex);
   },[selectedIndex])
 
   return (
@@ -185,25 +193,40 @@ function ReceiveMessage({message}:{message: string}) {
   );
 }
 
+interface ChatMessage {
+  message: string;
+  user_id: number;
+  conv_id: number;
+}
 
 function ConversationWindow() {
   const [returnToSide, setReturnToSide] = useState<boolean>(false)
-  const [chatHeader, setChatHeader] = useState(null)
-  const [chatMessages, setChatMessages] = useState([])
+  const [chatHeader, setChatHeader] = useState<HeaderTypes|null>(null)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loadding, setLodding] = useState<boolean>(false)
   const {setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket, setNewMessageSocket} = useStore();
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
+  const scrollableDivRef = useRef(null);
+
+
+  useEffect(() => {
+    if (scrollableDivRef.current) {
+      scrollableDivRef.current.scrollTop = scrollableDivRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value);
   };
 
-  useEffect(()=>{
-    if (newMessageSocket && newMessageSocket.conv_id === selectedConv)
-      setChatMessages((prevMessages:any) => [...prevMessages, newMessageSocket]);
-    setNewMessageSocket(null)
-  }, [newMessageSocket])
+
+  useEffect(() => {
+    if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
+        setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
+        setNewMessageSocket(null); // Clear the socket message after processing
+    }
+}, [newMessageSocket]);
 
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
@@ -252,23 +275,17 @@ function ConversationWindow() {
     
     setLodding(false)
     
-    if (selectedConv !== null) {
+    if (selectedConv) {
       getChatWindow();
       setLodding(true);
     }
   }, [selectedConv]);
 
   const handleReturnClick = () => {
-    setSelectedIndex(null);
-    setSelectedConv(null)
+    setSelectedIndex(0);
+    setSelectedConv(0);
   }
-  const scrollableDivRef = useRef(null);
 
-  useEffect(() => {
-    if (scrollableDivRef.current) {
-      scrollableDivRef.current.scrollTop = scrollableDivRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
 
   return(
     <>
@@ -299,8 +316,8 @@ function ConversationWindow() {
               </div>
 
               <div ref={scrollableDivRef} className='w-full h-[80vh] p-[0_4em] pt-4 flex flex-col   gap-3 overflow-y-scroll overflow-x-hidden grow'>
-                {chatMessages.map((data:any, index:number) => (
-                  (data.user_id === chatHeader.id)?
+                {chatMessages.map((data:any) => (
+                  (data.user_id === chatHeader?.id)?
                     <SenderMessage message={data.message}/>
                     :
                     <ReceiveMessage message={data.message}/>
@@ -313,7 +330,7 @@ function ConversationWindow() {
                   value={newMessage}
                   onChange={handleMessageChange}
                   onKeyDown={handleKeyDown}
-                  size="larg"
+                  size="large"
                   placeholder='typeMessage'
                   className="h-[3em] rounded-xl"
                   suffix={<div className="custom-send-icon">
@@ -363,7 +380,7 @@ export default function ChatPage() {
   }, [messagePages, setMessagePages]);
 
   useEffect(()=>{
-    if (selectedIndex != null && window.innerWidth <= 768)
+    if (selectedIndex && window.innerWidth <= 768)
       setMessagePages('window');
     else if (!selectedIndex && window.innerWidth <= 768)
       setMessagePages('list');
