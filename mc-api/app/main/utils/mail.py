@@ -1,6 +1,7 @@
 from flask import current_app as app
 from app.main import mail, Message
 from loguru import logger
+from urllib.parse import quote
 import datetime
 import jwt
 
@@ -13,9 +14,8 @@ def generate_verification_token(id):
 
 def send_verification_email(email, id):
     try:
-        logger.info(f"afdsfafsdf {email}")
-        token = generate_verification_token(id)
-        verification_link = f"http://localhost:5000/api/auth/verify/{token}"
+        token = quote(generate_verification_token(id))
+        verification_link = f"{app.config['FRONTEND_URL']}/verify-email/{token}"
         msg = Message("Email Verification", recipients=[email])
         msg.body = f"Click the link to verify your email: {verification_link}"
         mail.send(msg)

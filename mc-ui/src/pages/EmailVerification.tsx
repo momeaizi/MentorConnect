@@ -1,33 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import api from '../services/api';
+import { Card, Result, Button } from 'antd';
+import { publicApi } from '../services/api';
 import { isAxiosError } from 'axios';
+import { useAuth } from '../providers/AuthProvider';
+import { Loader2 } from 'lucide-react'
+import { Logo } from '../components/Logo';
 
 const EmailVerification: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(true);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { token } = useParams();
+  const { login } = useAuth();
 
   useEffect(() => {
     const verifyEmail = async () => {
-
-      console.log(token);
-
-      if (!token) {
-        setError('Invalid verification link');
-        setLoading(false);
-        return;
-      }
-
+      setError(null);
       try {
-        await api.get(`/auth/verify/${token}`);
-        navigate('/');
+        const res = await publicApi.get(`/auth/verify/${token}`);
+        const { access_token } = res.data;
+        login(access_token);
+
+        setSuccess(true);
 
       } catch (error) {
         if (isAxiosError(error)) {
-          setError(error.response?.data?.message);
+          setError(error.response?.data?.message || "An unexpected error occurred.");
         } else {
           setError('The verification link is invalid or has expired.');
         }
@@ -39,32 +40,60 @@ const EmailVerification: React.FC = () => {
     verifyEmail();
   }, [location, navigate]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-custom text-2xl">Verifying your email...</div>
-      </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="p-8 rounded-lg shadow-md max-w-md w-full border border-custom">
-          <h2 className="text-2xl font-bold  mb-4">Verification Error</h2>
-          <p className="text-custom mb-4">{error}</p>
-          <button
-            className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
-            onClick={() => navigate('/')}
-          >
-            Return to Login
-          </button>
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-md p-6 space-y-6 text-center">
+            <Loader2 className="w-16 h-16  animate-spin mx-auto" />
+            <p>Please wait while we verify your account. This may take a few moments.</p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+
+    if (error) {
+      return (
+          <Result
+            status="error"
+            title="Verification Error"
+            subTitle={error}
+            extra={[
+              <Button key="retry" onClick={() => navigate('/')}>
+                Return to Login
+              </Button>,
+            ]}
+          />
+      );
+    }
+
+    if (success) {
+      <Result
+            status="success"
+            title="mail Verification Successful"
+            subTitle="Your email address has been successfully verified! You can now access all the features and services associated with your account. Thank you for verifying your email."
+            extra={[
+              <Button key="retry" onClick={() => navigate('/home')}>
+                Go to Home
+              </Button>,
+            ]}
+          />
+    }
   }
 
-  return null; // This will not be rendered as the component will redirect on success
+
+
+
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <Card className="w-full max-w-lg flex justify-center items-center">
+        <Logo />
+        <h2 className="text-2xl text-center text-custom">Verifying Your Account</h2>
+        {renderContent()}
+      </Card>
+    </div >
+  );
 };
 
 export default EmailVerification;

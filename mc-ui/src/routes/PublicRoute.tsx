@@ -5,10 +5,10 @@ import { isTokenExpired } from '../utils/jwtUtils';
 
 
 
-const PrivateRoute: FC = () => {
+const PublicRoute: FC = () => {
   const { isAuthenticated, payload } = useAuth();
 
-  return (isAuthenticated && !isTokenExpired(payload)) ? <Outlet /> : <Navigate to="/" replace />;
+  return (!isAuthenticated || isTokenExpired(payload)) ? <Outlet /> : <Navigate to="/home" replace />;
 };
 
-export default PrivateRoute;
+export default PublicRoute;

@@ -4,7 +4,7 @@ import {
   Input,
   Button
 } from 'antd';
-import api from '../services/api';
+import { publicApi } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { isAxiosError } from '../types/api';
@@ -27,7 +27,7 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
 
   const onFinish = async (values: CreateAccountFormValues) => {
     try {
-      const res = await api.post('/auth/register', {
+      const res = await publicApi.post('/auth/register', {
         username: values.username,
         email: values.email,
         password: values.password,
@@ -37,7 +37,7 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
 
       closeModal();
       login(access_token);
-      setTimeout(() => navigate('/'), 400);
+      setTimeout(() => navigate('/home'), 400);
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data?.message == "Verify Your Email" && error.response?.data?.email) {

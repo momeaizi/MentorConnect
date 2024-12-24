@@ -27,7 +27,7 @@ class SocketService:
 
 
 
-    def handle_disconnect(self, user):
+    def chandle_disconnect(self, user):
         logger.info(f"disconnected: {request.sid}")
 
         user_id = user.get('id')

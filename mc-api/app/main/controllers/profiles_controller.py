@@ -34,7 +34,7 @@ def get_viewed_profiles(user):
 
 @profile_bp.route('/liked')
 @token_required
-def liked_profiles(user, liked_profile_id):
+def liked_profiles(user):
     return profile_likes_service.liked_profiles(user.get('id'))
 
 

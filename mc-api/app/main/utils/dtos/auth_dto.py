@@ -35,19 +35,19 @@ class RegisterUserDTO:
 
 class VerifyAccountDTO:
     def __init__(self, data):
-        fields = ['username']
+        fields = ['email']
         fields_to_remove = [key for key in data if key not in fields]
         for attribute in fields_to_remove:
             del data[attribute]
         self.data = data
 
     def validate(self):
-        username = self.data.get('username', None)
+        email = self.data.get('email', None)
         
-        if not username:
-            raise ValidationError("username is required", "MISSING_USERNAME")
-        if not len(username):
-            raise ValidationError("username must not be empty", "INVALID_USERNAME_LENGTH")
+        if not email:
+            raise ValidationError("email is required", "MISSING_EMAIL")
+        if not len(email):
+            raise ValidationError("email must not be empty", "INVALID_EMAIL_LENGTH")
 
 
 class LoginUserDTO:
