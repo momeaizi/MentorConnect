@@ -82,10 +82,10 @@ function FullScreen() {
         <Menu.Item onClick={() => handleNavigation('/chat')} className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfMessage} dot><MessageOutlined className='antd-icon' /></Badge></div>} key="chat">
           Chat
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
+        <Menu.Item onClick={() => handleNavigation('/history')} className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
           History
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
+        <Menu.Item onClick={() => handleNavigation('/favorie')} className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
           Favories
         </Menu.Item>
       </div>
@@ -140,7 +140,7 @@ function MobileNavBar() {
         <Menu.Item onClick={() => handleNavigation('/history')}  className='menu-item-top-navbar-pages' icon={<HistoryOutlined className='antd-icon'/>} key="history">
           History
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
+        <Menu.Item onClick={() => handleNavigation('/favorie')} className='menu-item-top-navbar-pages' icon={<HeartOutlined className='antd-icon'/>} key="favorie">
           Favories
         </Menu.Item>
         <Menu.Item onClick={() => handleNavigation('/notification')}  className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">

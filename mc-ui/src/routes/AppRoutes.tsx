@@ -6,6 +6,8 @@ import Home from '../pages/Home';
 import Navbar from '../components/NavBar/NavBar';
 import NotificationPage from '../pages/Notification';
 import ChatPage from '../pages/Chat';
+import HistoryPage from '../pages/History';
+import FavoriePage from '../pages/Favorie';
 
 const AppRoutes = () => {
   return (
@@ -63,6 +65,31 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       />
+
+    <Route
+    path="/history"
+    element={
+      <PrivateRoute>
+        <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+          <Navbar />
+          <HistoryPage />
+        </div>
+      </PrivateRoute>
+    }
+    />
+
+    <Route
+    path="/favorie"
+    element={
+      <PrivateRoute>
+        <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+          <Navbar />
+          <FavoriePage />
+        </div>
+      </PrivateRoute>
+    }
+    />
+
     </Routes>
   );
 };

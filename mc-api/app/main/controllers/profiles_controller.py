@@ -36,14 +36,14 @@ def get_profile_views(user):
 
 #?????
 @profile_bp.route('/viewed')
-@token_required
-def get_viewed_profiles(user):
+# @token_required
+def get_viewed_profiles(user={'id':1}):
     return profile_views_service.get_viewed_profiles(user['id'])
 
 #?????
 @profile_bp.route('/liked')
 @token_required
-def liked_profiles(user, liked_profile_id):
+def liked_profiles(user):
     return profile_likes_service.liked_profiles(user.get('id'))
 
 
