@@ -1,4 +1,3 @@
-
 import React, {useState, useEffect, useRef} from 'react';
 import '../assets/styles/globals.css'
 import { Input, Empty } from 'antd';
@@ -207,7 +206,7 @@ function ConversationWindow() {
   const {setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket, setNewMessageSocket} = useStore();
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
-  const scrollableDivRef = useRef(null);
+  const scrollableDivRef = useRef<HTMLDivElement | null>(null);
 
 
   useEffect(() => {
@@ -241,7 +240,6 @@ function ConversationWindow() {
     setNewMessage('');
   }
   
-
   const handleKeyDown = (event:any) => {
     if (event.key === 'Enter')
       sendMessage();
@@ -285,7 +283,6 @@ function ConversationWindow() {
     setSelectedIndex(0);
     setSelectedConv(0);
   }
-
 
   return(
     <>

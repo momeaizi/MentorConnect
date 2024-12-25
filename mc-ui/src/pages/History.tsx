@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import useStore from "../lib/store";
 import { useAuth } from "../providers/AuthProvider";
 import api from "../services/api";
 
