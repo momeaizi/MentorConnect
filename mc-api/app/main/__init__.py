@@ -20,9 +20,6 @@ def create_app(config_name):
 
     global redis_client
 
-
-
-
     logger.info("App is starting on : " + config_name + " mode")
     app = Flask(__name__)
 

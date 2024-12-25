@@ -32,7 +32,7 @@ def create_notif_service(data):
             'time': humanize.naturaltime(
                 datetime.now(timezone.utc) - notification_time
             ),
-            'isUnread': notif['is_seen']
+            'isRead': notif['is_seen']
         }
         socket_service.handle_new_notification(new_notification)
 
@@ -53,6 +53,7 @@ def get_notif_by_user_service(user):
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
+        see_notification_service(user_id)
         select_query = "SELECT * FROM notifications WHERE notified_user_id = %s ORDER BY notification_time DESC"
         notifications = execute_query(select_query, params=(user_id,), fetch_all=True)
 
@@ -71,11 +72,10 @@ def get_notif_by_user_service(user):
                 'time': humanize.naturaltime(
                     datetime.now(timezone.utc) - notification_time
                 ),
-                'isUnread': notif['is_seen']
+                'isRead': notif['is_seen']
             })
 
-        see_notification_service(user_id)
-
+        # logger.info(formatted_notifications)
         return jsonify({'status': 'success', 'data': formatted_notifications}), 200
 
     except Exception as e:
@@ -104,19 +104,19 @@ def see_notification_service(user_id):
         logger.error(f"Error marking notification(s) as seen: {str(e)}")
         return jsonify({'status': 'error', 'message': 'Failed to update notifications.'}), 500
 
-def number_of_notification(user):
+def number_of_notification_service(user):
     user_id = user.get('id', None)
 
     if not user_id:
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
-        select_query = "SELECT COUNT(*) FROM notifications WHERE notified_user_id = %s"
+        select_query = "SELECT COUNT(*) FROM notifications WHERE notified_user_id = %s AND is_seen = FALSE"
         result = execute_query(select_query, params=(user_id,), fetch_all=True)
         
-        notification_count = result[0][0] if result else 0
+        notification_count = result[0].get('count', None) if result else 0
 
-        return jsonify({'status': 'success', 'data': {'number': notification_count}}), 200
+        return jsonify({'status': 'success', 'number': notification_count}), 200
 
     except Exception as e:
         logger.error(f"Error retrieving notifications: {str(e)}")

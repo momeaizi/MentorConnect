@@ -1,6 +1,8 @@
 from app.db.sql_executor import execute_query
 from flask import jsonify
 from loguru import logger
+from datetime import datetime, timezone
+import humanize
 
 
 class ProfileViewsService():
@@ -34,6 +36,23 @@ class ProfileViewsService():
         try:
             select_query = "SELECT * FROM profile_views WHERE viewer_id = %s"
             viewers = execute_query(select_query, params=(viewer_id,), fetch_all=True)
-            return jsonify(viewers), 200
+
+            formatted_history = []
+            for history in viewers:
+                select_query = "SELECT * FROM users WHERE ID = %s"
+                user = execute_query(select_query, params=(history.get('profile_owner_id'),), fetch_one=True)
+                history_time = history.get('viewed_at')
+                if history_time.tzinfo is None:
+                    history_time = history_time.replace(tzinfo=timezone.utc)
+                formatted_history.append({
+                    'username': user.get('username'),
+                    'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+                    'time': humanize.naturaltime(
+                        datetime.now(timezone.utc) - history_time
+                    ),
+                })
+
+            # return jsonify(viewers), 200
+            return jsonify({'status': 'success', 'data': formatted_history}), 200
         except Exception as e:
             logger.error(f"Error fetching viewed profiles by viewer_id: {e}")

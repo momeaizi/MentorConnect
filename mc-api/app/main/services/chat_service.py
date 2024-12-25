@@ -4,6 +4,7 @@ from app.db.sql_executor import execute_query
 from app.main.utils.decorators import expect_dto, token_required
 from app.main.utils.exceptions import ValidationError
 from flask_socketio import emit
+from app.main import socketio
 
 def create_conversation_service(data, user_id):
     try:
@@ -33,41 +34,43 @@ def get_conv_with_user_id_service(user_id):
                 u.username,
                 u.email,
                 u.is_online,
-                c.see AS isSeen,
+                c.see AS is_seen,
+                c.created_at AS conv_time,
                 m.id AS last_message_id,
                 m.message AS last_message_content,
-                m.created_at AS last_message_time
+                m.created_at AS last_message_time,
+                m.user_id AS message_user_id 
             FROM conversations c
             JOIN users u 
                 ON u.id = CASE 
                             WHEN c.user_id_1 = %s THEN c.user_id_2 
                             ELSE c.user_id_1 
                         END
-            JOIN (
+            LEFT JOIN LATERAL (
                 SELECT 
-                    conversation_id, 
-                    MAX(created_at) AS max_time
-                FROM messages
-                GROUP BY conversation_id
-            ) subquery 
-                ON c.id = subquery.conversation_id
-            JOIN messages m 
-                ON m.conversation_id = subquery.conversation_id 
-            AND m.created_at = subquery.max_time
+                    m.id,
+                    m.message,
+                    m.created_at,
+                    m.user_id 
+                FROM messages m
+                WHERE m.conversation_id = c.id
+                ORDER BY m.created_at DESC
+                LIMIT 1
+            ) m ON TRUE
             WHERE c.user_id_1 = %s OR c.user_id_2 = %s
-            ORDER BY m.created_at DESC;
+            ORDER BY c.created_at DESC;
         """
 
         conversations = execute_query(query, params=(user_id, user_id, user_id), fetch_all=True)
 
-        logger.info(conversations)
         result = [
             {
                 "id": conv["conversation_id"],
+                "user_id":conv["message_user_id"],
                 "name": conv["username"],# change username with name
                 "lastMessage": conv["last_message_content"] or "", 
-                "time": conv["last_message_time"].strftime("%I:%M%p") if conv["last_message_time"] else "",
-                "isSeen": conv["isseen"],
+                "time": conv["last_message_time"].strftime("%I:%M%p") if conv.get("last_message_time") else conv["conv_time"].strftime("%I:%M%p") if conv.get("conv_time") else "",
+                "isSeen": conv["is_seen"],
                 "image": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
             }
             for conv in conversations
@@ -81,18 +84,6 @@ def get_conv_with_user_id_service(user_id):
         return jsonify({'status': 'error', 'message': f"Error: {str(e)}"}), 500
 
 
-# def get_conv_with_user_id_service(user_id):
-#     try:
-#         if not user_id:
-#             return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
-
-#         select_query = "SELECT * FROM conversations WHERE user_id_1 = %s OR user_id_2 = %s"
-
-#         conversations = execute_query(select_query, params=(user_id, user_id), fetch_all=True)
-#         return jsonify({'status': 'success', 'data': conversations}), 200
-#     except Exception as e:
-#         return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
-
 def get_conv_with_conv_id_service(conv_id, user_id):
     try:
         select_conversation_query = "SELECT * FROM conversations WHERE id = %s"
@@ -105,11 +96,18 @@ def get_conv_with_conv_id_service(conv_id, user_id):
         messages = execute_query(select_messages_query, params=(conv_id,), fetch_all=True)
         last_message = None
         if messages:
-            last_message = messages[-1] 
+            last_message = messages[-1]
+        
+        logger.info("_____________________________________________")
+        logger.info(user_id)
+        logger.info(last_message)
+        logger.info("_____________________________________________")
         if messages and user_id != last_message.get('user_id', None):
-            update_query = "UPDATE conversations SET see = TRUE WHERE id = %s"
-            execute_query(update_query, params=(conv_id,))
+            logger.info("******************")
+            update_query = "UPDATE conversations SET see = TRUE WHERE id = %s RETURNING *"
+            execute_query(update_query, params=(last_message.get('conversation_id', None),))
             conversation = execute_query(select_conversation_query, params=(conv_id,), fetch_one=True)
+            logger.info(f"=======> {conversation}")
 
         select_user_query = "SELECT * FROM users WHERE id = %s"
 
@@ -121,7 +119,7 @@ def get_conv_with_conv_id_service(conv_id, user_id):
             "is_online": user['is_online'],
             "id": user['id']
         }
-
+        
         return jsonify({
             'status': 'success',
             'data': {
@@ -160,18 +158,45 @@ def create_message_service(data):
         if not conversation:
             return jsonify({'status': 'error', 'message': "Conversation not found."}), 404
 
-        
+        logger.info(conversation)
+
         insert_query = f"INSERT INTO messages ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
         new_message = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
+        logger.info(new_message)
+        # created_at
+        update_query = "UPDATE conversations SET created_at = %s, see = FALSE WHERE id = %s"
+        execute_query(update_query, params=(new_message['created_at'], new_message['conversation_id']))
         send_message = {
             'message':new_message['message'],
-            'id': new_message['user_id']
+            'user_id': new_message['user_id'],
+            'conv_id': new_message['conversation_id']
         }
         
-        emit('new_message', send_message, namespace='/', broadcast=True)
+        # emit('new_message', send_message, namespace='/',  broadcast=True)
+        socketio.emit('new_message', send_message, namespace='/',  room='room_1')
         
         return jsonify({'status': 'success', 'message': 'Message created successfully'}), 201
 
     except Exception as e:
         logger.error()
         return jsonify({'status': 'error', 'message': f"Failed to create conversation: {str(e)}"}), 500
+    
+
+def number_of_chat_service(user):
+    user_id = user.get('id', None)
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
+
+    try:
+        select_query = "SELECT COUNT(*) FROM conversations WHERE user_id_1 = %s OR user_id_2 = %s AND see =  FALSE"
+        result = execute_query(select_query, params=(user_id,user_id,), fetch_all=True)
+        
+        chat_count = result[0].get('count', None) if result else 0
+
+        return jsonify({'status': 'success', 'number': chat_count, 'message': result}), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving chat: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to fetch chat. Please try again later.'}), 500
+

@@ -18,7 +18,7 @@ def token_required(f):
                 "error": "Unauthorized"
             }, 401
         try:
-            data = jwt.decode(token, app.config['JWT_PRIVATE_KEY'], algorithms=app.config['JWT_ALGORITHM'])
+            data = jwt.decode(token, app.config['JWT_PUBLIC_KEY'], algorithms=app.config['JWT_ALGORITHM'])
             select_query = "SELECT * FROM users WHERE id = %s"
             current_user = execute_query(select_query, params=(data['id'],) ,fetch_one=True)
             if current_user is None:
@@ -27,11 +27,11 @@ def token_required(f):
                 "data": None,
                 "error": "Unauthorized"
             }, 401
-            if not current_user.get('validate', None):
+            if not current_user.get('is_verified', None):
                 return {
-                "message": "Account is not Validated!",
+                "message": "Account is not Verified!",
                 "data": None,
-                "error": "Unvalidated"
+                "error": "Unverified"
             }, 401
         except Exception as e:
             return {

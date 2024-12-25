@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 'use client'
 
 // import type { Metadata } from "next";
+=======
+"use client"
+import { Inter } from 'next/font/google'
+
+>>>>>>> feature/history
 import localFont from "next/font/local";
 import { ConfigProvider } from 'antd';
 import "./globals.css";
@@ -11,6 +17,10 @@ import { io } from 'socket.io-client';
 import useStore from "@/lib/store";
 import Toast from "@/components/Toast";
 
+<<<<<<< HEAD
+=======
+const inter = Inter({ subsets: ['latin'] })
+>>>>>>> feature/history
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,7 +41,7 @@ const geistMono = localFont({
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   const [toastData, setToastData] = useState(null);
 
@@ -72,10 +82,9 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden	`}
-      >
-        <ConfigProvider
+      <body className={`${inter.className} bg-background text-foreground`}>
+        <AuthProvider>
+          <ConfigProvider
             theme={{
               token: {
                 colorBgBase: '#021428',
@@ -119,5 +128,6 @@ export default function RootLayout({
         </ConfigProvider>
       </body>
     </html>
-  );
+  )
 }
+

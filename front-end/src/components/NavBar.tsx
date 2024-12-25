@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 'use client'
 import React, { useState, useEffect } from 'react';
 import { Menu, Dropdown, Badge } from 'antd';
@@ -188,3 +189,5 @@ const Navbar= () => {
 };
 
 export default Navbar;
+=======
+>>>>>>> feature/history

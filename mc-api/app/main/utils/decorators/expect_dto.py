@@ -11,10 +11,8 @@ def expect_dto(dto_class, validate=False):
                 if not request.is_json:
                     return jsonify({
                         "status": "error",
-                        "error": {
-                            "message": "Invalid content type. Expected application/json",
-                            "code": "EXPECTED_JSON",
-                        }
+                        "message": "Invalid content type. Expected application/json",
+                        "code": "EXPECTED_JSON",
                     }), 400
 
                 data = request.json
@@ -28,11 +26,9 @@ def expect_dto(dto_class, validate=False):
             except ValidationError as e:
                 return jsonify({
                     "status": "error",
-                    "error": {
-                        "message": e.error,
-                        "code": e.code
-                    }
-                }), 409
+                    "message": e.error,
+                    "code": e.code
+                }), 400
             except Exception as e:
                 return jsonify({"error": str(e)}), 400
 

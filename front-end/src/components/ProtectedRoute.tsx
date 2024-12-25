@@ -1,38 +1,49 @@
-'use client';
-import { useAuth } from '../context/AuthContext';
-import { useRouter, usePathname } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
+import { useRouter, usePathname } from 'next/navigation';
+import { UnverifiedUser } from '@/components/UnverifiedUser';
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { user, loading } = useAuth();
+  const { isAuthenticated, isVerified, isProfileComplete } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.push('/');
-      }
-      else if (pathname === '/') {
-        router.push('/viewers');
-      }
+    if (!isAuthenticated && pathname !== '/') {
+      router.push('/');
+    } else if (isAuthenticated && pathname === '/') {
+      router.push('/home');
+    } else if (isAuthenticated && isVerified && !isProfileComplete && pathname !== 'profile') {
+      router.push('/profile');
     }
-  }, [loading, user, router, pathname]);
+  }, [isAuthenticated, isVerified, isProfileComplete, pathname]);
 
-  if (loading) {
-    return (
-      <div className="w-screen h-screen flex flex-col justify-center items-center">Loading...</div>
-    );
+  if (!isAuthenticated && pathname !== '/') {
+    return <div>loading</div>;
   }
-  else if ((!user && pathname !== '/') || (user && pathname === '/')) {
-    return null;
+
+  if (isAuthenticated && pathname === '/') {
+    return <div>loading</div>;
+  }
+
+  if (isAuthenticated && !isVerified) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <UnverifiedUser />
+      </div>
+    )
+  }
+
+  if (isAuthenticated && isVerified && !isProfileComplete && pathname !== '/profile') {
+    return <div>loading</div>;
   }
 
   return <>{children}</>;
 };
 
 export default ProtectedRoute;
+

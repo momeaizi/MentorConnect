@@ -1,9 +1,14 @@
-import React from 'react';
+
+import React, { useState, FC } from 'react';
 import {
   Form,
   Input,
   Button
 } from 'antd';
+import axios, { AxiosError } from 'axios';
+import api from '@/apis/api';
+import { useRouter } from 'next/navigation';
+import { useAuthContext } from '@/context/AuthContext';
 
 
 interface CreateAccountFormValues {
@@ -14,12 +19,37 @@ interface CreateAccountFormValues {
 }
 
 
+const isAxiosError = (error: unknown): error is AxiosError => {
+  return axios.isAxiosError(error);
+};
 
-const CreateAccountForm: React.FC = () => {
+
+const CreateAccountForm: FC = ({ closeModal }: CreateAccountProps) => {
   const [form] = Form.useForm();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const router = useRouter();
+  const { login } = useAuthContext();
 
-  const onFinish = (values: CreateAccountFormValues) => {
-    console.log('Received values of form: ', values);
+  const onFinish = async (values: CreateAccountFormValues) => {
+    try {
+      const res = await api.post('/auth/register', {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+      });
+
+      const { access_token } = res.data;
+
+      closeModal();
+      login(access_token);
+      setTimeout(() => router.push('/home'), 400);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        setErrorMessage(error.response?.data?.message);
+      } else {
+        setErrorMessage(setErrorMessage(error.response?.data?.message));
+      }
+    }
   };
 
 
@@ -129,6 +159,9 @@ const CreateAccountForm: React.FC = () => {
         />
       </Form.Item>
 
+      {errorMessage && <div className="mb-[16px] text-base text-red-400">{errorMessage}</div>}
+
+    
       <Form.Item>
         <Button
           type="primary"
@@ -150,17 +183,20 @@ const CreateAccountForm: React.FC = () => {
 };
 
 
+interface CreateAccountProps {
+  closeModal: () => void;
+}
 
 
 
-const CreateAccount = () => {
+const CreateAccount = ({ closeModal }: CreateAccountProps) => {
   return (
     <div className="flex flex-col justify-center items-center">
       <h1 className="flex items-center text-4xl font-bold text-white">
         <span className="italic text-3xl font-extrabold	font-sans bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">Matcha</span>
       </h1>
       <p className="text-2xl mb-6">Create an account</p>
-      <CreateAccountForm />
+      <CreateAccountForm closeModal={closeModal}/>
     </div>
   );
 }

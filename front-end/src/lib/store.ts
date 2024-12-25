@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 
 interface Notification {
@@ -5,7 +6,11 @@ interface Notification {
     username: string;
     type: string;
     time: string;
+<<<<<<< HEAD
     isUnread: boolean;
+=======
+    isRead: boolean;
+>>>>>>> feature/history
 }
 
 const useStore = create((set:any) => ({
@@ -17,6 +22,10 @@ const useStore = create((set:any) => ({
     socket: null,
     newNotif: null,
     numberOfNotif: 0,
+<<<<<<< HEAD
+=======
+    numberOfMessage: 0,
+>>>>>>> feature/history
 
 
     // Define actions,
@@ -24,6 +33,10 @@ const useStore = create((set:any) => ({
     setUser: (user:any) => set({ user }),
     setNewNotif: (newNotif:Notification) => set({ newNotif }),
     setNumberOfNotif: (numberOfNotif:number) => set({ numberOfNotif }),
+<<<<<<< HEAD
+=======
+    setNumberOfMessage: (numberOfMessage:number) => set({ numberOfMessage }),
+>>>>>>> feature/history
     setMessagePages: (messagePages:string)=>set({messagePages}),
     setSelectedIndex: (selectedIndex:number)=>set({selectedIndex}),
     setSelectedConv: (selectedConv:number)=>set({selectedConv})
