@@ -1,83 +1,83 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon } from 'lucide-react'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar } from 'lucide-react'
 import { Img } from 'react-image';
 
 const { Option } = Select
 
 interface Profile {
     id: number
-    name: string
+    firstName: string
+    lastName: string
     age: number
     fameRating: number
     location: string
     interests: string[]
     image: string
     gender: 'male' | 'female' | 'other'
-    orientation: 'straight' | 'gay' | 'bisexual'
 }
 
 interface User {
     id: number
-    name: string
+    firstName: string
+    lastName: string
     age: number
     location: string
     interests: string[]
     gender: 'male' | 'female' | 'other'
-    orientation: 'straight' | 'gay' | 'bisexual'
 }
 
 const currentUser: User = {
     id: 0,
-    name: "Current User",
+    firstName: "Mohamed Taha",
+    lastName: "Meaizi",
     age: 30,
     location: "New York",
     interests: ["travel", "music", "cooking"],
-    gender: "male",
-    orientation: "straight"
+    gender: "male"
 }
 
 const dummyProfiles: Profile[] = [
-    { id: 1, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking", "sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 2, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 3, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 4, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 5, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 6, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 7, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 8, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 9, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 10, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 11, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 12, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 13, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 14, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 15, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 16, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 17, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 18, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 19, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 20, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 21, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 22, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 23, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 24, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 25, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 26, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 27, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 28, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 29, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 30, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 31, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 32, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 33, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 34, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 35, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 36, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 37, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 38, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 39, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 40, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
+    { id: 1, firstName: "AliceAliceAliceAliceAliceAliceAlice", lastName: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking", "sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 2, firstName: "Bob", lastName: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 3, firstName: "Charlie", lastName: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 4, firstName: "Diana", lastName: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 5, firstName: "Ethan", lastName: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 6, firstName: "Fiona", lastName: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 7, firstName: "George", lastName: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 8, firstName: "Hannah", lastName: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 9, firstName: "Ian", lastName: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 10, firstName: "Julia", lastName: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 11, firstName: "Alice", lastName: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 12, firstName: "Bob", lastName: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 13, firstName: "Charlie", lastName: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 14, firstName: "Diana", lastName: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 15, firstName: "Ethan", lastName: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 16, firstName: "Fiona", lastName: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 17, firstName: "George", lastName: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 18, firstName: "Hannah", lastName: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 19, firstName: "Ian", lastName: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 20, firstName: "Julia", lastName: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 21, firstName: "Alice", lastName: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 22, firstName: "Bob", lastName: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 23, firstName: "Charlie", lastName: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 24, firstName: "Diana", lastName: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 25, firstName: "Ethan", lastName: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 26, firstName: "Fiona", lastName: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 27, firstName: "George", lastName: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 28, firstName: "Hannah", lastName: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 29, firstName: "Ian", lastName: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 30, firstName: "Julia", lastName: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 31, firstName: "Alice", lastName: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 32, firstName: "Bob", lastName: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 33, firstName: "Charlie", lastName: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 34, firstName: "Diana", lastName: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 35, firstName: "Ethan", lastName: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 36, firstName: "Fiona", lastName: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 37, firstName: "George", lastName: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 38, firstName: "Hannah", lastName: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female" },
+    { id: 39, firstName: "Ian", lastName: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male" },
+    { id: 40, firstName: "Julia", lastName: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female" },
 ]
 
 const allInterests = Array.from(new Set(dummyProfiles.flatMap(profile => profile.interests)))
@@ -122,10 +122,7 @@ const ProfileList: React.FC = () => {
     }
 
     const isCompatible = (profile: Profile, user: User) => {
-        if (user.orientation === 'straight') {
-            return user.gender !== profile.gender
-        }
-        return true
+        return user.gender !== profile.gender;
     }
 
     const resetFilters = () => {
@@ -268,62 +265,64 @@ const ProfileList: React.FC = () => {
                     renderItem={profile => (
                         <List.Item>
                             <Card
-                                hoverable
-                                cover={
-                                    <div className="relative h-48">
-                                        <Img
-                                            src={profile.image}
-                                            alt={profile.name}
-                                            className="rounded-t-lg"
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            loader={<div>Loading...</div>}
-                                        />
-                                    </div>
-                                }
-                                className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
+                            hoverable
+                            cover={
+                                <div className="relative h-48">
+                                    <Img
+                                        src={profile.image}
+                                        alt={`${profile.firstName} ${profile.lastName}`}
+                                        className="rounded-t-lg"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        loader={<div>Loading...</div>}
+                                    />
+                                </div>
+                            }
+                            className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
+            >
+                            <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
+
+                            <div className="flex items-center mb-2 text-secondary">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                <span>{profile.location}</span>
+                            </div>
+                            <div className="flex items-center mb-2 text-secondary">
+                                <StarIcon className="w-4 h-4 mr-1" />
+                                <span>Fame: {profile.fameRating}</span>
+                            </div>
+                            <div className="flex items-center mb-2 text-secondary">
+                                <Calendar className="w-4 h-4 mr-1" />
+                                <span>Age: {profile.age}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                                {profile.interests.map(interest => (
+                                    <Tag key={interest} color="blue" className="text-xs">
+                                        {interest}
+                                    </Tag>
+                                ))}
+                            </div>
+                            <Button
+                                type="primary"
+                                icon={<HeartIcon className="w-4 h-4" />}
+                                className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+                                onClick={() => handleLike(profile.id)}
+                                disabled={likedProfiles.includes(profile.id)}
                             >
-                                <h3 className="text-xl font-semibold mb-2 text-primary">{profile.name}, {profile.age}</h3>
-                                <div className="flex items-center mb-2 text-secondary">
-                                    <MapPinIcon className="w-4 h-4 mr-1" />
-                                    <span>{profile.location}</span>
-                                </div>
-                                <div className="flex items-center mb-2 text-secondary">
-                                    <StarIcon className="w-4 h-4 mr-1" />
-                                    <span>Fame: {profile.fameRating}</span>
-                                </div>
-                                <div className="mb-2 text-secondary">
-                                    <span>{profile.gender}, {profile.orientation}</span>
-                                </div>
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                    {profile.interests.map(interest => (
-                                        <Tag key={interest} color="blue" className="text-xs">
-                                            {interest}
-                                        </Tag>
-                                    ))}
-                                </div>
-                                <Button
-                                    type="primary"
-                                    icon={<HeartIcon className="w-4 h-4" />}
-                                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
-                                    onClick={() => handleLike(profile.id)}
-                                    disabled={likedProfiles.includes(profile.id)}
-                                >
-                                    Like
-                                </Button>
-                                <Button
-                                    type="default"
-                                    icon={<XIcon className="w-4 h-4" />}
-                                    className="w-full mt-2"
-                                    onClick={() => handleUnlike(profile.id)}
-                                >
-                                    Unlike
-                                </Button>
-                            </Card>
+                                Like
+                            </Button>
+                            <Button
+                                type="default"
+                                icon={<XIcon className="w-4 h-4" />}
+                                className="w-full mt-2"
+                                onClick={() => handleUnlike(profile.id)}
+                            >
+                                Unlike
+                            </Button>
+                        </Card>
                         </List.Item>
                     )}
                 />
-            </div>
         </div>
+        </div >
     )
 }
 
