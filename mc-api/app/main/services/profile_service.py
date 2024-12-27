@@ -1,9 +1,7 @@
 import os
-from flask import Blueprint, request, jsonify
+from flask import jsonify
 from loguru import logger
 from app.db.sql_executor import execute_query
-from app.main.utils.decorators import expect_dto, token_required
-from app.main.utils.exceptions import ValidationError
 from flask import send_file
 from werkzeug.utils import secure_filename
 from flask import current_app as app
@@ -16,15 +14,20 @@ def get_profile_service(user_id):
 
         select_query = "SELECT * FROM users WHERE id = %s"
         profile = execute_query(select_query, params=(str(user_id)), fetch_one=True)
+        profile['birth_date'] = (
+            profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
+        )
+
         return jsonify({'status': 'success', 'data': profile}), 200
     except Exception as e:
         return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
     
 #TODO CHANGE VALUES TO ALL DATA
-def update_profile_service(data):
+def update_profile_service(data, user_id):
     try:
-        update_query = f"UPDATE users  ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
-        updated_profile = execute_query(update_query, params=tuple(data.values()))
+        gender = 'TRUE' if data.get('gender') else 'FALSE'
+        update_query = f"UPDATE users SET first_name = %s , last_name = %s , email = %s , username = %s , bio = %s , gender = {gender}, birth_date = %s  WHERE id = %s RETURNING *"
+        updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), str(user_id)))
 
 
         return jsonify({'status': 'success', 'message': updated_profile}), 200

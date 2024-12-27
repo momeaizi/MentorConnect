@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from app.main.services.profile_views_service import ProfileViewsService
 from app.main.services.profile_likes_service import ProfilelikesService
 from app.main.utils.decorators import token_required
+from loguru import logger
 from app.main.services.profile_service import (
     get_profile_service, update_profile_service,
     handle_profile_picture_service, handle_other_pictures_service,
@@ -17,8 +18,8 @@ profile_likes_service = ProfilelikesService()
 #? Get Profile
 @profile_bp.route('/', methods=['GET'])
 # @token_required
-def get_profile():#user
-    user_id = 1#user.get('id', None)
+def get_profile(user={'id':1}):
+    user_id = user.get('id', None)
     return get_profile_service(user_id)
 
 #*********************************
@@ -36,8 +37,8 @@ def get_profile_views(user):
 
 #?????
 @profile_bp.route('/viewed')
-# @token_required
-def get_viewed_profiles(user={'id':1}):
+@token_required
+def get_viewed_profiles(user):
     return profile_views_service.get_viewed_profiles(user['id'])
 
 #?????
@@ -70,7 +71,9 @@ def unlike_profile(user, unliked_profile_id):
 @token_required
 def update_profile(user):
     data = request.json
-    return update_profile_service(data)
+
+    user_id = user.get('id', None)
+    return update_profile_service(data, user_id)
 
 
 # TODO ADD DTO

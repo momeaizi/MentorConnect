@@ -4,10 +4,9 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
-    --for update
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    gender VARCHAR(50),
+    gender BOOLEAN DEFAULT TRUE,
     bio TEXT,
     birth_date DATE,
     fame_rate INT DEFAULT 0,
@@ -16,7 +15,9 @@ CREATE TABLE users (
     is_logged_in BOOLEAN DEFAULT FALSE,
     last_logged_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8)
 );
 
 CREATE TABLE  tags(
