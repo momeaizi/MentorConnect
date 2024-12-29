@@ -10,26 +10,25 @@ CREATE TABLE users (
     gender VARCHAR(50),
     bio TEXT,
     birth_date DATE,
-    fame_rate INT DEFAULT 0,
-    is_online BOOLEAN DEFAULT FALSE,
-    last_connection TIMESTAMP,
+    fame_rating INT DEFAULT 0,
     is_logged_in BOOLEAN DEFAULT FALSE,
     last_logged_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    geolocation geography(POINT, 4326),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE  tags(
+CREATE TABLE  interests(
     id SERIAL PRIMARY KEY,
-    tag VARCHAR(100) UNIQUE NOT NULL
+    interest VARCHAR(100) UNIQUE NOT NULL
 );
 
 
-CREATE TABLE  user_tags(
+CREATE TABLE  user_interests(
     id SERIAL PRIMARY KEY,
-    tag_id INT NOT NULL,
+    interest_id INT NOT NULL,
     user_id INT NOT NULL,
-    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE,
+    FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

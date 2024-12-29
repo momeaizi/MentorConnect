@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from app.main.services.profile_views_service import ProfileViewsService
 from app.main.services.profile_likes_service import ProfilelikesService
+from app.main.services.profile_suggestions_service import ProfileSuggestionsService
 from app.main.utils.decorators import token_required
 from app.main.services.profile_service import (
     get_profile_service, update_profile_service,
@@ -12,6 +13,12 @@ profile_bp = Blueprint('profile_bp', __name__)
 
 profile_views_service = ProfileViewsService()
 profile_likes_service = ProfilelikesService()
+profile_suggestions_service = ProfileSuggestionsService()
+
+@profile_bp.route('/suggestions')
+# @token_required
+def get_suggestions(user={"id": 1}):
+    return profile_suggestions_service.get_suggestions(user['id']);
 
 
 @profile_bp.route('/<int:profile_owner_id>/view', methods=['POST'])

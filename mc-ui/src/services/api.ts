@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { useAuth } from '../providers/AuthProvider';
-import { isTokenExpired } from '../utils/jwtUtils';
+import { CustomJwtPayload, isTokenExpired } from '../utils/jwtUtils';
+import { jwtDecode } from 'jwt-decode';
 
 const baseURL = 'https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api';
 
@@ -16,13 +16,19 @@ const api = axios.create({
 
 
 api.interceptors.request.use((config) => {
-  const { isAuthenticated, payload, token, logout } = useAuth();
+  const token = localStorage.getItem('token');
+  let payload = null;
 
-  if (!isAuthenticated || !token || isTokenExpired(payload)) {
-    logout();
-    return config;
+  if (!token) return config;
+
+  try {
+    payload = jwtDecode<CustomJwtPayload>(token);
+    if (isTokenExpired(payload)) return config;
+
+
+    config.headers.Authorization = `Bearer ${token}`;
+  } catch (err) {
   }
-  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
