@@ -105,6 +105,7 @@ const LoginForm = ({ closeModal }: LoginProps) => {
           className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
           icon={loading ? <LoadingOutlined /> : null}
           loading={loading}
+          disabled={loading}
           type="primary"
           htmlType="submit"
         >

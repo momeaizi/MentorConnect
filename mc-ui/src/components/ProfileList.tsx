@@ -7,15 +7,16 @@ import api from '../services/api';
 const { Option } = Select
 
 interface Profile {
-    id: number
-    firstName: string
-    lastName: string
-    age: number
-    fameRating: number
-    location: string
-    interests: string[]
-    image: string
-    gender: 'male' | 'female'
+    id: number;
+    distance: number;
+    firstName: string;
+    lastName: string;
+    age: number;
+    fameRating: number;
+    location: string;
+    interests: string[];
+    image: string;
+    gender: 'male' | 'female';
 }
 
 interface User {
@@ -26,6 +27,7 @@ interface User {
     location: string
     interests: string[]
     gender: 'male' | 'female'
+    
 }
 
 const currentUser: User = {
@@ -34,7 +36,7 @@ const currentUser: User = {
     lastName: "Meaizi",
     age: 30,
     location: "New York",
-    interests: ["travel", "music", "cooking"],
+    interests: ["start", "top", "look"],
     gender: "male"
 }
 
@@ -83,6 +85,7 @@ const ProfileList: React.FC = () => {
                 interests: item.interests || [],
                 image: item.image,
                 gender: item.gender,
+                distance: Math.floor(item.distance),
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
@@ -97,14 +100,13 @@ const ProfileList: React.FC = () => {
 
 
     const applyFilters = () => {
-        let filtered = profiles;
 
-        // let filtered = profiles.filter(profile =>
-        //     profile.age >= ageRange[0] && profile.age <= ageRange[1] &&
-        //     profile.fameRating >= fameRange[0] && profile.fameRating <= fameRange[1] &&
-        //     (selectedLocation ? profile.location === selectedLocation : true) &&
-        //     (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest)))
-        // )
+        let filtered = profiles.filter(profile =>
+            profile.age >= ageRange[0] && profile.age <= ageRange[1] &&
+            profile.fameRating >= fameRange[0] && profile.fameRating <= fameRange[1] &&
+            (selectedLocation ? profile.location === selectedLocation : true) &&
+            (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest)))
+        )
 
         filtered.sort((a, b) => {
             if (a.location === currentUser.location && b.location !== currentUser.location) return -1;
@@ -284,7 +286,7 @@ const ProfileList: React.FC = () => {
 
                                 <div className="flex items-center mb-2 text-secondary">
                                     <MapPinIcon className="w-4 h-4 mr-1" />
-                                    <span>{profile.location}</span>
+                                    <span>{profile.distance} Km</span>
                                 </div>
                                 <div className="flex items-center mb-2 text-secondary">
                                     <StarIcon className="w-4 h-4 mr-1" />

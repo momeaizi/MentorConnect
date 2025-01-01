@@ -9,6 +9,91 @@ from werkzeug.utils import secure_filename
 from flask import current_app as app
 import uuid
 
+
+def get_profile_by_username_service(user_id, username):
+    try:
+        select_query = """
+            WITH current_user_interests AS (
+                SELECT 
+                    i.id AS interest_id,
+                    i.interest
+                FROM 
+                    user_interests ui
+                JOIN 
+                    interests i ON ui.interest_id = i.id
+                WHERE 
+                    ui.user_id = %s -- Current user's ID
+            ),
+            target_user AS (
+                SELECT 
+                    u.id AS user_id,
+                    u.username,
+                    u.email,
+                    u.first_name,
+                    u.last_name,
+                    u.gender,
+                    u.bio,
+                    u.birth_date,
+                    u.fame_rating,
+                    u.is_logged_in,
+                    u.last_logged_in,
+                    ST_X(ST_AsText(u.geolocation)) AS longitude,
+                    ST_Y(ST_AsText(u.geolocation)) AS latitude,
+                    DATE_PART('year', AGE(u.birth_date)) AS age,
+                    ARRAY_AGG(i.interest) AS interests
+                FROM 
+                    users u
+                LEFT JOIN 
+                    user_interests ui ON u.id = ui.user_id
+                LEFT JOIN 
+                    interests i ON ui.interest_id = i.id
+                WHERE 
+                    u.username = %s -- Target user's username
+                GROUP BY 
+                    u.id
+            )
+            SELECT 
+                t.user_id,
+                t.username,
+                t.email,
+                t.first_name,
+                'https://thispersondoesnotexist.com/' AS image,
+                ARRAY['https://thispersondoesnotexist.com/', 'https://thispersondoesnotexist.com/', 'https://thispersondoesnotexist.com/'] AS pictures,
+                t.last_name,
+                t.gender,
+                t.bio,
+                t.birth_date,
+                t.fame_rating,
+                t.is_logged_in,
+                t.last_logged_in,
+                t.longitude,
+                t.latitude,
+                t.age,
+                t.interests,
+                ARRAY_AGG(c.interest) AS common_interests
+            FROM 
+                target_user t
+            LEFT JOIN 
+                current_user_interests c ON c.interest_id = ANY (
+                    SELECT ui.interest_id
+                    FROM user_interests ui
+                    WHERE ui.user_id = t.user_id
+                )
+            GROUP BY 
+                t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
+                t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude, t.latitude, t.age, t.interests;
+        """
+        profile = execute_query(select_query, params=(user_id, username), fetch_one=True)
+
+        if not profile:
+            return jsonify({'status': 'error', 'message': 'Profile not found'}), 404
+
+        return jsonify({'status': 'success', 'data': profile}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
+    
+
+
 def get_profile_service(user_id):
     try:
         if not user_id:

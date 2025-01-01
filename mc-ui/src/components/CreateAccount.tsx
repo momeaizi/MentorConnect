@@ -8,7 +8,8 @@ import { publicApi } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { isAxiosError } from '../types/api';
-import { FireFilled } from '@ant-design/icons';
+import { FireFilled, LoadingOutlined } from '@ant-design/icons';
+
 
 
 interface CreateAccountFormValues {
@@ -22,10 +23,12 @@ interface CreateAccountFormValues {
 const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
   const [form] = Form.useForm();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const onFinish = async (values: CreateAccountFormValues) => {
+    setLoading(true);
     try {
       const res = await publicApi.post('/auth/register', {
         username: values.username,
@@ -49,6 +52,8 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
       } else {
         setErrorMessage('An unexpected error occurred. Please try again.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,26 +112,30 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
       </Form.Item>
 
       <div className="text-base text-[#D1D1D6] mb-2">Password</div>
-      <Form.Item
-        name="password"
-        rules={[
-          {
-            required: true,
-            message: 'Please input your password!',
-          },
-        ]}
-        hasFeedback
-      >
-        <Input.Password
-          placeholder="Password"
-          style={{
-            width: '100%',
-            height: '40px',
-            fontSize: '18px',
-            borderRadius: '10px'
-          }}
-        />
-      </Form.Item>
+        <Form.Item
+          name="password"
+          rules={[
+            {
+              required: true,
+              message: 'Please input your password!',
+            },
+            {
+              pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+              message: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
+            },
+          ]}
+          hasFeedback
+        >
+          <Input.Password
+            placeholder="Password"
+            style={{
+              width: '100%',
+              height: '40px',
+              fontSize: '18px',
+              borderRadius: '10px'
+            }}
+          />
+        </Form.Item>
 
       <div className="text-base text-[#D1D1D6] mb-2">Confirm Password</div>
       <Form.Item
@@ -167,6 +176,9 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
           className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
           type="primary"
           htmlType="submit"
+          icon={loading ? <LoadingOutlined /> : null}
+          loading={loading}
+          disabled={loading}
         >
           Create account
         </Button>

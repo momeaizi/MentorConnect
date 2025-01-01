@@ -21,7 +21,7 @@ function App() {
     >
       <BrowserRouter>
         <AuthProvider>
-          <AppRoutes></AppRoutes>
+          <AppRoutes />
         </AuthProvider>
       </BrowserRouter>
     </ConfigProvider>

@@ -7,6 +7,8 @@ import SendPasswordResetEmail from '../pages/SendPasswordResetEmail';
 import PasswordReset from '../pages/PasswordReset.tsx';
 import LandingPage from '../pages/landingPage.tsx';
 import PublicRoute from './PublicRoute.tsx';
+import UserProfilePage from '../pages/UserProfilePage.tsx';
+import NotFound from '../pages/NotFound.tsx';
 
 const AppRoutes = () => {
   return (
@@ -49,9 +51,9 @@ const AppRoutes = () => {
           element={<Home />}
         />
         <Route
-          path="/profile"
+          path="/profiles/:username"
           element={
-            <div>PROFILE</div>
+            <UserProfilePage />
           }
         />
         <Route
@@ -61,6 +63,10 @@ const AppRoutes = () => {
           }
         />
       </Route>
+      <Route
+          path="*"
+          element={<NotFound />}
+        />
     </Routes>
   );
 };

@@ -12,3 +12,4 @@ flask-cors==3.0.10
 cryptography==3.4.7
 loguru
 watchdog
+faker
