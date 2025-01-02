@@ -1,12 +1,11 @@
-"use client";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useState, useRef} from "react";
 import {
   DatePicker, Form, Input,
   Radio, Upload, Skeleton
   ,notification
 } from "antd";
-import { PlusOutlined,CloudUploadOutlined,
-    CloseCircleOutlined
+import { PlusOutlined,CheckCircleOutlined,
+    InfoCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import Button from "@/components/Button";
@@ -61,14 +60,51 @@ export async function postData(data: ProfileData) {
         // throw new Error('Network response was not ok');
         // }
 
-        return await response.json();
+        return await response;
     } catch (error) {
         console.error('Error posting data:', error);
         throw error;
     }
 }
 
+export async function postImage(formData: any) {
+    try {
+        const response = await api.post('profiles/picture', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log("----> ", response)
+    } catch (error) {
+        console.error("----> ", error)
+    }
+}
 
+export async function postImages(formData: any) {
+    try {
+        const response = await api.post('profiles/pictures', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response;
+        console.log("----> ", response)
+    } catch (error) {
+        console.error("----> ", error)
+    }
+}
+
+export async function getImage(fileName:string, setSelectAvatar:any ,setLoading:any) {
+    api.get(`profiles/get_image/${fileName}`, { responseType: 'blob' })
+    .then((response:any) => {
+        const fileUrl = URL.createObjectURL(response.data);
+        setSelectAvatar(fileUrl)
+        setLoading(false);
+    })
+    .catch((error:any) => {
+        console.error('Error fetching profile data:', error);
+    });
+}
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -78,8 +114,7 @@ L.Icon.Default.mergeOptions({
 });
 
 
-const LeafletMap = ({userPosition, setUserPosition}:any) => {
-  const [position, setPosition] = useState([32.253672, -8.982608]);
+const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) => {
   const [isPermissionDenied, setIsPermissionDenied] = useState(false);
 
   useEffect(() => {
@@ -137,7 +172,7 @@ const LeafletMap = ({userPosition, setUserPosition}:any) => {
       <MapContainer center={position} zoom={13} className="h-full w-full">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution='mskerba'
         />
         <LocationMarker />
       </MapContainer>
@@ -146,16 +181,16 @@ const LeafletMap = ({userPosition, setUserPosition}:any) => {
 };
 
 
-function Map({userPosition, setUserPosition}:any) {
+function Map({userPosition, setUserPosition, position, setPosition}:any) {
     return (
         <div className="w-full flex flex-col gap-4 ">
             <h1 className="font-bold text-2xl "> User Location Map:</h1>
-            <LeafletMap userPosition={userPosition} setUserPosition={setUserPosition}/>
-            {/* <Button text="Save Changes" className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500">
-            </Button> */}
+            <LeafletMap userPosition={userPosition} setUserPosition={setUserPosition} position={position} setPosition={setPosition}/>
         </div>
     )
 }
+
+
 
 function EditProfile({profileData}:any) {
     const [form] = Form.useForm();
@@ -164,6 +199,9 @@ function EditProfile({profileData}:any) {
     const [selectAvatar, setSelectAvatar] = useState<boolean>(true);
     const [preview, setPreview] = useState<string | null>(null);
     const [formValid, setFormValid] = useState<boolean>(false);
+    const [api, contextHolder] = notification.useNotification();
+    const [file, setFile] = useState<any>(null);
+    const fileInputRef = useRef<any>(null);
 
     // New state variables for form fields
     const [firstName, setFirstName] = useState<string>(profileData?.first_name);
@@ -174,13 +212,20 @@ function EditProfile({profileData}:any) {
     const [bio, setBio] = useState<string>(profileData?.bio);
 
     // User position
-    const defaultPosition: [number, number] = [51.505, -0.09]; // Example: London
-    const position: [number, number] | [] = profileData?.latitude
-        ? [profileData.latitude, profileData.longitude]
+    const defaultPosition: [number, number] = [32.253672, -8.982608]; // Example: London
+    const lat = Number(profileData?.latitude);
+    const defPosition: [number, number] | [] = lat
+        ? [Number(profileData.latitude), Number(profileData.longitude)]
         : defaultPosition;
-    const [userPosition, setUserPosition] = useState<[number, number]>(position);
+    const [userPosition, setUserPosition] = useState<[number, number]>([0,0]);
+    const [position, setPosition] = useState<[number, number]>(defPosition);
     
-
+    const openNotification = (message:string, icon:any) => {
+        api.open({
+          message: message,
+          icon: icon,
+        });
+    };
     
     useEffect(()=>{
         console.log(userPosition);
@@ -194,18 +239,16 @@ function EditProfile({profileData}:any) {
         setUsername(e.target.value);
     };
 
-    const handleAvatarChange = async (e) => {
-        setLoading(true);
+    async function handleSubmitProfile(e:any) {
         const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setPreview(event?.target?.result);
-          setLoading(false)
-          setSelectAvatar(false);
-        };
-        reader.readAsDataURL(file);
-        //Further actions with the file can be added here.
+        setFile(file)
+
+        setSelectAvatar(true);
+        setLoading(false)
+        setPreview(URL.createObjectURL(file));
+
     };
+
 
     useEffect(() => {
         form.setFieldsValue({ "preferredGender": !gender });
@@ -217,6 +260,8 @@ function EditProfile({profileData}:any) {
     }, [username, form]);
 
     useEffect(() => {
+        if (profileData?.file_name)
+            getImage(profileData?.file_name, setSelectAvatar, setLoading);
 
         if (profileData?.username) {
             form.setFieldsValue({ "username": profileData?.username });
@@ -259,7 +304,6 @@ function EditProfile({profileData}:any) {
     }
 
     useEffect(() => {
-        // Check if all required fields are filled
         const isValid = 
             !!firstName &&
             !!lastName &&
@@ -270,8 +314,7 @@ function EditProfile({profileData}:any) {
             bio.length >= 10 &&
             bio.length <= 250 &&
             !selectAvatar;
-            
-        console.log(isValid);
+
         setFormValid(isValid);
     }, [firstName, lastName, email, username, birthDate, bio, selectAvatar]);
 
@@ -281,18 +324,41 @@ function EditProfile({profileData}:any) {
             const latitude = userPosition[0];
             const longitude = userPosition[1];
 
-            const result = postData({
-                firstName,
-                lastName,
-                email,
-                username,
-                bio,
-                gender,
-                birthDate,
-                latitude,
-                longitude
-            });
-          console.log('Form submitted successfully:', result);
+            const isValid = !!firstName &&
+            !!lastName &&
+            !!email &&
+            !!username &&
+            !!birthDate &&
+            !!bio &&
+            bio.length >= 10 &&
+            bio.length <= 250 &&
+            selectAvatar &&
+            latitude && 
+            longitude;
+ 
+            if (isValid) {  
+                postData({
+                    firstName,
+                    lastName,
+                    email,
+                    username,
+                    bio,
+                    gender,
+                    birthDate,
+                    latitude,
+                    longitude
+                });
+                if (file != null) {
+                    const data = new FormData();
+                    data.append('profile', file);
+                
+                    postImage(data);
+          
+                }
+                openNotification("The profile is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
+            }
+            else 
+                openNotification("All fields is requiered", <InfoCircleOutlined style={{ color: 'red' }}/>)
         } catch (error) {
           console.error('Error submitting form:', error);
         }
@@ -301,6 +367,8 @@ function EditProfile({profileData}:any) {
 
     return (
         <div className="w-full flex flex-col gap-4">
+
+            {contextHolder}
             <h1 className="font-bold text-2xl"> Edit Profile:</h1>
             <Form
                 form={form}
@@ -318,14 +386,16 @@ function EditProfile({profileData}:any) {
                         <img
                             style={{ display: loading ? 'none' : 'block' }}
                             alt="User Avatar"
+                            src={selectAvatar}
                         />
                         )}
                         <input
                             id="avatarInput"
+                            ref={fileInputRef}
                             type="file"
                             style={{ display: 'none' }}
                             accept="image/*"
-                            onChange={handleAvatarChange}
+                            onChange={handleSubmitProfile}
                         />
                     </div>
                 </div>
@@ -443,7 +513,7 @@ function EditProfile({profileData}:any) {
                 </Form.Item>
 
                 <Form.Item>
-                    <Map userPosition={userPosition} setUserPosition={setUserPosition} />
+                    <Map userPosition={userPosition} setUserPosition={setUserPosition} position={position} setPosition={setPosition}/>
                 </Form.Item>
                 
                 <Form.Item>
@@ -462,66 +532,184 @@ function EditProfile({profileData}:any) {
 }
 
 
-function UploadPictures() {
+function UploadPictures({profileData}:any) {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
 
     const handleChange = ({ fileList }: any) => setFileList(fileList);
   
     const beforeUpload = (file: any) => {
-      if (fileList.length >= 5)
-        return false;
-      return true;
+        if (fileList.length >= 5)
+            return false;
+        return true;
     };
 
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        fileList.forEach((file, index) => {
+            formData.append(`picture${index + 1}`, file.originFileObj);
+        });
+        try {
+            const response = await postImages(formData)
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Upload successful:', result);
+                setFileList([]); // Clear the file list after successful upload
+            } else {
+                console.error('Upload failed:', await response.text());
+            }
+        } catch (error) {
+            console.error('Error during upload:', error);
+        }
+    };
+
+    const normFile = (e: any) => {
+        if (Array.isArray(e)) {
+            return e;
+        }
+        return e?.fileList;
+    };
+
+    const preloadImages = async (imageNames: string[]) => {
+        const files =  imageNames.map(async (fileName) => {
+            try {
+                setLoading(true);
+                const url = `http://localhost:5000/api/profiles/get_image/${fileName}`;
+                console.log("url:",url)
+                return {
+                    uid: fileName,
+                    name: 'default.png',
+                    status: 'done',
+                    url: url,
+                };
+            } catch (error) {
+                console.error(`Error loading image ${fileName}:`, error);
+                return null;
+            }
+        });
+        const loadedImages = (await Promise.all(files)).filter(Boolean);
+        setFileList([...loadedImages]);
+    };
+
+    useEffect(()=>{
+        form.setFieldsValue({ "pictures": fileList });
+        
+    },[fileList])
+    
+    useEffect(()=>{
+        if (profileData?.images_name && loading)
+            preloadImages(profileData.images_name);
+        setLoading(false)
+    },[profileData])
+
     return (
-        <div className="w-full flex flex-col gap-4 ">
-            <h1 className="font-bold text-2xl "> Pictures:</h1>
+        <div className="w-full flex flex-col gap-4">
+            <h1 className="font-bold text-2xl"> Pictures:</h1>
             <Form
                 form={form}
-                variant={"filled"}
+                variant="filled"
                 initialValues={{ variant: "filled" }}
                 className="w-full"
+                onFinish={handleSubmit}
             >
-
-                <Form.Item valuePropName="fileList" getValueFromEvent={normFile}>
+                {!loading&&<Form.Item 
+                    name="pictures"
+                    valuePropName="fileList" 
+                    getValueFromEvent={normFile}
+                    rules={[{ required: true, message: 'Please upload at least one image!' }]}
+                >
                     <Upload
-                        action="/upload.do"
+                        // action={(file)=> "http://localhost:5000/api/profiles/valid"}
                         listType="picture-card"
                         fileList={fileList}
                         onChange={handleChange}
                         beforeUpload={beforeUpload}
-                        onPreview={(file) => {
-                        // handle preview of the image if necessary
+                        maxCount={5}
+                        showUploadList={{
+                            showPreviewIcon: false,
+                            showRemoveIcon: true,
                         }}
+                        status="done"
                         onRemove={(file) => {
-                        // This ensures the state is updated when a file is removed
-                        setFileList((prevFileList) => prevFileList.filter((f) => f.uid !== file.uid));
+                            setFileList((prevFileList) => prevFileList.filter((f) => f.uid !== file.uid));
                         }}
                     >
-                        <button style={{ border: 0, background: 'none' }} type="button">
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                        </button>
+                        {fileList.length < 5 && (
+                            <button style={{ border: 0, background: 'none' }} type="button">
+                                <PlusOutlined />
+                                <div style={{ marginTop: 8 }}>Upload</div>
+                            </button>
+                        )}
                     </Upload>
-                </Form.Item>
+                </Form.Item>}
 
-                {/* Submit Button */}
                 <Form.Item>
                     <Button
-                        text="Save Changes" className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500">
+                        onclick={handleSubmit}
+                        text="Save Changes" className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer">
                     </Button>
                 </Form.Item>
             </Form>
         </div>
-    )
+    );
 }
+
+export async function updatePassword(data: any) {
+    const response = await api.patch('auth/update-password', {
+        "password": data?.password,
+        "new_password": data?.new_password,
+    })
+    console.log(response.status)
+    if (response.status ==400) {
+        throw response.status
+    }
+    return await response;
+}
+
 
 function ChangePassword() {
     const [form] = Form.useForm();
+    const [password, setPassword] = useState<string>();
+    const [newPassword, setNewPassword] = useState<string>();
+    const [confirmPassword, setConfirmPassword] = useState<string>();
+    const [api, contextHolder] = notification.useNotification();
+
+    const openNotification = (message:string, icon:any) => {
+        api.open({
+          message: message,
+          icon: icon,
+        });
+    };
+
+    const handleSubmit = () => {
+        if (password && newPassword && confirmPassword) {
+            if (newPassword === confirmPassword) {
+                try {
+                    updatePassword({"password": password, "new_password": newPassword})
+                    setPassword('');
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    openNotification("The profile is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
+                } catch (error) {
+                    console.log(error)
+                    openNotification("Password is wrong", <InfoCircleOutlined style={{ color: 'red' }}/>)
+                }
+            }
+            else
+                openNotification("Passwords do NOT match", <InfoCircleOutlined style={{ color: 'red' }}/>)
+        }
+        else
+            openNotification("All fields is requiered", <InfoCircleOutlined style={{ color: 'red' }}/>)
+
+    }
     
     return (
         <div className="w-full flex flex-col gap-4 ">
+
+            {contextHolder}
             <h1 className="font-bold text-2xl "> Change Password:</h1>
             <Form
                 form={form}
@@ -532,12 +720,18 @@ function ChangePassword() {
 
                 <p className="font-bold text-l pl-3">Password:</p>
                 <Form.Item name="actual-password" rules={[{ required: true }]}>
-                    <Input.Password />
+                    <Input.Password 
+                        value={password}
+                        onChange={(e:any) => setPassword(e.target.value)}
+                    />
                 </Form.Item>
 
                 <p className="font-bold text-l pl-3">New Password:</p>
                 <Form.Item name="password" rules={[{ required: true }]}>
-                    <Input.Password />
+                    <Input.Password
+                        value={newPassword}
+                        onChange={(e:any) => setNewPassword(e.target.value)}
+                    />
                 </Form.Item>
 
                 {/* Field */}
@@ -560,12 +754,19 @@ function ChangePassword() {
                     }),
                     ]}
                 >
-                    <Input.Password />
+                    <Input.Password
+                        value={confirmPassword}
+                        onChange={(e:any) => setConfirmPassword(e.target.value)}
+                    />
                 </Form.Item>
                 
                 {/* Submit Button */}
                 <Form.Item>
-                    <Button text="Save Changes" className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500">
+                    <Button
+                        onclick={handleSubmit}
+                        text="Save Changes"
+                        className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer"
+                    >
                     </Button>
                 </Form.Item>
             </Form>
@@ -586,17 +787,18 @@ function fetchData() {
 }
   
 export default function ProfilePage() {
-    const [profileData, setProfileData] = useState(null)
+    const [profileData, setProfileData] = useState(null);
+    const [loading, setLoading] = useState<Boolean>(true);
 
     useEffect(() => {
         const getProfile = async () => {
           try {
             const profile = await fetchData();
-            console.log(profile?.data);
             setProfileData(profile?.data);
           } catch (error) {
             console.error('Failed to fetch the profile:', error);
           }
+          setLoading(false);
         };
     
         getProfile();
@@ -605,11 +807,11 @@ export default function ProfilePage() {
 
   return (
     <div className="w-screen h-full bg-[#232735] flex justify-center p-2 pt-5 overflow-y-scroll overflow-x-hidden">
-        <div className="w-screen sm:w-[640px]">
+        {!loading && <div className="w-screen sm:w-[640px]">
             <EditProfile profileData={profileData} />
-            <UploadPictures />
+            <UploadPictures profileData={profileData} />
             <ChangePassword />
-        </div>
+        </div>}
     </div>
   );
 }

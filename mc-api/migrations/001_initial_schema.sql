@@ -4,6 +4,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
+    is_complete BOOLEAN DEFAULT FALSE,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     gender BOOLEAN DEFAULT TRUE,

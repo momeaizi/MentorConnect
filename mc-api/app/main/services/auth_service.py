@@ -3,7 +3,7 @@ from flask import current_app as app
 from app.main.utils.exceptions import UniqueConstraintError
 from app.main.utils.mail import send_verification_email
 from app.main.utils.password import update_password
-from itsdangerous import URLSafeTimedSerializer
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from app.main import bcrypt, mail, Message
 from app.db.sql_executor import execute_query
 from loguru import logger
@@ -22,7 +22,7 @@ def register_user(data):
             "email": new_user.get('email', None),
             "username": new_user.get('username', None),
             "is_verified": new_user.get('is_verified', None),
-            "is_profile_complete": False,
+            "is_complete": False,
         })
         return jsonify(access_token=access_token), 200
     except UniqueConstraintError as e:
@@ -57,15 +57,12 @@ def login_user(data):
         user = execute_query(select_query, params=(data.get('username', None),) ,fetch_one=True)
         logger.info(user)
         if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password',None)):
-            # TODO remove this
-            # if user.get('is_verified', None):
-            #     return jsonify({'status': 'error', 'message': 'Verify Your Email'}), 401
             access_token = create_custom_access_token(identity={
                 "id": user.get('id', None),
                 "email": user.get('email', None),
                 "username": user.get('username', None),
-                "is_verified": user.get('is_verified',None),
-                "is_profile_complete": True, # TODO remove this
+                "is_verified": user.get('is_verified',False),
+                "is_complete": user.get('is_complete', False),
             })
             return jsonify(access_token=access_token), 200
         else:
@@ -85,7 +82,7 @@ def verify_email_service(token):
             "email": updated_user.get('email', None),
             "username": updated_user.get('username', None),
             "is_verified": updated_user.get('is_verified',None),
-            "is_profile_complete": True, #TODO remove this
+            "is_complete":  updated_user.get('is_complete',None),
         })
         return jsonify(access_token=access_token), 200
     except jwt.ExpiredSignatureError:
@@ -127,3 +124,18 @@ def reset_password_service(token, new_password):
         return jsonify({"message": "Password reset successfully"}), 200
     else:
         return jsonify({"message": "Failed to reset password"}), 500
+
+
+def update_password_service(user, data):
+    try:
+        select_query = "SELECT * FROM users WHERE id = %s"
+        user = execute_query(select_query, params=(str(user.get('id', None)),) ,fetch_one=True)
+        if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password')):
+            new_password_hash = bcrypt.generate_password_hash(data.pop('new_password')).decode('utf-8')
+            update_password_query = f"UPDATE  users SET password_hash = %s RETURNING *"
+            new_user = execute_query(update_password_query, params=(new_password_hash,), fetch_one=True)
+        else:
+            return jsonify(status='error', message="passwrod is wrong"), 400
+        return jsonify(status='success', message=new_user), 200
+    except Exception as e:
+        return jsonify({"message": "Failed to update password"}), 500

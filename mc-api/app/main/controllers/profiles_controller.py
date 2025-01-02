@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from app.main.services.profile_views_service import ProfileViewsService
 from app.main.services.profile_likes_service import ProfilelikesService
 from app.main.utils.decorators import token_required
@@ -17,8 +17,8 @@ profile_likes_service = ProfilelikesService()
 #! (remove)  method post
 #? Get Profile
 @profile_bp.route('/', methods=['GET'])
-# @token_required
-def get_profile(user={'id':1}):
+@token_required
+def get_profile(user):
     user_id = user.get('id', None)
     return get_profile_service(user_id)
 
@@ -71,13 +71,11 @@ def unlike_profile(user, unliked_profile_id):
 @token_required
 def update_profile(user):
     data = request.json
-
-    user_id = user.get('id', None)
-    return update_profile_service(data, user_id)
+    return update_profile_service(data, user)
 
 
 # TODO ADD DTO
-#? Upload or Update profile image
+# ? Upload or Update profile image
 @profile_bp.route('/picture', methods=['POST'])
 @token_required
 def handle_profile_picture(user):
@@ -93,8 +91,14 @@ def handle_other_pictures(user):
     request_file = request.files
     return handle_other_pictures_service(user, request_file)
 
-#? Get Image With Name
-@profile_bp.route('/get_image/<filename>', methods=['GET'])
-@token_required
-def get_image(user, filename):
-    return get_image_service(user, filename)
+# #? Get Image With Name
+@profile_bp.route('/get_image/<file_name>', methods=['GET'])
+def get_image(file_name):
+    return get_image_service(file_name)
+
+
+@profile_bp.route('/valid', methods=['OPTIONS', 'POST'])
+def valid_image_upload():
+    return jsonify({'status': 'success'}), 200 
+
+

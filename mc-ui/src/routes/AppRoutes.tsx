@@ -35,8 +35,12 @@ const AppRoutes = () => {
         path="/profile"
         element={
           <PrivateRoute>
-            <Navbar/>
-            <ProfilePage/>
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+              <ProfilePage/>
+              </div>
+            </div>
           </PrivateRoute>
         }
       />
