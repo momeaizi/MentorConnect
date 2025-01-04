@@ -7,7 +7,7 @@ CREATE TABLE users (
     is_complete BOOLEAN DEFAULT FALSE,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
-    gender BOOLEAN DEFAULT TRUE,
+    gender VARCHAR(50),
     bio TEXT,
     birth_date DATE,
     fame_rate INT DEFAULT 0,

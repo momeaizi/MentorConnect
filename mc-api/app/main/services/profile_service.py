@@ -20,6 +20,8 @@ def get_profile_service(user_id):
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
         )
 
+        profile['gender'] = (True) if profile.get('gender', None) == 'Male' else (False)
+
         profile_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
         image = execute_query(profile_query, params=(str(user_id)), fetch_one=True)
         if image:
@@ -41,7 +43,7 @@ def get_profile_service(user_id):
 def update_profile_service(data, user):
     try:
         user_id = user.get('id', None)
-        gender = 'TRUE' if data.get('gender') else 'FALSE'
+        gender = '\'Male\'' if data.get('gender') else '\'Female\''
         update_query = f"UPDATE users SET first_name = %s , last_name = %s , email = %s , username = %s , bio = %s , gender = {gender}, birth_date = %s , latitude = %s , longitude = %s, is_complete = TRUE  WHERE id = %s RETURNING *"
         updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
         logger.info(updated_profile)

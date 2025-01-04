@@ -120,10 +120,10 @@ const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) 
         (err) => {
           if (err.code === err.PERMISSION_DENIED) {
             setIsPermissionDenied(true);
-            // notification.warning({
-            //   message: 'Location Permission Denied',
-            //   description: 'Please click on the map to set your location manually.',
-            // });
+            if (!position && !userPosition) {
+                setUserPosition(  [32.253672, -8.982608]);
+                setPosition(  [32.253672, -8.982608]);
+            }
           }
         },
         { enableHighAccuracy: true, timeout: 10000 }
@@ -140,10 +140,6 @@ const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) 
           const { lat, lng } = e.latlng;
           setUserPosition([lat, lng]);
           setPosition([lat, lng]);
-          notification.success({
-            message: 'Location Set',
-            description: `You clicked at Latitude: ${lat}, Longitude: ${lng}.`,
-          });
         }
       },
     });
@@ -161,19 +157,20 @@ const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) 
 
   return (
     <div className="w-full h-96">
-      <MapContainer center={position} zoom={13} className="h-full w-full">
+      {userPosition && position && <MapContainer center={position} zoom={13} className="h-full w-full">
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='mskerba'
         />
         <LocationMarker />
-      </MapContainer>
+      </MapContainer>}
     </div>
   );
 };
 
 
 function Map({userPosition, setUserPosition, position, setPosition}:any) {
+    console.log(userPosition, position)
     return (
         <div className="w-full flex flex-col gap-4 ">
             <h1 className="font-bold text-2xl "> User Location Map:</h1>
@@ -181,8 +178,6 @@ function Map({userPosition, setUserPosition, position, setPosition}:any) {
         </div>
     )
 }
-
-
 
 function EditProfile({profileData}:any) {
     const [form] = Form.useForm();
@@ -205,13 +200,14 @@ function EditProfile({profileData}:any) {
     const [bio, setBio] = useState<string>(profileData?.bio);
 
     // User position
-    const defaultPosition: [number, number] = [32.253672, -8.982608]; // Example: London
+    const defaultPosition: [number, number] | null = null //[32.253672, -8.982608]; 
     const lat = Number(profileData?.latitude);
-    const defPosition: [number, number] | [] = lat
+    const defPosition: [number, number] | []|null = lat
         ? [Number(profileData.latitude), Number(profileData.longitude)]
         : defaultPosition;
-    const [userPosition, setUserPosition] = useState<[number, number]>([0,0]);
-    const [position, setPosition] = useState<[number, number]>(defPosition);
+    // const [userPosition, setUserPosition] = useState<[number, number]>([0,0]);
+    const [userPosition, setUserPosition] = useState<[number, number]|null>(defPosition);
+    const [position, setPosition] = useState<[number, number]|null>(defPosition);
     
     const openNotification = (message:string, icon:any) => {
         api.open({
@@ -253,7 +249,6 @@ function EditProfile({profileData}:any) {
 
     useEffect(() => {
         if (profileData?.file_name) {
-            console.log("------>", profileData.file_name)
             getImage(profileData?.file_name, setSelectAvatar, setLoading);
         }
 
@@ -263,7 +258,6 @@ function EditProfile({profileData}:any) {
         }
         
         if (profileData?.birth_date) {
-            console.log("**************")
             form.setFieldsValue({ "birthDate": dayjs(profileData.birth_date) });
             setBirthDate(profileData?.birth_date);
         }
