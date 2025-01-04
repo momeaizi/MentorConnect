@@ -8,19 +8,13 @@ import { PlusOutlined,CheckCircleOutlined,
     InfoCircleOutlined
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import Button from "@/components/Button";
+import Button from "../components/Button";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents} from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '../assets/styles/globals.css';
 import api from "../services/api";
-
-
-const normFile = (e: any) => {
-    if (Array.isArray(e))
-      return e;
-    return e?.fileList;
-};
+import { useAuth } from "../providers/AuthProvider";
 
 const handleImageClick = () => {
     const fileInput = document.getElementById('avatarInput');
@@ -37,7 +31,7 @@ interface ProfileData {
     username: string;
     bio: string;
     gender: boolean;
-    birthDate: dayjs;
+    birthDate: any;
     latitude:number;
     longitude:number;
 }
@@ -56,11 +50,9 @@ export async function postData(data: ProfileData) {
             "longitude": data?.longitude
         })
 
-        // if (!response.ok) {
-        // throw new Error('Network response was not ok');
-        // }
 
-        return await response;
+
+        return await response.data.access_token;
     } catch (error) {
         console.error('Error posting data:', error);
         throw error;
@@ -143,7 +135,7 @@ const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) 
 
   const LocationMarker = () => {
     useMapEvents({
-      click(e) {
+      click(e:any) {
         if (isPermissionDenied) {
           const { lat, lng } = e.latlng;
           setUserPosition([lat, lng]);
@@ -196,19 +188,20 @@ function EditProfile({profileData}:any) {
     const [form] = Form.useForm();
     const [gender, setGender] = useState<boolean>(profileData?.gender);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectAvatar, setSelectAvatar] = useState<boolean>(true);
+    const [selectAvatar, setSelectAvatar] = useState<boolean>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [formValid, setFormValid] = useState<boolean>(false);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<any>(null);
     const fileInputRef = useRef<any>(null);
+    const {login} = useAuth();
 
     // New state variables for form fields
     const [firstName, setFirstName] = useState<string>(profileData?.first_name);
     const [lastName, setLastName] = useState<string>(profileData?.last_name);
     const [email, setEmail] = useState<string>(profileData?.email);
     const [username, setUsername] = useState<string>(profileData?.username);
-    const [birthDate, setBirthDate] = useState(profileData?.birth_date);
+    const [birthDate, setBirthDate] = useState();
     const [bio, setBio] = useState<string>(profileData?.bio);
 
     // User position
@@ -243,7 +236,6 @@ function EditProfile({profileData}:any) {
         const file = e.target.files[0];
         setFile(file)
 
-        setSelectAvatar(true);
         setLoading(false)
         setPreview(URL.createObjectURL(file));
 
@@ -260,15 +252,19 @@ function EditProfile({profileData}:any) {
     }, [username, form]);
 
     useEffect(() => {
-        if (profileData?.file_name)
+        if (profileData?.file_name) {
+            console.log("------>", profileData.file_name)
             getImage(profileData?.file_name, setSelectAvatar, setLoading);
+        }
 
         if (profileData?.username) {
             form.setFieldsValue({ "username": profileData?.username });
             setUsername(profileData?.username);
         }
-
+        
         if (profileData?.birth_date) {
+            console.log("**************")
+            form.setFieldsValue({ "birthDate": dayjs(profileData.birth_date) });
             setBirthDate(profileData?.birth_date);
         }
 
@@ -303,6 +299,7 @@ function EditProfile({profileData}:any) {
         setBirthDate(dateOnly)
     }
 
+
     useEffect(() => {
         const isValid = 
             !!firstName &&
@@ -318,7 +315,7 @@ function EditProfile({profileData}:any) {
         setFormValid(isValid);
     }, [firstName, lastName, email, username, birthDate, bio, selectAvatar]);
 
-    const handleSubmit =  () => {
+    const handleSubmit = async () => {
         console.log(birthDate)
         try {
             const latitude = userPosition[0];
@@ -332,12 +329,12 @@ function EditProfile({profileData}:any) {
             !!bio &&
             bio.length >= 10 &&
             bio.length <= 250 &&
-            selectAvatar &&
+            (preview || selectAvatar) &&
             latitude && 
             longitude;
  
             if (isValid) {  
-                postData({
+                const access_token = await postData({
                     firstName,
                     lastName,
                     email,
@@ -351,10 +348,10 @@ function EditProfile({profileData}:any) {
                 if (file != null) {
                     const data = new FormData();
                     data.append('profile', file);
-                
-                    postImage(data);
-          
+                    await postImage(data);
                 }
+                if (access_token)
+                    login(access_token)
                 openNotification("The profile is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
             }
             else 
@@ -461,12 +458,11 @@ function EditProfile({profileData}:any) {
                         <Form.Item
                             name="birthDate"
                             rules={[{ required: true, message: "Please input your birth date!" }]}
-                            initialValue={dayjs(birthDate)}
+                            // initialValue={dayjs(birthDate)}
                         >
                             <DatePicker
                                 style={{ width: '100%' }}
                                 value={birthDate ? dayjs(birthDate) : null}
-                                // defaultValue={dayjs(birthDate)}
                                 onChange={(date)=>{handleChangeDate(date)}}
                             />
                         </Form.Item>}
@@ -520,7 +516,7 @@ function EditProfile({profileData}:any) {
                     <Button
                         text="Save Changes"
                         className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer"
-                        disabled={!formValid}
+                        // disabled={!formValid}
                         onclick={handleSubmit}
                     >
                     </Button>
@@ -578,7 +574,6 @@ function UploadPictures({profileData}:any) {
             try {
                 setLoading(true);
                 const url = `http://localhost:5000/api/profiles/get_image/${fileName}`;
-                console.log("url:",url)
                 return {
                     uid: fileName,
                     name: 'default.png',
@@ -622,7 +617,7 @@ function UploadPictures({profileData}:any) {
                     rules={[{ required: true, message: 'Please upload at least one image!' }]}
                 >
                     <Upload
-                        // action={(file)=> "http://localhost:5000/api/profiles/valid"}
+                        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
                         listType="picture-card"
                         fileList={fileList}
                         onChange={handleChange}
@@ -657,18 +652,17 @@ function UploadPictures({profileData}:any) {
     );
 }
 
-export async function updatePassword(data: any) {
-    const response = await api.patch('auth/update-password', {
-        "password": data?.password,
-        "new_password": data?.new_password,
-    })
-    console.log(response.status)
-    if (response.status ==400) {
-        throw response.status
+async function updatePassword(data: any):number {
+    try {
+        await api.patch('auth/update-password', {
+            password: data?.password,
+            new_password: data?.new_password,
+        });
+        return 200;
+    } catch (error: any) {
+        return 400;
     }
-    return await response;
 }
-
 
 function ChangePassword() {
     const [form] = Form.useForm();
@@ -684,18 +678,22 @@ function ChangePassword() {
         });
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async() => {
         if (password && newPassword && confirmPassword) {
             if (newPassword === confirmPassword) {
-                try {
-                    updatePassword({"password": password, "new_password": newPassword})
+                const code = await updatePassword({"password": password, "new_password": newPassword});
+
+                if (code == 400)
+                    openNotification("Password is wrong", <InfoCircleOutlined style={{ color: 'red' }}/>)
+                else {
+
                     setPassword('');
                     setNewPassword('');
                     setConfirmPassword('');
-                    openNotification("The profile is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
-                } catch (error) {
-                    console.log(error)
-                    openNotification("Password is wrong", <InfoCircleOutlined style={{ color: 'red' }}/>)
+                    form.setFieldsValue({ "password": '' });
+                    form.setFieldsValue({ "new-password": '' });
+                    form.setFieldsValue({ "conf-password": '' });
+                    openNotification("The password is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
                 }
             }
             else
@@ -719,16 +717,18 @@ function ChangePassword() {
             >
 
                 <p className="font-bold text-l pl-3">Password:</p>
-                <Form.Item name="actual-password" rules={[{ required: true }]}>
+                <Form.Item name="password" rules={[{ required: true }]}>
                     <Input.Password 
+                        className='h-[40px]'
                         value={password}
                         onChange={(e:any) => setPassword(e.target.value)}
                     />
                 </Form.Item>
 
                 <p className="font-bold text-l pl-3">New Password:</p>
-                <Form.Item name="password" rules={[{ required: true }]}>
+                <Form.Item name="new-password" rules={[{ required: true }]}>
                     <Input.Password
+                        className='h-[40px]'
                         value={newPassword}
                         onChange={(e:any) => setNewPassword(e.target.value)}
                     />
@@ -738,26 +738,27 @@ function ChangePassword() {
 
                 <p className="font-bold text-l pl-3">Confirm Password:</p>
                 <Form.Item
-                    name="password2"
+                    name="conf-password"
                     dependencies={['password']}
                     rules={[
-                    {
-                        required: true,
-                    },
-                    ({ getFieldValue }:any) => ({
-                        validator(_, value:any) {
-                        if (!value || getFieldValue('password') === value) {
-                            return Promise.resolve();
-                        }
-                        return Promise.reject(new Error('The new password that you entered do not match!'));
+                        {
+                            required: true,
                         },
-                    }),
+                        ({ getFieldValue }:any) => ({
+                            validator(_, value:any) {
+                                if (!value || getFieldValue('password') === value) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(new Error('The new password that you entered do not match!'));
+                            },
+                        }),
                     ]}
-                >
+                    >
                     <Input.Password
+                        className='h-[40px]'
                         value={confirmPassword}
                         onChange={(e:any) => setConfirmPassword(e.target.value)}
-                    />
+                        />
                 </Form.Item>
                 
                 {/* Submit Button */}

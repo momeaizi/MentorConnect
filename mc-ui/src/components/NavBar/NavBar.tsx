@@ -113,6 +113,12 @@ function MobileNavBar() {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const {numberOfNotif} = useStore();
   const navigteTo = useNavigate();
+  const {logout} = useAuth()
+
+  const handleLogout = () => {
+    logout();
+    handleNavigation('/');
+  }
 
   const handleNavigation = (to:string) => {
     navigteTo(to);
@@ -149,7 +155,7 @@ function MobileNavBar() {
         <Menu.Item className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
           View Profile
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
+        <Menu.Item onClick={handleLogout}  className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
           Logout
         </Menu.Item>
     </Menu>

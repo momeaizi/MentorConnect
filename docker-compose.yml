@@ -61,19 +61,6 @@ services:
   #   networks:
   #     - internal_network
 
-  # front-end:
-  #   container_name: front-end
-  #   image: front-end:latest
-  #   build: ./front-end
-  #   ports:
-  #     - "3000:3000"
-  #   depends_on:
-  #     - mc-api
-  #   networks:
-  #     - internal_network
-  #   volumes:
-  #     - ./front-end/src:/app/src
-
   mc-ui:
     container_name: mc-ui
     image: mc-ui:latest
