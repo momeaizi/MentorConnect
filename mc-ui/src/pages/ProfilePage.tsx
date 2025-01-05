@@ -98,7 +98,7 @@ export async function getImage(fileName:string, setSelectAvatar:any ,setLoading:
     });
 }
 
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
@@ -183,7 +183,7 @@ function EditProfile({profileData}:any) {
     const [form] = Form.useForm();
     const [gender, setGender] = useState<boolean>(profileData?.gender);
     const [loading, setLoading] = useState<boolean>(true);
-    const [selectAvatar, setSelectAvatar] = useState<boolean>(null);
+    const [selectAvatar, setSelectAvatar] = useState<string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<any>(null);
@@ -219,7 +219,8 @@ function EditProfile({profileData}:any) {
     },[userPosition]);
 
     const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setGender(e.target.value);
+        const newGender: boolean = (e.target.value == 'true') ?true:false;
+        setGender(newGender);
     };
 
     const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,7 +287,7 @@ function EditProfile({profileData}:any) {
         }
     }, [profileData]);
 
-    const handleChangeDate = (date: dayjs.Dayjs | null) => {
+    const handleChangeDate = (date: any) => {
         const dateOnly = date?.$d.toISOString().split('T')[0];
         setBirthDate(dateOnly)
     }
@@ -294,8 +295,12 @@ function EditProfile({profileData}:any) {
     const handleSubmit = async () => {
         console.log(birthDate)
         try {
-            const latitude = userPosition[0];
-            const longitude = userPosition[1];
+            let latitude:any = 0;
+            let longitude:any = 0;
+            if (userPosition) {
+                latitude = userPosition[0];
+                longitude = userPosition[1];
+            }
 
             const isValid = !!firstName &&
             !!lastName &&
@@ -355,13 +360,13 @@ function EditProfile({profileData}:any) {
                         {loading && <Skeleton.Avatar active={true} size={118} shape={'circle'} />}
                         {preview ? (
                         <img src={preview} alt="Selected Avatar" />
-                        ) : (
+                        ) : (selectAvatar)?(
                         <img
                             style={{ display: loading ? 'none' : 'block' }}
                             alt="User Avatar"
                             src={selectAvatar}
                         />
-                        )}
+                        ):''}
                         <input
                             id="avatarInput"
                             ref={fileInputRef}
@@ -524,14 +529,14 @@ function UploadPictures({profileData}:any) {
             formData.append(`picture${index + 1}`, file.originFileObj);
         });
         try {
-            const response = await postImages(formData)
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log('Upload successful:', result);
-                setFileList([]); // Clear the file list after successful upload
-            } else {
-                console.error('Upload failed:', await response.text());
+            const response:any = await postImages(formData)
+            if (response) {
+                if (response?.ok) {
+                    const result = await response.json();
+                    console.log('Upload successful:', result);
+                    setFileList([]); // Clear the file list after successful upload
+                } else
+                    console.error('Upload failed:', await response.text());
             }
         } catch (error) {
             console.error('Error during upload:', error);
@@ -603,7 +608,6 @@ function UploadPictures({profileData}:any) {
                             showPreviewIcon: false,
                             showRemoveIcon: true,
                         }}
-                        status="done"
                         onRemove={(file) => {
                             setFileList((prevFileList) => prevFileList.filter((f) => f.uid !== file.uid));
                         }}
@@ -628,7 +632,7 @@ function UploadPictures({profileData}:any) {
     );
 }
 
-async function updatePassword(data: any):number {
+async function updatePassword(data: any) {
     try {
         await api.patch('auth/update-password', {
             password: data?.password,
