@@ -185,7 +185,6 @@ function EditProfile({profileData}:any) {
     const [loading, setLoading] = useState<boolean>(true);
     const [selectAvatar, setSelectAvatar] = useState<boolean>(null);
     const [preview, setPreview] = useState<string | null>(null);
-    const [formValid, setFormValid] = useState<boolean>(false);
     const [api, contextHolder] = notification.useNotification();
     const [file, setFile] = useState<any>(null);
     const fileInputRef = useRef<any>(null);
@@ -204,8 +203,7 @@ function EditProfile({profileData}:any) {
     const lat = Number(profileData?.latitude);
     const defPosition: [number, number] | []|null = lat
         ? [Number(profileData.latitude), Number(profileData.longitude)]
-        : defaultPosition;
-    // const [userPosition, setUserPosition] = useState<[number, number]>([0,0]);
+        : defaultPosition; 
     const [userPosition, setUserPosition] = useState<[number, number]|null>(defPosition);
     const [position, setPosition] = useState<[number, number]|null>(defPosition);
     
@@ -289,25 +287,9 @@ function EditProfile({profileData}:any) {
     }, [profileData]);
 
     const handleChangeDate = (date: dayjs.Dayjs | null) => {
-        const dateOnly = date.$d.toISOString().split('T')[0];
+        const dateOnly = date?.$d.toISOString().split('T')[0];
         setBirthDate(dateOnly)
     }
-
-
-    useEffect(() => {
-        const isValid = 
-            !!firstName &&
-            !!lastName &&
-            !!email &&
-            !!username &&
-            !!birthDate &&
-            !!bio &&
-            bio.length >= 10 &&
-            bio.length <= 250 &&
-            !selectAvatar;
-
-        setFormValid(isValid);
-    }, [firstName, lastName, email, username, birthDate, bio, selectAvatar]);
 
     const handleSubmit = async () => {
         console.log(birthDate)
@@ -530,7 +512,7 @@ function UploadPictures({profileData}:any) {
 
     const handleChange = ({ fileList }: any) => setFileList(fileList);
   
-    const beforeUpload = (file: any) => {
+    const beforeUpload = () => {
         if (fileList.length >= 5)
             return false;
         return true;
