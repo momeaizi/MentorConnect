@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import type { FormProps } from 'antd';
 import { Form, Input, Button } from 'antd';
-import api from '../services/api';
+import { publicApi } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { isAxiosError } from '../types/api';
 import { FireFilled } from '@ant-design/icons';
 import "../assets/styles/navBar.css";
+import { LoadingOutlined } from '@ant-design/icons';
 
 
 type FieldType = {
@@ -16,13 +17,15 @@ type FieldType = {
 
 
 const LoginForm = ({ closeModal }: LoginProps) => {
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
+    setLoading(true);
     try {
-      const res = await api.post('/auth/login', {
+      const res = await publicApi.post('/auth/login', {
         username: values.username,
         password: values.password,
       });
@@ -31,7 +34,7 @@ const LoginForm = ({ closeModal }: LoginProps) => {
 
       closeModal();
       login(access_token);
-      setTimeout(() => navigate('/'), 400);
+      setTimeout(() => navigate('/home'), 400);
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data?.message == "Verify Your Email" && error.response?.data?.email) {
@@ -43,6 +46,8 @@ const LoginForm = ({ closeModal }: LoginProps) => {
       } else {
         setErrorMessage('An unexpected error occurred. Please try again.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,7 +78,11 @@ const LoginForm = ({ closeModal }: LoginProps) => {
 
       <div className="flex justify-between">
         <div className="text-base text-[#D1D1D6] mb-2">Password</div>
-        <div className="text-base text-[#70707B] hover:text-[#ec4899] mb-2 cursor-pointer " onClick={() => { console.log('clicked') }}>Forgot ?</div>
+        <div className="text-base text-[#70707B] hover:text-[#ec4899] mb-2 cursor-pointer " onClick={() => {
+          closeModal();
+          setTimeout(() => navigate('/send-reset-password-email'), 400);
+        }}>
+          Forgot password?</div>
       </div>
       <Form.Item<FieldType>
         name="password"
@@ -94,6 +103,9 @@ const LoginForm = ({ closeModal }: LoginProps) => {
       <Form.Item>
         <Button
           className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+          icon={loading ? <LoadingOutlined /> : null}
+          loading={loading}
+          disabled={loading}
           type="primary"
           htmlType="submit"
         >

@@ -218,7 +218,8 @@ function EditProfile({profileData}:any) {
         console.log(userPosition);
     },[userPosition]);
 
-    const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleGenderChange = (e: any) => {
+        console.log("***********", e.target.value)
         const newGender: boolean = (e.target.value == 'true') ?true:false;
         setGender(newGender);
     };
@@ -238,6 +239,7 @@ function EditProfile({profileData}:any) {
 
 
     useEffect(() => {
+        console.log("---->>")
         form.setFieldsValue({ "preferredGender": !gender });
     }, [gender, form]);
 

@@ -1,84 +1,147 @@
-import psycopg2
-from datetime import datetime
+import random
+from faker import Faker
 from flask_bcrypt import Bcrypt
+import psycopg2
 import os
-from loguru import logger
 
-# Database connection parameters
-DB_PARAMS = {
-    'dbname': os.getenv('DB_NAME'),
-    'user': os.getenv('DB_USER'),
-    'password': os.getenv('DB_PASSWORD'),
-    'host': os.getenv('DB_HOST'),
-    'port': 5432
-}
+# Initialize Faker
+faker = Faker()
+bcrypt = Bcrypt()
 
-bcrypt = Bcrypt() 
-hashed_password = bcrypt.generate_password_hash("taha").decode('utf-8')
+# Connect to your PostgreSQL database
+conn = psycopg2.connect(
+    dbname=os.getenv('DB_NAME'),
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD'),
+    host=os.getenv('DB_HOST'),
+    port="5432"
+)
+cursor = conn.cursor()
 
-# Sample data for the tables
-users_data = [
-    ('alice', 'alice@example.com', hashed_password, True),
-    ('bob', 'bob@example.com', hashed_password, True),
-    ('charlie', 'charlie@example.com', hashed_password, True),
-    ('dave', 'dave@example.com', hashed_password, True),
-    ('eve', 'eve@example.com', hashed_password, True)
-]
+plain_password = "taha"
+hashed_password = bcrypt.generate_password_hash(plain_password).decode('utf-8')
 
-profile_views_data = [
-    (1, 2, datetime(2024, 11, 1, 10, 0, 0)),
-    (2, 1, datetime(2024, 11, 2, 11, 0, 0)),
-    (3, 1, datetime(2024, 11, 3, 14, 30, 0)),
-    (4, 2, datetime(2024, 11, 4, 9, 15, 0)),
-    (1, 3, datetime(2024, 11, 5, 12, 45, 0))
-]
+# Helper function to seed data
+def seed_users(n=100):
+    print("Seeding users...")
+    users = []
+    for _ in range(n):
+        users.append((
+            faker.user_name(),
+            faker.email(),
+            hashed_password,
+            faker.first_name(),
+            faker.last_name(),
+            random.choice(['Male', 'Female']),
+            faker.text(max_nb_chars=200),
+            faker.date_of_birth(minimum_age=18, maximum_age=80),
+            random.randint(0, 100),
+            faker.latitude(),
+            faker.longitude()
+        ))
 
-profile_likes_data = [
-    (1, 2, datetime(2024, 11, 1, 11, 30, 0)),
-    (2, 3, datetime(2024, 11, 2, 16, 0, 0)),
-    (3, 4, datetime(2024, 11, 3, 17, 45, 0)),
-    (4, 1, datetime(2024, 11, 4, 19, 20, 0)),
-    (5, 1, datetime(2024, 11, 5, 13, 10, 0))
-]
+    cursor.executemany("""
+        INSERT INTO users (username, email, password_hash, first_name, last_name, gender, bio, birth_date, fame_rating, geolocation, is_verified)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, ST_Point(%s, %s), true)
+    """, users)
+    conn.commit()
 
-# Function to insert data into the database
-def seed_data():
-    try:
-        # Connect to the PostgreSQL database
-        conn = psycopg2.connect(**DB_PARAMS)
-        cur = conn.cursor()
+def seed_interests(n=50):
+    print("Seeding interests...")
+    interests = [(faker.word(),) for _ in range(n)]
 
-        # Insert data into users table
-        cur.executemany("""
-            INSERT INTO users (username, email, password_hash, is_verified)
-            VALUES (%s, %s, %s, %s)
-        """, users_data)
+    # Use ON CONFLICT DO NOTHING to avoid duplicate errors
+    cursor.executemany("""
+        INSERT INTO interests (interest)
+        VALUES (%s)
+        ON CONFLICT (interest) DO NOTHING
+    """, interests)
+    conn.commit()
 
-        # Insert data into profile_views table
-        cur.executemany("""
-            INSERT INTO profile_views (viewer_id, profile_owner_id, viewed_at)
-            VALUES (%s, %s, %s)
-        """, profile_views_data)
+def seed_user_interests(n=200):
+    print("Seeding user_interests...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
 
-        # Insert data into profile_likes table
-        cur.executemany("""
-            INSERT INTO profile_likes (liker_id, liked_profile_id, liked_at)
-            VALUES (%s, %s, %s)
-        """, profile_likes_data)
+    cursor.execute("SELECT id FROM interests")
+    interest_ids = [row[0] for row in cursor.fetchall()]
 
-        # Commit the transaction
-        conn.commit()
+    user_interests = [
+        (random.choice(user_ids), random.choice(interest_ids))
+        for _ in range(n)
+    ]
 
-        logger.success("Data seeded successfully!")
+    cursor.executemany("""
+        INSERT INTO user_interests (user_id, interest_id)
+        VALUES (%s, %s)
+    """, user_interests)
+    conn.commit()
 
-    except (Exception, psycopg2.DatabaseError) as error:
-        logger.error(f"Error while seeding data: {error}")
-        conn.rollback()
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
+def seed_pictures(n=100):
+    print("Seeding pictures...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
 
-# Run the seed function
-if __name__ == "__main__":
-    seed_data()
+    pictures = [
+        (random.choice(user_ids), 'https://thispersondoesnotexist.com/')
+        for _ in range(n)
+    ]
+
+    cursor.executemany("""
+        INSERT INTO pictures (user_id, file_name)
+        VALUES (%s, %s)
+    """, pictures)
+    conn.commit()
+
+def seed_likes(n=200):
+    print("Seeding profile likes...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    profile_likes = []
+    for _ in range(n):
+        liker_id = random.choice(user_ids)
+        liked_profile_id = random.choice(user_ids)
+        if liker_id != liked_profile_id:  # Prevent liking one's own profile
+            profile_likes.append((liker_id, liked_profile_id))
+
+    cursor.executemany("""
+        INSERT INTO profile_likes (liker_id, liked_profile_id)
+        VALUES (%s, %s)
+        ON CONFLICT DO NOTHING
+    """, profile_likes)
+    conn.commit()
+
+def seed_views(n=300):
+    print("Seeding profile views...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    profile_views = []
+    for _ in range(n):
+        viewer_id = random.choice(user_ids)
+        profile_owner_id = random.choice(user_ids)
+        if viewer_id != profile_owner_id:  # Prevent viewing one's own profile
+            profile_views.append((viewer_id, profile_owner_id, faker.date_time_this_year()))
+
+    cursor.executemany("""
+        INSERT INTO profile_views (viewer_id, profile_owner_id, viewed_at)
+        VALUES (%s, %s, %s)
+    """, profile_views)
+    conn.commit()
+
+# Call the seed functions
+try:
+    seed_users(100)
+    seed_interests(50)
+    seed_user_interests(200)
+    seed_pictures(100)
+    seed_likes(200)
+    seed_views(300)
+    print("Data seeding completed successfully!")
+except Exception as e:
+    print(f"Error while seeding data: {e}")
+    conn.rollback()
+finally:
+    cursor.close()
+    conn.close()

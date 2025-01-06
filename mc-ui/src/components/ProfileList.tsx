@@ -1,131 +1,132 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon } from 'lucide-react'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar } from 'lucide-react'
 import { Img } from 'react-image';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const { Option } = Select
 
 interface Profile {
-    id: number
-    name: string
-    age: number
-    fameRating: number
-    location: string
-    interests: string[]
-    image: string
-    gender: 'male' | 'female' | 'other'
-    orientation: 'straight' | 'gay' | 'bisexual'
+    id: number;
+    username: string;
+    distance: number;
+    firstName: string;
+    lastName: string;
+    age: number;
+    fameRating: number;
+    location: string;
+    interests: string[];
+    image: string;
+    gender: 'male' | 'female';
 }
 
 interface User {
     id: number
-    name: string
+    firstName: string
+    lastName: string
     age: number
     location: string
     interests: string[]
-    gender: 'male' | 'female' | 'other'
-    orientation: 'straight' | 'gay' | 'bisexual'
+    gender: 'male' | 'female'
+    
 }
 
 const currentUser: User = {
     id: 0,
-    name: "Current User",
+    firstName: "Mohamed Taha",
+    lastName: "Meaizi",
     age: 30,
     location: "New York",
-    interests: ["travel", "music", "cooking"],
-    gender: "male",
-    orientation: "straight"
+    interests: ["start", "top", "look"],
+    gender: "male"
 }
 
-const dummyProfiles: Profile[] = [
-    { id: 1, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking", "sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 2, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 3, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 4, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 5, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 6, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 7, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 8, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 9, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 10, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 11, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 12, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 13, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 14, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 15, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 16, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 17, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 18, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 19, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 20, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 21, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 22, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 23, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 24, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 25, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 26, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 27, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 28, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 29, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 30, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 31, name: "Alice", age: 28, fameRating: 75, location: "New York", interests: ["travel", "music", "cooking"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 32, name: "Bob", age: 32, fameRating: 60, location: "Los Angeles", interests: ["sports", "movies", "hiking"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 33, name: "Charlie", age: 25, fameRating: 80, location: "Chicago", interests: ["art", "photography", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 34, name: "Diana", age: 30, fameRating: 70, location: "Miami", interests: ["dancing", "beach", "reading"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 35, name: "Ethan", age: 35, fameRating: 65, location: "Seattle", interests: ["technology", "coffee", "running"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 36, name: "Fiona", age: 27, fameRating: 85, location: "Boston", interests: ["fashion", "travel", "food"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 37, name: "George", age: 29, fameRating: 72, location: "San Francisco", interests: ["tech", "surfing", "vegan"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 38, name: "Hannah", age: 31, fameRating: 68, location: "Austin", interests: ["music", "coding", "yoga"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-    { id: 39, name: "Ian", age: 33, fameRating: 77, location: "Denver", interests: ["skiing", "photography", "beer"], image: "https://thispersondoesnotexist.com/", gender: "male", orientation: "straight" },
-    { id: 40, name: "Julia", age: 26, fameRating: 82, location: "Portland", interests: ["hiking", "art", "coffee"], image: "https://thispersondoesnotexist.com/", gender: "female", orientation: "straight" },
-]
-
-const allInterests = Array.from(new Set(dummyProfiles.flatMap(profile => profile.interests)))
-const allLocations = Array.from(new Set(dummyProfiles.map(profile => profile.location)))
 
 const ProfileList: React.FC = () => {
-    const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([])
-    const [ageRange, setAgeRange] = useState<[number, number]>([18, 50])
-    const [fameRange, setFameRange] = useState<[number, number]>([0, 100])
-    const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
-    const [selectedInterests, setSelectedInterests] = useState<string[]>([])
-    const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend')
-    const [likedProfiles, setLikedProfiles] = useState<number[]>([])
-    const [sortCriteria, setSortCriteria] = useState<string>('fameRating');
+    const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
+    const [ageRange, setAgeRange] = useState<[number, number]>([18, 50]);
+    const [fameRange, setFameRange] = useState<[number, number]>([0, 100]);
+    const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+    const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
+    const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
+    const [sortCriteria, setSortCriteria] = useState<string>('');
+    const [allInterests, setAllInterests] = useState<string[]>([]);
+    const [allLocations, setAllLocations] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    const navigate = useNavigate();
+
+
+
 
     useEffect(() => {
-        applyFilters();
-        handleSort(sortCriteria);
+        const loadData = async () => {
+            const fetchedProfiles: Profile[] = await fetchProfiles();
+            setAllInterests(Array.from(new Set(fetchedProfiles.flatMap(profile => profile.interests))));
+            setAllLocations(Array.from(new Set(fetchedProfiles.map(profile => profile.location))));
+            // applyFilters();
+            // handleSort(sortCriteria);
+        }
+        loadData();
     }, [])
 
+
+
+    const fetchProfiles = async () => {
+        setLoading(true);
+        try {
+            const res = await api.get('/profiles/suggestions');
+            const fetchedProfiles = res.data?.map((item: any) => ({
+                id: item.id,
+                firstName: item.first_name,
+                lastName: item.last_name,
+                age: Math.floor(item.age),
+                fameRating: item.fame_rating,
+                location: item.location,
+                interests: item.interests.filter((interest: string | null) => (interest)),
+                image: item.image,
+                gender: item.gender,
+                distance: Math.floor(item.distance),
+                username: item.username,
+            }));
+            setProfiles(fetchedProfiles);
+            setFilteredProfiles(fetchedProfiles);
+            return fetchedProfiles;
+        } catch (error) {
+            console.log(error);
+            return [];
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
     const applyFilters = () => {
-        let filtered = dummyProfiles.filter(profile =>
+
+        let filtered = profiles.filter(profile =>
             profile.age >= ageRange[0] && profile.age <= ageRange[1] &&
             profile.fameRating >= fameRange[0] && profile.fameRating <= fameRange[1] &&
             (selectedLocation ? profile.location === selectedLocation : true) &&
-            (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest))) &&
-            isCompatible(profile, currentUser)
+            (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest)))
         )
 
         filtered.sort((a, b) => {
-            if (a.location === currentUser.location && b.location !== currentUser.location) return -1
-            if (b.location === currentUser.location && a.location !== currentUser.location) return 1
+            if (a.location === currentUser.location && b.location !== currentUser.location) return -1;
+            if (b.location === currentUser.location && a.location !== currentUser.location) return 1;
 
-            const aCommonTags = a.interests.filter(interest => currentUser.interests.includes(interest)).length
-            const bCommonTags = b.interests.filter(interest => currentUser.interests.includes(interest)).length
-            if (aCommonTags !== bCommonTags) return bCommonTags - aCommonTags
+            const aCommonTags = a.interests.filter(interest => currentUser.interests.includes(interest)).length;
+            const bCommonTags = b.interests.filter(interest => currentUser.interests.includes(interest)).length;
+            if (aCommonTags !== bCommonTags) return bCommonTags - aCommonTags;
 
-            return b.fameRating - a.fameRating
-        })
+            return b.fameRating - a.fameRating;
+        });
 
-        setFilteredProfiles(filtered)
-    }
-
-    const isCompatible = (profile: Profile, user: User) => {
-        if (user.orientation === 'straight') {
-            return user.gender !== profile.gender
-        }
-        return true
+        setFilteredProfiles(filtered);
+        console.log("apply filters: ", profiles);
+        console.log("apply filters: ", filteredProfiles);
     }
 
     const resetFilters = () => {
@@ -231,13 +232,16 @@ const ProfileList: React.FC = () => {
                             <Button className="bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
                                 onClick={applyFilters}
                                 type="primary"
-                                block>
+                                disabled={loading}
+                                block
+                            >
                                 Apply Filters
                             </Button>
                             <Button onClick={resetFilters} block>
                                 Reset
                             </Button>
                         </div>
+                        {loading && <div className="mt-4 text-center">Loading profiles...</div>}
                     </div>
                 </Card>
 
@@ -265,6 +269,7 @@ const ProfileList: React.FC = () => {
                         xxl: 4,
                     }}
                     dataSource={filteredProfiles}
+                    loading={loading}
                     renderItem={profile => (
                         <List.Item>
                             <Card
@@ -273,28 +278,31 @@ const ProfileList: React.FC = () => {
                                     <div className="relative h-48">
                                         <Img
                                             src={profile.image}
-                                            alt={profile.name}
+                                            alt={`${profile.firstName} ${profile.lastName}`}
                                             className="rounded-t-lg"
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             loader={<div>Loading...</div>}
                                         />
                                     </div>
                                 }
+                                onClick={() => { navigate(`/profiles/${profile.username}`) }}
                                 className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
                             >
-                                <h3 className="text-xl font-semibold mb-2 text-primary">{profile.name}, {profile.age}</h3>
+                                <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
+
                                 <div className="flex items-center mb-2 text-secondary">
                                     <MapPinIcon className="w-4 h-4 mr-1" />
-                                    <span>{profile.location}</span>
+                                    <span>{profile.distance} Km</span>
                                 </div>
                                 <div className="flex items-center mb-2 text-secondary">
                                     <StarIcon className="w-4 h-4 mr-1" />
                                     <span>Fame: {profile.fameRating}</span>
                                 </div>
-                                <div className="mb-2 text-secondary">
-                                    <span>{profile.gender}, {profile.orientation}</span>
+                                <div className="flex items-center mb-2 text-secondary">
+                                    <Calendar className="w-4 h-4 mr-1" />
+                                    <span>Age: {profile.age}</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1 mt-2">
+                                <div className="flex gap-1 mt-2 overflow-y-auto max-h-20">
                                     {profile.interests.map(interest => (
                                         <Tag key={interest} color="blue" className="text-xs">
                                             {interest}
@@ -323,7 +331,7 @@ const ProfileList: React.FC = () => {
                     )}
                 />
             </div>
-        </div>
+        </div >
     )
 }
 

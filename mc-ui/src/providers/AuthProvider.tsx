@@ -1,13 +1,22 @@
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { JwtPayload, jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import { CustomJwtPayload } from '../utils/jwtUtils';
 
-interface CustomJwtPayload extends JwtPayload {
-    name?: string;
+interface User {
+    id: number;
+    username?: string;
     email?: string;
+    is_verified?: boolean;
+    is_profile_complete?: boolean;
 }
+
+
+
 interface AuthContextType {
-    user: any;
+    user: User | null;
+    token: string | null;
+    payload: CustomJwtPayload | null;
     login: (token: string) => void;
     logout: () => void;
     isAuthenticated: boolean;
@@ -19,16 +28,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [isAuthenticated, setIsAuthenticated] = useState(!!token);
-    const [user, setUser] = useState<any | null>(() => {
+    const [payload, setPayload] = useState<any | null>(() => {
         if (!token) return null;
         try {
             const decodedToken = jwtDecode<CustomJwtPayload>(token);
             return decodedToken;
         } catch (err) {
-            setUser(null);
+            return null;
         }
     }
     );
+    const [user, setUser] = useState<User | null>(() => {
+        if (!payload) return null;
+        const { id, username, email, is_verified, is_profile_complete } = payload;
+        return { id, username, email, is_verified, is_profile_complete };
+    });
     const navigate = useNavigate();
 
 
@@ -38,17 +52,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setToken(token);
         setIsAuthenticated(!!token);
 
-        if (!token) return setUser(null);
+        if (!token) {
+            setPayload(null);
+            setUser(null);
+            return ;
+        }
         try {
             const decodedToken = jwtDecode<CustomJwtPayload>(token);
-            setUser(decodedToken);
+            setPayload(decodedToken);
+            const { id, username, email, is_verified, is_profile_complete } = decodedToken;
+            setUser({ id, username, email, is_verified, is_profile_complete });
         } catch (err) {
+            setPayload(null);
             setUser(null);
         }
     };
 
     const logout = () => {
         localStorage.removeItem('token');
+        setPayload(null);
         setUser(null);
         setIsAuthenticated(false);
         navigate('/');
@@ -56,8 +78,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
     const contextValue = useMemo(
-        () => ({ user, login, logout, isAuthenticated }),
-        [user, isAuthenticated]
+        () => ({ token, user, payload, login, logout, isAuthenticated }),
+        [payload, isAuthenticated]
     );
 
     return (

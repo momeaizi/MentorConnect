@@ -1,7 +1,7 @@
 services:
   mc-postgres:
     container_name: mc-postgres
-    image: postgres
+    image: postgis/postgis:15-3.3
     restart: always
     environment:
       - POSTGRES_DB=${DB_NAME}
@@ -37,6 +37,7 @@ services:
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
     ports:
       - "5000:5000"
     depends_on:

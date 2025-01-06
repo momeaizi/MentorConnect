@@ -3,6 +3,12 @@ import PrivateRoute from './PrivateRoute';
 import SendVerificationEmail from '../pages/SendVerificationEmail';
 import EmailVerification from '../pages/EmailVerification';
 import Home from '../pages/Home';
+import SendPasswordResetEmail from '../pages/SendPasswordResetEmail';
+import PasswordReset from '../pages/PasswordReset.tsx';
+import LandingPage from '../pages/landingPage.tsx';
+import PublicRoute from './PublicRoute.tsx';
+import UserProfilePage from '../pages/UserProfilePage.tsx';
+import NotFound from '../pages/NotFound.tsx';
 import Navbar from '../components/NavBar/NavBar';
 import NotificationPage from '../pages/Notification';
 import ChatPage from '../pages/Chat';
@@ -13,88 +19,127 @@ import ProfilePage from '../pages/ProfilePage';
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <Home />
-        }
-      />
-      <Route
-        path="/send-verification-email"
-        element={
-          <SendVerificationEmail />
-        }
-      />
-      <Route
-        path="/verify-email/:token"
-        element={
-          <EmailVerification />
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <PrivateRoute>
+      <Route element={<PublicRoute />}>
+        <Route
+          path="/"
+          element={
+            <LandingPage />
+          }
+        />
+        <Route
+          path="/send-reset-password-email"
+          element={
+            <SendPasswordResetEmail />
+          }
+        />
+        <Route
+          path="/send-verification-email"
+          element={
+            <SendVerificationEmail />
+          }
+        />
+        <Route
+          path="/verify-email/:token"
+          element={
+            <EmailVerification />
+          }
+        />
+        <Route
+          path="/reset-password/:token"
+          element={
+            <PasswordReset />
+          }
+        />
+      </Route>
+      <Route element={<PrivateRoute />}>
+        <Route
+          path="/home"
+          element={
             <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
               <Navbar />
               <div className='p-0 h-full w-screen overflow-x-hidden'>
-              <ProfilePage/>
+                <Home />
               </div>
             </div>
-          </PrivateRoute>
-        }
-      />
+          }
+        />
+        <Route
+          path="/profiles/:username"
+          element={
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+                <UserProfilePage />
+              </div>
+            </div>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+                <ProfilePage />
+              </div>
+            </div>
+          }
+        />
 
 
-      <Route
-        path="/notification"
-        element={
-          <PrivateRoute>
+        <Route
+          path="/notification"
+          element={
             <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
               <Navbar />
               <div className='p-0 h-full w-screen overflow-hidden'>
-              <NotificationPage/> 
+                <NotificationPage />
               </div>
             </div>
-          </PrivateRoute>
-        }
-      />
+          }
+        />
 
-      <Route
-        path="/chat"
-        element={
-          <PrivateRoute>
+        <Route
+          path="/chat"
+          element={
+
             <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
               <Navbar />
               <ChatPage />
             </div>
-          </PrivateRoute>
-        }
+
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <HistoryPage />
+            </div>
+
+          }
+        />
+
+        <Route
+          path="/favorie"
+          element={
+
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <FavoriePage />
+            </div>
+
+          }
+        />
+
+      </Route>
+      <Route
+        path="*"
+        element={<NotFound />}
       />
-
-    <Route
-    path="/history"
-    element={
-      <PrivateRoute>
-        <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
-          <Navbar />
-          <HistoryPage />
-        </div>
-      </PrivateRoute>
-    }
-    />
-
-    <Route
-    path="/favorie"
-    element={
-      <PrivateRoute>
-        <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
-          <Navbar />
-          <FavoriePage />
-        </div>
-      </PrivateRoute>
-    }
-    />
 
     </Routes>
   );

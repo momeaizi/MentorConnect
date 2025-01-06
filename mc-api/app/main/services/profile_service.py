@@ -8,12 +8,140 @@ from werkzeug.utils import secure_filename
 from flask import current_app as app
 import uuid
 
+
+def get_profile_by_username_service(user_id, username):
+    try:
+        select_query = """
+            WITH current_user_interests AS (
+                SELECT 
+                    i.id AS interest_id,
+                    i.interest
+                FROM 
+                    user_interests ui
+                JOIN 
+                    interests i ON ui.interest_id = i.id
+                WHERE 
+                    ui.user_id = %s -- Current user's ID
+            ),
+            target_user AS (
+                SELECT 
+                    u.id AS user_id,
+                    u.username,
+                    u.email,
+                    u.first_name,
+                    u.last_name,
+                    u.gender,
+                    u.bio,
+                    u.birth_date,
+                    u.is_logged_in,
+                    u.last_logged_in,
+                    ST_X(ST_AsText(u.geolocation)) AS longitude,
+                    ST_Y(ST_AsText(u.geolocation)) AS latitude,
+                    DATE_PART('year', AGE(u.birth_date)) AS age,
+                    ARRAY_AGG(i.interest) AS interests,
+                    ARRAY_AGG(p.file_name) AS pictures,
+                    u.geolocation,
+                    -- Fame Rating Calculation
+                    (
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_views pv
+                            WHERE pv.profile_owner_id = u.id
+                        ), 0) + -- Views
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl
+                            WHERE pl.liked_profile_id = u.id
+                        ), 0) + -- Likes
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl1
+                            JOIN profile_likes pl2
+                            ON pl1.liker_id = pl2.liked_profile_id AND pl1.liked_profile_id = pl2.liker_id
+                            WHERE pl1.liked_profile_id = u.id
+                        ), 0) -- Matches
+                    ) AS fame_rating
+                FROM 
+                    users u
+                LEFT JOIN 
+                    user_interests ui ON u.id = ui.user_id
+                LEFT JOIN 
+                    interests i ON ui.interest_id = i.id
+                LEFT JOIN 
+                    pictures p ON p.user_id = i.id
+                WHERE 
+                    u.username = %s -- Target user's username
+                GROUP BY 
+                    u.id
+            )
+            SELECT 
+                t.user_id,
+                t.username,
+                t.email,
+                t.first_name,
+                'https://thispersondoesnotexist.com/' AS image,
+                t.pictures,
+                t.last_name,
+                t.gender,
+                t.bio,
+                t.birth_date,
+                t.fame_rating,
+                t.is_logged_in,
+                t.last_logged_in,
+                t.longitude,
+                t.latitude,
+                t.age,
+                t.interests,
+                ARRAY_AGG(c.interest) AS common_interests,
+                ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance -- Distance in kilometers
+            FROM 
+                target_user t
+            LEFT JOIN 
+                current_user_interests c ON c.interest_id = ANY (
+                    SELECT ui.interest_id
+                    FROM user_interests ui
+                    WHERE ui.user_id = t.user_id
+                )
+            GROUP BY 
+                t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
+                t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
+                t.latitude, t.age, t.interests, t.geolocation, t.pictures;
+        """
+        profile = execute_query(select_query, params=(user_id, username, user_id), fetch_one=True)
+
+
+        if not profile:
+            return jsonify({'status': 'error', 'message': 'Profile not found'}), 404
+
+        return jsonify({'status': 'success', 'data': profile}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
+    
+
+
 def get_profile_service(user_id):
     try:
         if not user_id:
             return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
-        select_query = "SELECT * FROM users WHERE id = %s"
+        select_query = """
+            SELECT
+u.                id,
+                u.username,
+                u.email,
+                u.first_name,
+                u.last_name,
+                u.gender,
+                u.bio,
+                u.birth_date,
+                ST_X(ST_AsText(u.geolocation)) AS longitude,
+                ST_Y(ST_AsText(u.geolocation)) AS latitude,
+                ARRAY_AGG(p.file_name) AS pictures
+            FROM users u
+            LEFT JOIN pictures p ON u.id = p.user_id
+            WHERE u.id = %s
+            GROUP BY u.id
+        """
         profile = execute_query(select_query, params=(str(user_id)), fetch_one=True)
 
         profile['birth_date'] = (
@@ -44,7 +172,21 @@ def update_profile_service(data, user):
     try:
         user_id = user.get('id', None)
         gender = '\'Male\'' if data.get('gender') else '\'Female\''
-        update_query = f"UPDATE users SET first_name = %s , last_name = %s , email = %s , username = %s , bio = %s , gender = {gender}, birth_date = %s , latitude = %s , longitude = %s, is_complete = TRUE  WHERE id = %s RETURNING *"
+        update_query = f"""
+            UPDATE users 
+            SET
+                first_name = %s ,
+                last_name = %s ,
+                email = %s ,
+                username = %s ,
+                bio = %s ,
+                gender = {gender},
+                birth_date = %s ,
+                geolocation = ST_Point(%s, %s),
+                is_complete = TRUE
+            WHERE id = %s
+            RETURNING *
+        """
         updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
         logger.info(updated_profile)
         access_token = create_custom_access_token(identity={
@@ -55,9 +197,8 @@ def update_profile_service(data, user):
             "is_complete": True,
         })
         return jsonify(access_token=access_token), 200
-        return jsonify({'status': 'success', 'message': updated_profile}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error deleting conversation: {str(e)}"}), 500
+        return jsonify({'status': 'error', 'message': f"Error updating user: {str(e)}"}), 500
 
 def handle_profile_picture_service(user, profile_file):
     if not profile_file:
