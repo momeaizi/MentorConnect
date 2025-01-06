@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { CustomJwtPayload } from '../utils/jwtUtils';
 
 interface User {
-    id?: number;
+    id: number;
     username?: string;
     email?: string;
     is_verified?: boolean;

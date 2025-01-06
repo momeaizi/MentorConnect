@@ -2,10 +2,10 @@ import { JwtPayload } from 'jwt-decode';
 
 
 export interface CustomJwtPayload extends JwtPayload {
-    id?: number;
-    username?: string;
-    email?: string;
-    is_verified?: boolean;
+    id: number;
+    username: string;
+    email: string;
+    is_verified: boolean;
     is_profile_complete?: boolean;
 }
   

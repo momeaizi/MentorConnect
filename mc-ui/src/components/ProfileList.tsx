@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
 import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar } from 'lucide-react'
 import { Img } from 'react-image';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 const { Option } = Select
 
 interface Profile {
     id: number;
+    username: string;
     distance: number;
     firstName: string;
     lastName: string;
@@ -55,6 +57,8 @@ const ProfileList: React.FC = () => {
     const [allLocations, setAllLocations] = useState<string[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
+    const navigate = useNavigate();
+
 
 
 
@@ -82,10 +86,11 @@ const ProfileList: React.FC = () => {
                 age: Math.floor(item.age),
                 fameRating: item.fame_rating,
                 location: item.location,
-                interests: item.interests || [],
+                interests: item.interests.filter((interest: string | null) => (interest)),
                 image: item.image,
                 gender: item.gender,
                 distance: Math.floor(item.distance),
+                username: item.username,
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
@@ -280,6 +285,7 @@ const ProfileList: React.FC = () => {
                                         />
                                     </div>
                                 }
+                                onClick={() => { navigate(`/profiles/${profile.username}`) }}
                                 className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
                             >
                                 <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
@@ -296,7 +302,7 @@ const ProfileList: React.FC = () => {
                                     <Calendar className="w-4 h-4 mr-1" />
                                     <span>Age: {profile.age}</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1 mt-2">
+                                <div className="flex gap-1 mt-2 overflow-y-auto max-h-20">
                                     {profile.interests.map(interest => (
                                         <Tag key={interest} color="blue" className="text-xs">
                                             {interest}
