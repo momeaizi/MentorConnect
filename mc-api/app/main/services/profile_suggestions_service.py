@@ -11,7 +11,7 @@ class ProfileSuggestionsService():
             select_query = """
                 WITH user_location AS (
                     SELECT 
-                        geolocation 
+                        *
                     FROM 
                         users 
                     WHERE 
@@ -70,6 +70,7 @@ class ProfileSuggestionsService():
                     common_tags c ON u.id = c.user_id
                 WHERE 
                     u.id != %s
+                    AND u.gender != (SELECT gender FROM user_location)
                     AND NOT EXISTS (
                         SELECT 1
                         FROM blocked_users b
@@ -77,15 +78,22 @@ class ProfileSuggestionsService():
                             (b.blocker_id = %s AND b.blocked_id = u.id)
                             OR (b.blocker_id = u.id AND b.blocked_id = %s)
                     )
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM profile_likes l
+                        WHERE 
+                            l.liker_id = %s
+                            AND l.liked_profile_id = u.id
+                    )
                 GROUP BY 
                     u.id, c.common_interests_count, c.common_interests_array
                 ORDER BY 
-                    c.common_interests_count DESC, -- Then by number of common interests
                     distance ASC, -- Prioritize by geographic proximity
+                    c.common_interests_count DESC, -- Then by number of common interests
                     u.fame_rating DESC; -- Finally by fame rating
 
             """
-            users = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id), fetch_all=True)
+            users = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id), fetch_all=True)
             return jsonify(users), 200
         except Exception as e:
             logger.error(f"Error fetching suggestions: {e}")

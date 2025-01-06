@@ -25,8 +25,8 @@ def get_profile_by_username(user, username):
 
 
 @profile_bp.route('/suggestions')
-# @token_required
-def get_suggestions(user={'id': 112}):
+@token_required
+def get_suggestions(user):
     return profile_suggestions_service.get_suggestions(user['id']);
 
 

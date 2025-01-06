@@ -34,19 +34,42 @@ def get_profile_by_username_service(user_id, username):
                     u.gender,
                     u.bio,
                     u.birth_date,
-                    u.fame_rating,
                     u.is_logged_in,
                     u.last_logged_in,
                     ST_X(ST_AsText(u.geolocation)) AS longitude,
                     ST_Y(ST_AsText(u.geolocation)) AS latitude,
                     DATE_PART('year', AGE(u.birth_date)) AS age,
-                    ARRAY_AGG(i.interest) AS interests
+                    ARRAY_AGG(i.interest) AS interests,
+                    ARRAY_AGG(p.file_name) AS pictures,
+                    u.geolocation,
+                    -- Fame Rating Calculation
+                    (
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_views pv
+                            WHERE pv.profile_owner_id = u.id
+                        ), 0) + -- Views
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl
+                            WHERE pl.liked_profile_id = u.id
+                        ), 0) + -- Likes
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl1
+                            JOIN profile_likes pl2
+                            ON pl1.liker_id = pl2.liked_profile_id AND pl1.liked_profile_id = pl2.liker_id
+                            WHERE pl1.liked_profile_id = u.id
+                        ), 0) -- Matches
+                    ) AS fame_rating
                 FROM 
                     users u
                 LEFT JOIN 
                     user_interests ui ON u.id = ui.user_id
                 LEFT JOIN 
                     interests i ON ui.interest_id = i.id
+                LEFT JOIN 
+                    pictures p ON p.user_id = i.id
                 WHERE 
                     u.username = %s -- Target user's username
                 GROUP BY 
@@ -58,7 +81,7 @@ def get_profile_by_username_service(user_id, username):
                 t.email,
                 t.first_name,
                 'https://thispersondoesnotexist.com/' AS image,
-                ARRAY['https://thispersondoesnotexist.com/', 'https://thispersondoesnotexist.com/', 'https://thispersondoesnotexist.com/'] AS pictures,
+                t.pictures,
                 t.last_name,
                 t.gender,
                 t.bio,
@@ -70,7 +93,8 @@ def get_profile_by_username_service(user_id, username):
                 t.latitude,
                 t.age,
                 t.interests,
-                ARRAY_AGG(c.interest) AS common_interests
+                ARRAY_AGG(c.interest) AS common_interests,
+                ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance -- Distance in kilometers
             FROM 
                 target_user t
             LEFT JOIN 
@@ -81,9 +105,11 @@ def get_profile_by_username_service(user_id, username):
                 )
             GROUP BY 
                 t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
-                t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude, t.latitude, t.age, t.interests;
+                t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
+                t.latitude, t.age, t.interests, t.geolocation, t.pictures;
         """
-        profile = execute_query(select_query, params=(user_id, username), fetch_one=True)
+        profile = execute_query(select_query, params=(user_id, username, user_id), fetch_one=True)
+
 
         if not profile:
             return jsonify({'status': 'error', 'message': 'Profile not found'}), 404

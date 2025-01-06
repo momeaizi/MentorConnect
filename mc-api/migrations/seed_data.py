@@ -83,14 +83,51 @@ def seed_pictures(n=100):
     user_ids = [row[0] for row in cursor.fetchall()]
 
     pictures = [
-        (random.choice(user_ids), faker.file_name(extension="jpg"), random.choice([True, False]))
+        (random.choice(user_ids), 'https://thispersondoesnotexist.com/')
         for _ in range(n)
     ]
 
     cursor.executemany("""
-        INSERT INTO pictures (user_id, file_name, is_profile)
-        VALUES (%s, %s, %s)
+        INSERT INTO pictures (user_id, file_name)
+        VALUES (%s, %s)
     """, pictures)
+    conn.commit()
+
+def seed_likes(n=200):
+    print("Seeding profile likes...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    profile_likes = []
+    for _ in range(n):
+        liker_id = random.choice(user_ids)
+        liked_profile_id = random.choice(user_ids)
+        if liker_id != liked_profile_id:  # Prevent liking one's own profile
+            profile_likes.append((liker_id, liked_profile_id))
+
+    cursor.executemany("""
+        INSERT INTO profile_likes (liker_id, liked_profile_id)
+        VALUES (%s, %s)
+        ON CONFLICT DO NOTHING
+    """, profile_likes)
+    conn.commit()
+
+def seed_views(n=300):
+    print("Seeding profile views...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    profile_views = []
+    for _ in range(n):
+        viewer_id = random.choice(user_ids)
+        profile_owner_id = random.choice(user_ids)
+        if viewer_id != profile_owner_id:  # Prevent viewing one's own profile
+            profile_views.append((viewer_id, profile_owner_id, faker.date_time_this_year()))
+
+    cursor.executemany("""
+        INSERT INTO profile_views (viewer_id, profile_owner_id, viewed_at)
+        VALUES (%s, %s, %s)
+    """, profile_views)
     conn.commit()
 
 # Call the seed functions
@@ -99,6 +136,8 @@ try:
     seed_interests(50)
     seed_user_interests(200)
     seed_pictures(100)
+    seed_likes(200)
+    seed_views(300)
     print("Data seeding completed successfully!")
 except Exception as e:
     print(f"Error while seeding data: {e}")
