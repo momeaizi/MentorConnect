@@ -1,9 +1,15 @@
 from flask import jsonify, request
+from datetime import datetime, timezone
 from loguru import logger
+import humanize
 from app.db.sql_executor import execute_query
+from app.main.services.socket_service import SocketService
+
+socket_service = SocketService()
 
 #{ notified_user_id, actor_id, type}
 def create_notif_service(data):
+
     try:
         validate_query = "SELECT 1 FROM users WHERE id = %s"
         user_exists = execute_query(validate_query, params=(data.get("notified_user_id", None),), fetch_one=True)
@@ -12,12 +18,31 @@ def create_notif_service(data):
             return jsonify({'status': 'error', 'message': 'Invalid notified_user_id. User does not exist.'}), 400
 
         insert_query = f"INSERT INTO notifications ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
-        execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
+        notif = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
+
+        select_query = "SELECT * FROM users WHERE ID = %s"
+        user = execute_query(select_query, params=(notif.get('actor_id'),), fetch_one=True)
+        notification_time = notif.get('notification_time')
+        if notification_time.tzinfo is None:
+            notification_time = notification_time.replace(tzinfo=timezone.utc)
+        new_notification= {
+            'username': user.get('username'),
+            'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+            'type': notif.get('type'),
+            'time': humanize.naturaltime(
+                datetime.now(timezone.utc) - notification_time
+            ),
+            'isRead': notif['is_seen']
+        }
+        socket_service.handle_new_notification(new_notification)
+
+        logger.info(new_notification)
+
         return jsonify({'status': 'success', 'message': 'Notification created successfully'}), 201
 
     except Exception as e:
         logger.error(f"Failed to create notification: {str(e)}")
-        return jsonify({'status': 'error', 'message': 'An error occurred while creating the notification.'}), 500
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 def get_notif_by_user_service(user):
@@ -28,19 +53,37 @@ def get_notif_by_user_service(user):
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
-        select_query = "SELECT * FROM notifications WHERE notified_user_id = %s"
+        see_notification_service(user_id)
+        select_query = "SELECT * FROM notifications WHERE notified_user_id = %s ORDER BY notification_time DESC"
         notifications = execute_query(select_query, params=(user_id,), fetch_all=True)
 
-        logger.info(f"Notifications retrieved: {notifications}")
-        return jsonify({'status': 'success', 'data': notifications}), 200
+
+        formatted_notifications = []
+        for notif in notifications:
+            select_query = "SELECT * FROM users WHERE ID = %s"
+            user = execute_query(select_query, params=(notif.get('actor_id'),), fetch_one=True)
+            notification_time = notif.get('notification_time')
+            if notification_time.tzinfo is None:
+                notification_time = notification_time.replace(tzinfo=timezone.utc)
+            formatted_notifications.append({
+                'username': user.get('username'),
+                'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+                'type': notif.get('type'),
+                'time': humanize.naturaltime(
+                    datetime.now(timezone.utc) - notification_time
+                ),
+                'isRead': notif['is_seen']
+            })
+
+        # logger.info(formatted_notifications)
+        return jsonify({'status': 'success', 'data': formatted_notifications}), 200
 
     except Exception as e:
         logger.error(f"Error retrieving notifications: {str(e)}")
         return jsonify({'status': 'error', 'message': 'Failed to fetch notifications. Please try again later.'}), 500
 
 
-def see_notification_service(user):
-    user_id = user.get('id')
+def see_notification_service(user_id):
 
     if not user_id:
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
@@ -60,4 +103,22 @@ def see_notification_service(user):
     except Exception as e:
         logger.error(f"Error marking notification(s) as seen: {str(e)}")
         return jsonify({'status': 'error', 'message': 'Failed to update notifications.'}), 500
+
+def number_of_notification_service(user):
+    user_id = user.get('id', None)
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
+
+    try:
+        select_query = "SELECT COUNT(*) FROM notifications WHERE notified_user_id = %s AND is_seen = FALSE"
+        result = execute_query(select_query, params=(user_id,), fetch_all=True)
+        
+        notification_count = result[0].get('count', None) if result else 0
+
+        return jsonify({'status': 'success', 'number': notification_count}), 200
+
+    except Exception as e:
+        logger.error(f"Error retrieving notifications: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Failed to fetch notifications. Please try again later.'}), 500
 

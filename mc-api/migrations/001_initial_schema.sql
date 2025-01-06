@@ -4,7 +4,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_verified BOOLEAN DEFAULT FALSE,
-    --for update
+    is_complete BOOLEAN DEFAULT FALSE,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     gender VARCHAR(50),
@@ -56,8 +56,9 @@ CREATE TABLE conversations (
     id SERIAL PRIMARY KEY,
     user_id_1 INT NOT NULL,
     user_id_2 INT NOT NULL,
-    see BOOLEAN DEFAULT FALSE,
+    see BOOLEAN DEFAULT TRUE,
     last_message_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id_1) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE
 );

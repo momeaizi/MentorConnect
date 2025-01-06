@@ -9,6 +9,12 @@ import LandingPage from '../pages/landingPage.tsx';
 import PublicRoute from './PublicRoute.tsx';
 import UserProfilePage from '../pages/UserProfilePage.tsx';
 import NotFound from '../pages/NotFound.tsx';
+import Navbar from '../components/NavBar/NavBar';
+import NotificationPage from '../pages/Notification';
+import ChatPage from '../pages/Chat';
+import HistoryPage from '../pages/History';
+import FavoriePage from '../pages/Favorie';
+import ProfilePage from '../pages/ProfilePage';
 
 const AppRoutes = () => {
   return (
@@ -48,25 +54,93 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route
           path="/home"
-          element={<Home />}
+          element={
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+                <Home />
+              </div>
+            </div>
+          }
         />
         <Route
           path="/profiles/:username"
           element={
-            <UserProfilePage />
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+                <UserProfilePage />
+              </div>
+            </div>
           }
         />
         <Route
-          path="/chat"
+          path="/profile"
           element={
-            <div>chat</div>
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-x-hidden'>
+                <ProfilePage />
+              </div>
+            </div>
           }
         />
+
+
+        <Route
+          path="/notification"
+          element={
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <div className='p-0 h-full w-screen overflow-hidden'>
+                <NotificationPage />
+              </div>
+            </div>
+          }
+        />
+
+        <Route
+          path="/chat"
+          element={
+
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <ChatPage />
+            </div>
+
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <HistoryPage />
+            </div>
+
+          }
+        />
+
+        <Route
+          path="/favorie"
+          element={
+
+            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
+              <Navbar />
+              <FavoriePage />
+            </div>
+
+          }
+        />
+
       </Route>
       <Route
-          path="*"
-          element={<NotFound />}
-        />
+        path="*"
+        element={<NotFound />}
+      />
+
     </Routes>
   );
 };

@@ -4,9 +4,9 @@ from app.main import bcrypt
 from app.main.services.auth_service import (
     register_user, login_user, verify_email_service,
     forgot_password_service, reset_password_service,
-    verify_acount_service
+    verify_acount_service, update_password_service
 )
-from app.main.utils.decorators import expect_dto
+from app.main.utils.decorators import expect_dto, token_required
 from app.main.utils.exceptions import ValidationError
 from app.main.utils.dtos.auth_dto import (
     RegisterUserDTO, LoginUserDTO, 
@@ -45,3 +45,11 @@ def forgot_password(data):
 @expect_dto(ResetPasswordDTO, validate=True)
 def reset_password(token, data):
     return reset_password_service(token, data['new_password'])
+
+
+@auth_bp.route('/update-password', methods=['PATCH'])
+# # @expect_dto(ResetPasswordDTO, validate=True)
+@token_required
+def update_password(user):
+    data = request.json
+    return update_password_service(user, data)

@@ -12,7 +12,7 @@ from flask_cors import CORS
 postgres_db_connection = PostgresDBConnection()
 bcrypt = Bcrypt() 
 mail = Mail()
-socketio = SocketIO()
+socketio = SocketIO(cors_allowed_origins="*")
 redis_client = None
 
 def create_app(config_name):

@@ -6,7 +6,7 @@ from app.main.utils.exceptions import ValidationError
 from app.main.services.chat_service import (
     create_conversation_service, get_conv_with_user_id_service,
     get_conv_with_conv_id_service, delete_conversation_service,
-    create_message_service
+    create_message_service, number_of_chat_service
 )
 
 chat_bp = Blueprint('chat_bp', __name__)
@@ -15,18 +15,32 @@ chat_bp = Blueprint('chat_bp', __name__)
 # TODO ADD DTO
 #? CREATE NEW CONVERSATION
 @chat_bp.route('/conversation', methods=['POST'])
-@token_required
-def create_conversation(user):
+# @token_required
+def create_conversation():
+    logger.info("+++++++++++++++++++++")
+    user = {"id":1}
     data = request.json
-    return create_conversation_service(data)
+    if not data:
+        logger.error("No data received")
+        return jsonify({"error": "No data provided"}), 400
+    
+    try:
+        return create_conversation_service(data, user.get('id', None))
+
+    except Exception as e:
+        logger.error(f"Error occurred: {str(e)}")
+        return jsonify({"error": "Internal server error", "details": str(e)}), 500
+
 
 #? GET THE CONVERSATIONS OF USER
-@chat_bp.route('/conversation',)
+@chat_bp.route('/conversation',methods=['GET'])
 @token_required
 def get_conv_with_user_id(user):
     user_id = user.get('id', None)
     return get_conv_with_user_id_service(user_id)
 
+# def get_conv_with_user_id():
+#     user = {'id':1}
 
 #? GET A CONVERSTION
 @chat_bp.route('/conversation/<conv_id>', methods=['GET'])
@@ -59,7 +73,13 @@ def update_conversation(conv_id, user):
 
 # data : {conversation_id, user_id, message}
 @chat_bp.route('/message', methods=['POST'])
-@token_required
-def create_message(user):
+# @token_required
+def create_message():
     data = request.json
     return create_message_service(data)
+
+
+@chat_bp.route('/number')
+@token_required
+def number_of_chat(user):
+    return number_of_chat_service(user)

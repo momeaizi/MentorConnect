@@ -13,3 +13,4 @@ cryptography==3.4.7
 loguru
 watchdog
 faker
+humanize==4.0.0
