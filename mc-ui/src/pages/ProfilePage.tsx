@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from "react";
 import {
   DatePicker, Form, Input,
   Radio, Upload, Skeleton
-  ,notification
+  ,notification, Select
 } from "antd";
 import { PlusOutlined,CheckCircleOutlined,
     InfoCircleOutlined
@@ -15,6 +15,8 @@ import 'leaflet/dist/leaflet.css';
 import '../assets/styles/globals.css';
 import api from "../services/api";
 import { useAuth } from "../providers/AuthProvider";
+
+const { Option } = Select
 
 const handleImageClick = () => {
     const fileInput = document.getElementById('avatarInput');
@@ -170,13 +172,24 @@ const LeafletMap = ({userPosition, setUserPosition, position, setPosition}:any) 
 
 
 function Map({userPosition, setUserPosition, position, setPosition}:any) {
-    console.log(userPosition, position)
     return (
         <div className="w-full flex flex-col gap-4 ">
             <h1 className="font-bold text-2xl "> User Location Map:</h1>
             <LeafletMap userPosition={userPosition} setUserPosition={setUserPosition} position={position} setPosition={setPosition}/>
         </div>
     )
+}
+
+const fetchProfiles = async () => {
+    try {
+        const res = await api.get('/profiles/suggestions');
+        const fetchedProfiles = res.data?.map((item: any) => ({
+            interests: item.interests.filter((interest: string | null) => (interest)),
+        }));
+        return fetchedProfiles;
+    } catch (error) {
+        return [];
+    }
 }
 
 function EditProfile({profileData}:any) {
@@ -197,6 +210,23 @@ function EditProfile({profileData}:any) {
     const [username, setUsername] = useState<string>(profileData?.username);
     const [birthDate, setBirthDate] = useState();
     const [bio, setBio] = useState<string>(profileData?.bio);
+    const [allInterests, setAllInterests] = useState<string[]>([]);
+    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+    const [tags, setTags] = useState<string[]>()
+
+
+
+
+    // ! change this 
+    useEffect(() => {
+        const loadData = async () => {
+            const fetchedProfiles = await fetchProfiles();
+            setAllInterests(Array.from(new Set(fetchedProfiles.flatMap(profile => profile.interests))));
+            console.log(allInterests)
+        }
+        loadData();
+    }, [])
+
 
     // User position
     const defaultPosition: [number, number] | null = null //[32.253672, -8.982608]; 
@@ -218,9 +248,8 @@ function EditProfile({profileData}:any) {
         console.log(userPosition);
     },[userPosition]);
 
-    const handleGenderChange = (e: any) => {
-        console.log("***********", e.target.value)
-        const newGender: boolean = (e.target.value == 'true') ?true:false;
+    const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newGender: boolean = (e.target.value == true) ?true:false;
         setGender(newGender);
     };
 
@@ -239,7 +268,6 @@ function EditProfile({profileData}:any) {
 
 
     useEffect(() => {
-        console.log("---->>")
         form.setFieldsValue({ "preferredGender": !gender });
     }, [gender, form]);
 
@@ -344,10 +372,8 @@ function EditProfile({profileData}:any) {
         }
       };
 
-
     return (
         <div className="w-full flex flex-col gap-4">
-
             {contextHolder}
             <h1 className="font-bold text-2xl"> Edit Profile:</h1>
             <Form
@@ -385,7 +411,8 @@ function EditProfile({profileData}:any) {
                     name="firstName"
                     rules={[{ required: true, message: "Please input your first name!" }]}
                 >
-                    <Input 
+                    <Input
+                        className='h-[40px]'
                         placeholder="Enter your first name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
@@ -397,7 +424,8 @@ function EditProfile({profileData}:any) {
                     name="lastName"
                     rules={[{ required: true, message: "Please input your last name!" }]}
                 >
-                    <Input 
+                    <Input
+                        className='h-[40px]' 
                         placeholder="Enter your last name"
                         value={lastName}
                         onChange={(e:any) => setLastName(e.target.value)}
@@ -413,6 +441,7 @@ function EditProfile({profileData}:any) {
                     ]}
                 >
                     <Input 
+                        className='h-[40px]'
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -427,6 +456,7 @@ function EditProfile({profileData}:any) {
                             rules={[{ required: true, message: "Please input your username!" }]}
                         >
                             <Input 
+                                className='h-[40px]'
                                 onChange={handleUsernameChange}
                                 placeholder="Enter your username"
                                 value={username}
@@ -444,6 +474,7 @@ function EditProfile({profileData}:any) {
                             // initialValue={dayjs(birthDate)}
                         >
                             <DatePicker
+                                className='h-[40px]'
                                 style={{ width: '100%' }}
                                 value={birthDate ? dayjs(birthDate) : null}
                                 onChange={(date)=>{handleChangeDate(date)}}
@@ -451,7 +482,21 @@ function EditProfile({profileData}:any) {
                         </Form.Item>}
                     </div>
                 </div>
-                
+                <Form.Item 
+                    name="interests"
+                >
+                    <Select
+                        mode="multiple"
+                        placeholder="Select interests"
+                        style={{ width: '100%' }}
+                        value={selectedInterests}
+                        onChange={setSelectedInterests}
+                    >
+                        {allInterests.map(interest => (
+                            <Option key={interest} value={interest}>{interest}</Option>
+                        ))}
+                    </Select>
+                </Form.Item>
                 <p className="font-bold text-l pl-3">Bio:</p>
                 <Form.Item
                     name="bio"
