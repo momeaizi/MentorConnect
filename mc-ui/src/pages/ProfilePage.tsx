@@ -36,6 +36,7 @@ interface ProfileData {
     birthDate: any;
     latitude:number;
     longitude:number;
+    selectedInterests:number[];
 }
   
 export async function postData(data: ProfileData) {
@@ -49,7 +50,8 @@ export async function postData(data: ProfileData) {
             "gender": data?.gender,
             "birth_date": data?.birthDate,
             "latitude": data?.latitude,
-            "longitude": data?.longitude
+            "longitude": data?.longitude,
+            'interests':data?.selectedInterests
         })
 
 
@@ -182,11 +184,8 @@ function Map({userPosition, setUserPosition, position, setPosition}:any) {
 
 const fetchProfiles = async () => {
     try {
-        const res = await api.get('/profiles/suggestions');
-        const fetchedProfiles = res.data?.map((item: any) => ({
-            interests: item.interests.filter((interest: string | null) => (interest)),
-        }));
-        return fetchedProfiles;
+        const res = await api.get('/interests/');
+        return res.data;
     } catch (error) {
         return [];
     }
@@ -212,24 +211,20 @@ function EditProfile({profileData}:any) {
     const [bio, setBio] = useState<string>(profileData?.bio);
     const [allInterests, setAllInterests] = useState<string[]>([]);
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-    const [tags, setTags] = useState<string[]>()
+    const [defaultInterests, setDefaultInterests] = useState<string[] | null>(null);
 
 
-
-
-    // ! change this 
     useEffect(() => {
         const loadData = async () => {
-            const fetchedProfiles = await fetchProfiles();
-            setAllInterests(Array.from(new Set(fetchedProfiles.flatMap(profile => profile.interests))));
-            console.log(allInterests)
+            const fetchInterests = await fetchProfiles();
+            setAllInterests(fetchInterests);
         }
         loadData();
     }, [])
 
 
     // User position
-    const defaultPosition: [number, number] | null = null //[32.253672, -8.982608]; 
+    const defaultPosition: [number, number] | null = null;
     const lat = Number(profileData?.latitude);
     const defPosition: [number, number] | []|null = lat
         ? [Number(profileData.latitude), Number(profileData.longitude)]
@@ -277,6 +272,12 @@ function EditProfile({profileData}:any) {
     }, [username, form]);
 
     useEffect(() => {
+        if (profileData?.interests) {
+            setDefaultInterests(profileData?.interests);
+            setSelectedInterests(profileData?.interests);
+        } else 
+            setDefaultInterests([])
+
         if (profileData?.file_name) {
             getImage(profileData?.file_name, setSelectAvatar, setLoading);
         }
@@ -323,7 +324,6 @@ function EditProfile({profileData}:any) {
     }
 
     const handleSubmit = async () => {
-        console.log(birthDate)
         try {
             let latitude:any = 0;
             let longitude:any = 0;
@@ -342,7 +342,8 @@ function EditProfile({profileData}:any) {
             bio.length <= 250 &&
             (preview || selectAvatar) &&
             latitude && 
-            longitude;
+            longitude &&
+            selectedInterests.length;
  
             if (isValid) {  
                 const access_token = await postData({
@@ -354,7 +355,8 @@ function EditProfile({profileData}:any) {
                     gender,
                     birthDate,
                     latitude,
-                    longitude
+                    longitude,
+                    selectedInterests
                 });
                 if (file != null) {
                     const data = new FormData();
@@ -485,17 +487,18 @@ function EditProfile({profileData}:any) {
                 <Form.Item 
                     name="interests"
                 >
-                    <Select
+                    {defaultInterests&& <Select
                         mode="multiple"
                         placeholder="Select interests"
                         style={{ width: '100%' }}
                         value={selectedInterests}
+                        defaultValue={defaultInterests}
                         onChange={setSelectedInterests}
                     >
                         {allInterests.map(interest => (
-                            <Option key={interest} value={interest}>{interest}</Option>
+                            <Option key={interest.id} value={interest.id}>{interest.interest}</Option>
                         ))}
-                    </Select>
+                    </Select> }
                 </Form.Item>
                 <p className="font-bold text-l pl-3">Bio:</p>
                 <Form.Item

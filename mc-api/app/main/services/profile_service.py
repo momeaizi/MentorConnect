@@ -118,7 +118,6 @@ def get_profile_by_username_service(user_id, username):
         return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
     
 
-
 def get_profile_service(user_id):
     try:
         if not user_id:
@@ -126,7 +125,7 @@ def get_profile_service(user_id):
 
         select_query = """
             SELECT
-u.                id,
+                u.id,
                 u.username,
                 u.email,
                 u.first_name,
@@ -136,13 +135,19 @@ u.                id,
                 u.birth_date,
                 ST_X(ST_AsText(u.geolocation)) AS longitude,
                 ST_Y(ST_AsText(u.geolocation)) AS latitude,
-                ARRAY_AGG(p.file_name) AS pictures
+                ARRAY_AGG(p.file_name) AS pictures,
+                ARRAY_AGG (i.id) AS interests
             FROM users u
             LEFT JOIN pictures p ON u.id = p.user_id
+            LEFT JOIN 
+                user_interests ui ON u.id = ui.user_id
+            LEFT JOIN 
+                interests i ON ui.interest_id = i.id
             WHERE u.id = %s
             GROUP BY u.id
         """
-        profile = execute_query(select_query, params=(str(user_id)), fetch_one=True)
+        profile = execute_query(select_query, params=(str(user_id),), fetch_one=True)
+
 
         profile['birth_date'] = (
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
@@ -151,12 +156,12 @@ u.                id,
         profile['gender'] = (True) if profile.get('gender', None) == 'Male' else (False)
 
         profile_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
-        image = execute_query(profile_query, params=(str(user_id)), fetch_one=True)
+        image = execute_query(profile_query, params=(user_id,), fetch_one=True)
         if image:
             profile['file_name'] = image.get('file_name')
 
         images_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = FALSE;"
-        images = execute_query(images_query, params=(str(user_id)), fetch_all=True)
+        images = execute_query(images_query, params=(user_id,), fetch_all=True)
         
         if images:
             images_names = [item['file_name'] for item in images]
@@ -165,7 +170,8 @@ u.                id,
 
         return jsonify({'status': 'success', 'data': profile}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
+        logger.info(f"Error retrieving notifications: {str(e)}")
+        return jsonify({'status': 'error', 'message': "something went wrong"}), 500
     
 #TODO CHANGE VALUES TO ALL DATA
 def update_profile_service(data, user):
@@ -188,7 +194,21 @@ def update_profile_service(data, user):
             RETURNING *
         """
         updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
-        logger.info(updated_profile)
+        
+        delete_query = """
+                DELETE FROM user_interests
+                WHERE user_id = %s;
+            """
+        execute_query(delete_query, params=(user_id,))
+
+        if data.get('interests', None):
+            insert_query = f"""
+                INSERT INTO user_interests (user_id, interest_id)
+                VALUES {f'({user_id}, %s), ' * (len(data['interests']) -1)} {(f'({user_id}, %s)')};
+            """
+            execute_query(insert_query, params=tuple(data['interests']))
+
+
         access_token = create_custom_access_token(identity={
             "id": user_id,
             "email": data.get('email'),
@@ -198,7 +218,8 @@ def update_profile_service(data, user):
         })
         return jsonify(access_token=access_token), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error updating user: {str(e)}"}), 500
+        logger.info(f"Error updating user: {str(e)}")
+        return jsonify({'message': "something went wrong"}), 500
 
 def handle_profile_picture_service(user, profile_file):
     if not profile_file:
