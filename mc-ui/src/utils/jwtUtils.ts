@@ -6,7 +6,7 @@ export interface CustomJwtPayload extends JwtPayload {
     username: string;
     email: string;
     is_verified: boolean;
-    is_profile_complete?: boolean;
+    is_complete?: boolean;
 }
   
   export const isTokenExpired = (payload: CustomJwtPayload | null): boolean => {

@@ -70,6 +70,7 @@ class ProfileSuggestionsService():
                     common_tags c ON u.id = c.user_id
                 WHERE 
                     u.id != %s
+                    AND u.is_complete = TRUE
                     AND u.gender != (SELECT gender FROM user_location)
                     AND NOT EXISTS (
                         SELECT 1

@@ -4,6 +4,9 @@ import { MapPinIcon } from 'lucide-react';
 import { Profile } from '../types/profile';
 import { useState } from 'react';
 import { Modal } from 'antd';
+import { getLastSeen } from '../utils/getLastSeen';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -52,13 +55,14 @@ const getLikeButtonProps = (isLikedByCurrentUser: boolean, hasLikedCurrentUser: 
 
 
 export default function UserProfile({ profile, currentUserId }: UserProfileProps) {
-
   const initials = getInitials(profile.firstName, profile.lastName);
   const avatarColor = stringToColor(profile.username);
 
   const [isLikedByCurrentUser, setIsLikedByCurrentUser] = useState(false);
   const hasLikedCurrentUser = true;
   const [likeButtonProps, setLikeButtonProps] = useState(getLikeButtonProps(isLikedByCurrentUser, hasLikedCurrentUser));
+
+  const navigate = useNavigate();
 
 
 
@@ -73,12 +77,10 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
         setLikeButtonProps(getLikeButtonProps(false, hasLikedCurrentUser));
         console.log(profileId);
       },
-      onCancel: () => {
-        console.log('Action canceled');
-      },
+      onCancel: () => { },
     });
   };
-  
+
 
 
   const onLike = async (profileId: number) => {
@@ -91,16 +93,37 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
     console.log(profileId, currentUserId);
   }
 
-  
+
+  const onBlock = async () => {
+    Modal.confirm({
+      title: 'Confirm Action',
+      content: 'Are you sure you want to block this profile?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        handleBlock();
+      },
+      onCancel: () => { },
+    });
+  }
+
+  const handleBlock = async () => {
+    try {
+      const res = await api.post(`/users/${profile.id}/block`);
+
+      navigate(0);
+
+    } catch (error) { }
+  }
 
   return (
     <Card style={{ maxWidth: 600, margin: '0 auto' }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
         <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
           <Title level={4}>{profile.username}</Title>
-          <Badge 
-            status={profile.is_logged_in ? "success" : "default"} 
-            text={profile.is_logged_in ? "Online" : `Last seen: ${profile.last_logged_in}`} 
+          <Badge
+            status={profile.is_logged_in ? "success" : "default"}
+            text={profile.is_logged_in ? "Online" : getLastSeen(profile.last_logged_in)}
           />
         </Space>
 
@@ -113,7 +136,7 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
             </Avatar>
           )}
           <Title level={3}>{`${profile.firstName} ${profile.lastName}`}</Title>
-          
+
           <Space size="large">
             <Space direction="vertical" align="center">
               <Text strong>Fame Rating</Text>
@@ -156,7 +179,7 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
             </Button>
           </Tooltip>
           {profile.conversationId && <Button className="shadow-none" icon={<MessageOutlined />}>Message</Button>}
-          <Button className="shadow-none" icon={<StopOutlined />} danger>Block</Button>
+          <Button className="shadow-none" icon={<StopOutlined />} onClick={() => onBlock()} danger>Block</Button>
           <Button className="shadow-none" icon={<FlagOutlined />}>Report</Button>
         </Space>
 

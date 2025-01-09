@@ -85,11 +85,11 @@ export default function UserProfilePage() {
     notFound ?
       <NotFound />
       :
-      <Layout style={{ background: '#1a1b27', minHeight: '100vh' }}>
+      // <Layout style={{ background: '#1a1b27' }}>
         <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
           {renderContent()}
         </Content>
-      </Layout>
+      // </Layout>
   )
 }
 

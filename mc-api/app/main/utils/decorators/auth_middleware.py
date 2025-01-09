@@ -21,7 +21,7 @@ def token_required(f):
             select_query = "SELECT * FROM users WHERE id = %s"
             current_user = execute_query(select_query, params=(data['id'],) ,fetch_one=True)
 
-            if current_user is None:
+            if not current_user:
                 return {
                 "message": "Invalid Authentication token!",
                 "error": "Unauthorized"
@@ -32,6 +32,7 @@ def token_required(f):
                 "error": "Unverified"
             }, 401
         except Exception as e:
+            logger.error(e)
             return {
                 "message": "Something went wrong",
             }, 500

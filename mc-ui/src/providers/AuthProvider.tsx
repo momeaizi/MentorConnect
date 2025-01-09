@@ -8,7 +8,7 @@ interface User {
     username?: string;
     email?: string;
     is_verified?: boolean;
-    is_profile_complete?: boolean;
+    is_complete?: boolean;
 }
 
 
@@ -40,8 +40,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
     const [user, setUser] = useState<User | null>(() => {
         if (!payload) return null;
-        const { id, username, email, is_verified, is_profile_complete } = payload;
-        return { id, username, email, is_verified, is_profile_complete };
+        const { id, username, email, is_verified, is_complete } = payload;
+        return { id, username, email, is_verified, is_complete };
     });
     const navigate = useNavigate();
 
@@ -60,8 +60,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             const decodedToken = jwtDecode<CustomJwtPayload>(token);
             setPayload(decodedToken);
-            const { id, username, email, is_verified, is_profile_complete } = decodedToken;
-            setUser({ id, username, email, is_verified, is_profile_complete });
+            const { id, username, email, is_verified, is_complete } = decodedToken;
+            setUser({ id, username, email, is_verified, is_complete });
         } catch (err) {
             setPayload(null);
             setUser(null);

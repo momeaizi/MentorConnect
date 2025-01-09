@@ -41,7 +41,6 @@ def get_profile_by_username_service(user_id, username):
                     ARRAY_AGG(i.interest) AS interests,
                     ARRAY_AGG(p.file_name) AS pictures,
                     u.geolocation,
-                    -- Fame Rating Calculation
                     (
                         COALESCE((
                             SELECT COUNT(*)
@@ -71,6 +70,15 @@ def get_profile_by_username_service(user_id, username):
                     pictures p ON p.user_id = i.id
                 WHERE 
                     u.username = %s -- Target user's username
+                    AND u.is_complete = TRUE
+                    AND u.id != %s
+                    AND NOT EXISTS (
+                        SELECT 1
+                        FROM blocked_users b
+                        WHERE 
+                            (b.blocker_id = %s AND b.blocked_id = u.id)
+                            OR (b.blocker_id = u.id AND b.blocked_id = %s)
+                    )
                 GROUP BY 
                     u.id
             )
@@ -107,7 +115,7 @@ def get_profile_by_username_service(user_id, username):
                 t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
                 t.latitude, t.age, t.interests, t.geolocation, t.pictures;
         """
-        profile = execute_query(select_query, params=(user_id, username, user_id), fetch_one=True)
+        profile = execute_query(select_query, params=(user_id, username, user_id, user_id, user_id, user_id), fetch_one=True)
 
 
         if not profile:
@@ -126,7 +134,7 @@ def get_profile_service(user_id):
 
         select_query = """
             SELECT
-u.                id,
+                u.id,
                 u.username,
                 u.email,
                 u.first_name,
@@ -142,7 +150,7 @@ u.                id,
             WHERE u.id = %s
             GROUP BY u.id
         """
-        profile = execute_query(select_query, params=(str(user_id)), fetch_one=True)
+        profile = execute_query(select_query, params=(user_id,), fetch_one=True)
 
         profile['birth_date'] = (
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
@@ -151,12 +159,12 @@ u.                id,
         profile['gender'] = (True) if profile.get('gender', None) == 'Male' else (False)
 
         profile_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
-        image = execute_query(profile_query, params=(str(user_id)), fetch_one=True)
+        image = execute_query(profile_query, params=(user_id,), fetch_one=True)
         if image:
             profile['file_name'] = image.get('file_name')
 
         images_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = FALSE;"
-        images = execute_query(images_query, params=(str(user_id)), fetch_all=True)
+        images = execute_query(images_query, params=(user_id,), fetch_all=True)
         
         if images:
             images_names = [item['file_name'] for item in images]
@@ -247,7 +255,7 @@ def handle_other_pictures_service(user, request):
 
     try:
         # select_query = "SELECT file_name FROM pictures WHERE user_id = %s AND is_profile = FALSE"
-        # existing_file = execute_query(select_query, params=(str(user_id)), fetch_all=True)
+        # existing_file = execute_query(select_query, params=(user_id,), fetch_all=True)
         # if existing_file:
         #     logger.info(existing_file)
         #     images_names = [item['file_name'] for item in existing_file]

@@ -10,8 +10,8 @@ def create_custom_access_token(identity):
     now = datetime.utcnow()
     payload = {
         **identity,
-        "exp": (now + timedelta(hours=1)).timestamp(),
-        "iat": now.timestamp(),
+        "exp": (now + timedelta(days=4)).timestamp(),
+        "iat": now.timestamp() - 2,
         "auth_time": now.timestamp() - 2,
         "jti": str(uuid.uuid4()),
         "sub": str(uuid.uuid4()),
