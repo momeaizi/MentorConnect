@@ -59,6 +59,13 @@ body {
   border-radius: 50%;
 }
 
+.button-component.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+
 ::-webkit-scrollbar {
   width: 3px;
 }

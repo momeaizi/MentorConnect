@@ -145,10 +145,8 @@ def get_profile_service(user_id):
                 u.birth_date,
                 ST_X(ST_AsText(u.geolocation)) AS longitude,
                 ST_Y(ST_AsText(u.geolocation)) AS latitude,
-                ARRAY_AGG(p.file_name) AS pictures,
                 ARRAY_AGG (i.id) AS interests
             FROM users u
-            LEFT JOIN pictures p ON u.id = p.user_id
             LEFT JOIN 
                 user_interests ui ON u.id = ui.user_id
             LEFT JOIN 
@@ -157,6 +155,15 @@ def get_profile_service(user_id):
             GROUP BY u.id
         """
         profile = execute_query(select_query, params=(user_id,), fetch_one=True)
+
+        # tags_query = f"""
+        #     SELECT interest_id
+        #     FROM user_interests 
+        #     WHERE user_id = %s;
+        # """
+        # tags = execute_query(tags_query, params=(user_id,), fetch_all=True)
+        # result = [item["interest_id"] for item in tags]
+        # profile['tags'] = result
 
         profile['birth_date'] = (
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''

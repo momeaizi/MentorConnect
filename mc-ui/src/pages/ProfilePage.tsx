@@ -39,7 +39,7 @@ interface ProfileData {
     selectedInterests:number[];
 }
   
-export async function postData(data: ProfileData) {
+export async function postData(data: ProfileData, openNotification:any, setUpdateLoading:any) {
     try {
         const response = await api.patch('profiles/', {
             "first_name": data?.firstName,
@@ -58,6 +58,10 @@ export async function postData(data: ProfileData) {
 
         return await response.data.access_token;
     } catch (error) {
+        setUpdateLoading(false)
+
+        openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+
         console.error('Error posting data:', error);
         throw error;
     }
@@ -76,19 +80,22 @@ export async function postImage(formData: any) {
     }
 }
 
-export async function postImages(formData: any) {
+export async function postImages(formData: any, openNotification:any) {
     try {
         const response = await api.post('profiles/pictures', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
+
+        openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
+
         return response;
     } catch (error) {
+        openNotification("Upload failed", <InfoCircleOutlined style={{ color: 'red' }}/>)
         console.error("----> ", error)
     }
 }
-
 export async function getImage(fileName:string, setSelectAvatar:any ,setLoading:any) {
     api.get(`profiles/get_image/${fileName}`, { responseType: 'blob' })
     .then((response:any) => {
@@ -194,6 +201,7 @@ function EditProfile({profileData}:any) {
     const [form] = Form.useForm();
     const [gender, setGender] = useState<boolean>(profileData?.gender);
     const [loading, setLoading] = useState<boolean>(true);
+    const [updateLoading, setUpdateLoading] = useState<boolean>(false);
     const [selectAvatar, setSelectAvatar] = useState<string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [api, contextHolder] = notification.useNotification();
@@ -344,7 +352,8 @@ function EditProfile({profileData}:any) {
             longitude &&
             selectedInterests.length;
  
-            if (isValid) {  
+            if (isValid) { 
+                setUpdateLoading(true)
                 const access_token = await postData({
                     firstName,
                     lastName,
@@ -356,7 +365,7 @@ function EditProfile({profileData}:any) {
                     latitude,
                     longitude,
                     selectedInterests
-                });
+                }, openNotification, setUpdateLoading);
                 if (file != null) {
                     const data = new FormData();
                     data.append('profile', file);
@@ -364,6 +373,7 @@ function EditProfile({profileData}:any) {
                 }
                 if (access_token)
                     login(access_token)
+                setUpdateLoading(false)
                 openNotification("The profile is updated", <CheckCircleOutlined style={{ color: 'green' }}/>)
             }
             else 
@@ -546,7 +556,7 @@ function EditProfile({profileData}:any) {
                     <Button
                         text="Save Changes"
                         className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer"
-                        // disabled={!formValid}
+                        disabled={updateLoading}
                         onclick={handleSubmit}
                     >
                     </Button>
@@ -561,8 +571,9 @@ function EditProfile({profileData}:any) {
 function UploadPictures({profileData}:any) {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState<any[]>([]);
+    const [updateLoading, setUpdateLoading] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
-
+    const [api, contextHolder] = notification.useNotification();
 
     const handleChange = ({ fileList }: any) => setFileList(fileList);
   
@@ -572,24 +583,38 @@ function UploadPictures({profileData}:any) {
         return true;
     };
 
+    const openNotification = (message:string, icon:any) => {
+        api.open({
+          message: message,
+          icon: icon,
+        });
+    };
+
     const handleSubmit = async () => {
         const formData = new FormData();
         fileList.forEach((file, index) => {
             formData.append(`picture${index + 1}`, file.originFileObj);
         });
+
+        setUpdateLoading(true)
         try {
-            const response:any = await postImages(formData)
+            const response:any = await postImages(formData, openNotification)
             if (response) {
                 if (response?.ok) {
                     const result = await response.json();
                     console.log('Upload successful:', result);
-                    setFileList([]); // Clear the file list after successful upload
-                } else
+                    
+                    openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
+                    
+                    setFileList([]);
+                } else {
                     console.error('Upload failed:', await response.text());
+                }
             }
         } catch (error) {
             console.error('Error during upload:', error);
         }
+        setUpdateLoading(false)
     };
 
     const normFile = (e: any) => {
@@ -603,7 +628,7 @@ function UploadPictures({profileData}:any) {
         const files =  imageNames.map(async (fileName) => {
             try {
                 setLoading(true);
-                const url = `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${fileName}`;
+                const url = `http://localhost:5000/api/profiles/get_image/${fileName}`;
                 return {
                     uid: fileName,
                     name: 'default.png',
@@ -632,6 +657,7 @@ function UploadPictures({profileData}:any) {
 
     return (
         <div className="w-full flex flex-col gap-4">
+            {contextHolder}
             <h1 className="font-bold text-2xl"> Pictures:</h1>
             <Form
                 form={form}
@@ -653,6 +679,7 @@ function UploadPictures({profileData}:any) {
                         onChange={handleChange}
                         beforeUpload={beforeUpload}
                         maxCount={5}
+                        accept="image/*"
                         showUploadList={{
                             showPreviewIcon: false,
                             showRemoveIcon: true,
@@ -672,6 +699,8 @@ function UploadPictures({profileData}:any) {
 
                 <Form.Item>
                     <Button
+
+                        disabled={updateLoading}
                         onclick={handleSubmit}
                         text="Save Changes" className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer">
                     </Button>

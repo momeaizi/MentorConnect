@@ -132,12 +132,13 @@ def reset_password_service(token, new_password):
 
 def update_password_service(user, data):
     try:
+        user_id = user.get('id', None)
         select_query = "SELECT * FROM users WHERE id = %s"
         user = execute_query(select_query, params=(str(user.get('id', None)),) ,fetch_one=True)
         if user and bcrypt.check_password_hash( user.get('password_hash',None), data.get('password')):
             new_password_hash = bcrypt.generate_password_hash(data.pop('new_password')).decode('utf-8')
-            update_password_query = f"UPDATE  users SET password_hash = %s RETURNING *"
-            new_user = execute_query(update_password_query, params=(new_password_hash,), fetch_one=True)
+            update_password_query = f"UPDATE  users SET password_hash = %s WHERE id = %s RETURNING *"
+            new_user = execute_query(update_password_query, params=(new_password_hash,user_id,), fetch_one=True)
         else:
             return jsonify(status='error', message="passwrod is wrong"), 400
         return jsonify(status='success', message=new_user), 200

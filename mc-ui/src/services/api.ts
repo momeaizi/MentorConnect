@@ -2,7 +2,7 @@ import axios from 'axios';
 import { CustomJwtPayload, isTokenExpired } from '../utils/jwtUtils';
 import { jwtDecode } from 'jwt-decode';
 
-const baseURL = 'https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api';
+const baseURL = 'http://localhost:5000/api';
 
 
 export const publicApi = axios.create({
