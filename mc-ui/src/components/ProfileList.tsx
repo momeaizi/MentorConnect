@@ -15,47 +15,39 @@ interface Profile {
     lastName: string;
     age: number;
     fameRating: number;
-    location: string;
     interests: string[];
+    commonInterestsCount: number;
     image: string;
-    gender: 'male' | 'female';
+    gender: string;
 }
 
-interface User {
-    id: number
-    firstName: string
-    lastName: string
-    age: number
-    location: string
-    interests: string[]
-    gender: 'male' | 'female'
-    
-}
-
-const currentUser: User = {
-    id: 0,
-    firstName: "Mohamed Taha",
-    lastName: "Meaizi",
-    age: 30,
-    location: "New York",
-    interests: ["start", "top", "look"],
-    gender: "male"
-}
 
 
 const ProfileList: React.FC = () => {
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
-    const [ageRange, setAgeRange] = useState<[number, number]>([18, 50]);
-    const [fameRange, setFameRange] = useState<[number, number]>([0, 100]);
-    const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-    const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
+
     const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
-    const [sortCriteria, setSortCriteria] = useState<string>('');
     const [allInterests, setAllInterests] = useState<string[]>([]);
-    const [allLocations, setAllLocations] = useState<string[]>([]);
+
     const [loading, setLoading] = useState<boolean>(true);
+    
+    // sliders states
+    const [minAge, setMinAge] = useState<number>(18);
+    const [maxAge, setMaxAge] = useState<number>(100);
+    const [ageRange, setAgeRange] = useState<[number, number]>([minAge, maxAge]);
+    const [minDistance, setMinDistance] = useState<number>(0);
+    const [maxDistance, setMaxDistance] = useState<number>(500);
+    const [distanceRange, setDistanceRange] = useState<[number, number]>([minDistance, maxDistance]);
+    const [maxFameRating, setMaxFameRating] = useState<number>(100);
+    const [fameRange, setFameRange] = useState<[number, number]>([0, maxFameRating]);
+    
+    // sort states
+    const [sortCriteria, setSortCriteria] = useState<string>('');
+    const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
+
+    
+    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
     const navigate = useNavigate();
 
@@ -65,10 +57,6 @@ const ProfileList: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             const fetchedProfiles: Profile[] = await fetchProfiles();
-            setAllInterests(Array.from(new Set(fetchedProfiles.flatMap(profile => profile.interests))));
-            setAllLocations(Array.from(new Set(fetchedProfiles.map(profile => profile.location))));
-            // applyFilters();
-            // handleSort(sortCriteria);
         }
         loadData();
     }, [])
@@ -85,15 +73,40 @@ const ProfileList: React.FC = () => {
                 lastName: item.last_name,
                 age: Math.floor(item.age),
                 fameRating: item.fame_rating,
-                location: item.location,
                 interests: item.interests.filter((interest: string | null) => (interest)),
-                image: item.image,
+                image: (item.image) ? `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${item.image}` : null,
                 gender: item.gender,
                 distance: Math.floor(item.distance),
                 username: item.username,
+                commonInterestsCount: item.common_interests_count,
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
+
+            const maxFameRating = Math.max(...profiles.map(profile => profile.fameRating));
+
+            setMaxFameRating(maxFameRating);
+    
+            if (fetchedProfiles.length > 0) {
+                const ages = fetchedProfiles.map((profile: Profile) => profile.age);
+                const minAge = Math.min(...ages);
+                const maxAge = Math.max(...ages);
+                setMinAge(minAge);
+                setMaxAge(maxAge);
+                setAgeRange([minAge, maxAge]);
+
+
+                const distances = fetchedProfiles.map((profile: Profile) => profile.distance);
+                const minDistance = Math.min(...distances);
+                const maxDistance = Math.max(...distances);
+                setMinDistance(minDistance);
+                setMaxDistance(maxDistance);
+                setDistanceRange([minDistance, maxDistance]);
+    
+            }
+
+            setAllInterests(Array.from(new Set(fetchedProfiles.flatMap((profile: Profile) => profile.interests))));
+        
             return fetchedProfiles;
         } catch (error) {
             console.log(error);
@@ -108,20 +121,15 @@ const ProfileList: React.FC = () => {
 
         let filtered = profiles.filter(profile =>
             profile.age >= ageRange[0] && profile.age <= ageRange[1] &&
+            profile.distance >= distanceRange[0] && profile.distance <= distanceRange[1] &&
             profile.fameRating >= fameRange[0] && profile.fameRating <= fameRange[1] &&
-            (selectedLocation ? profile.location === selectedLocation : true) &&
             (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest)))
         )
 
+        setSortCriteria('commonTags');
+
         filtered.sort((a, b) => {
-            if (a.location === currentUser.location && b.location !== currentUser.location) return -1;
-            if (b.location === currentUser.location && a.location !== currentUser.location) return 1;
-
-            const aCommonTags = a.interests.filter(interest => currentUser.interests.includes(interest)).length;
-            const bCommonTags = b.interests.filter(interest => currentUser.interests.includes(interest)).length;
-            if (aCommonTags !== bCommonTags) return bCommonTags - aCommonTags;
-
-            return b.fameRating - a.fameRating;
+            return a.commonInterestsCount - b.commonInterestsCount;
         });
 
         setFilteredProfiles(filtered);
@@ -130,9 +138,8 @@ const ProfileList: React.FC = () => {
     }
 
     const resetFilters = () => {
-        setAgeRange([18, 50])
-        setFameRange([0, 100])
-        setSelectedLocation(null)
+        setAgeRange([minAge, maxAge])
+        setFameRange([0, maxFameRating])
         setSelectedInterests([])
         setSortOrder('descend')
         setLikedProfiles([])
@@ -145,14 +152,10 @@ const ProfileList: React.FC = () => {
         setSortCriteria(value);
         setFilteredProfiles(prevProfiles => {
             const sorted = [...prevProfiles].sort((a, b) => {
-                if (value === 'age') return a.age - b.age;
-                if (value === 'fameRating') return b.fameRating - a.fameRating;
-                if (value === 'location') return a.location.localeCompare(b.location);
-                if (value === 'commonTags') {
-                    const aCommonTags = a.interests.filter(interest => currentUser.interests.includes(interest)).length;
-                    const bCommonTags = b.interests.filter(interest => currentUser.interests.includes(interest)).length;
-                    return bCommonTags - aCommonTags;
-                }
+                if (value === 'age') return b.age - a.age;
+                if (value === 'fameRating') return a.fameRating - b.fameRating;
+                if (value === 'distance') return b.distance - a.distance;
+                if (value === 'commonTags') return a.commonInterestsCount - b.commonInterestsCount;
                 return 0;
             });
             return sortOrder === 'ascend' ? sorted : sorted.reverse();
@@ -182,10 +185,21 @@ const ProfileList: React.FC = () => {
                             <h3 className="text-lg font-medium mb-2 text-primary">Age Range</h3>
                             <Slider
                                 range
-                                min={18}
-                                max={80}
+                                min={minAge}
+                                max={maxAge}
                                 value={ageRange}
                                 onChange={(value: number[]) => setAgeRange(value as [number, number])}
+                                className="text-primary"
+                            />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-medium mb-2 text-primary">Distance Range</h3>
+                            <Slider
+                                range
+                                min={minDistance}
+                                max={maxDistance}
+                                value={distanceRange}
+                                onChange={(value: number[]) => setDistanceRange(value as [number, number])}
                                 className="text-primary"
                             />
                         </div>
@@ -194,25 +208,11 @@ const ProfileList: React.FC = () => {
                             <Slider
                                 range
                                 min={0}
-                                max={100}
+                                max={maxFameRating}
                                 value={fameRange}
                                 onChange={(value: number[]) => setFameRange(value as [number, number])}
                                 className="text-primary"
                             />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Location</h3>
-                            <Select
-                                placeholder="Select location"
-                                style={{ width: '100%' }}
-                                value={selectedLocation}
-                                onChange={setSelectedLocation}
-                                allowClear
-                            >
-                                {allLocations.map(location => (
-                                    <Option key={location} value={location}>{location}</Option>
-                                ))}
-                            </Select>
                         </div>
                         <div>
                             <h3 className="text-lg font-medium mb-2 text-primary">Interests</h3>
@@ -250,7 +250,7 @@ const ProfileList: React.FC = () => {
                 <div className="flex justify-end items-center mb-4">
                     <Radio.Group value={sortCriteria} onChange={(e) => handleSort(e.target.value)}>
                         <Radio.Button value="age">Age</Radio.Button>
-                        <Radio.Button value="location">Location</Radio.Button>
+                        <Radio.Button value="distance">Distance</Radio.Button>
                         <Radio.Button value="fameRating">Fame Rating</Radio.Button>
                         <Radio.Button value="commonTags">Common Tags</Radio.Button>
                     </Radio.Group>

@@ -1,10 +1,10 @@
 from app.main.utils.jwt import create_custom_access_token
 from flask import current_app as app
 from app.main.utils.exceptions import UniqueConstraintError
-from app.main.utils.mail import send_verification_email
+from app.main.utils.mail import send_verification_email, send_email
 from app.main.utils.password import update_password
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from app.main import bcrypt, mail, Message
+from app.main import bcrypt
 from app.db.sql_executor import execute_query
 from loguru import logger
 from flask import jsonify
@@ -18,7 +18,6 @@ def register_user(data):
         new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
         if not new_user.get('is_verified', None):
             return jsonify({'status': 'error', 'message': 'Verify Your Email', 'email': new_user.get('email')}), 401
-        # send_verification_email(new_user.get('email', None), new_user.get('id', None)) TODO remove this
         access_token = create_custom_access_token(identity={
             "id": new_user.get('id', None),
             "email": new_user.get('email', None),
@@ -44,7 +43,7 @@ def verify_acount_service(data):
         if user.get('is_verified', None):
             return jsonify({"message": "This email address has already been verified. No further action is required."}), 409
         send_verification_email(user.get('email', None), user.get('id', None))
-        return jsonify({'message': 'Send Verification Email'}), 201
+        return jsonify({'message': 'Verification email sent successfully'}), 201
     except UniqueConstraintError as e:
         return jsonify({
             "status": "error",
@@ -96,18 +95,18 @@ def verify_email_service(token):
         return jsonify({"message": "Invalid token. Please request a new verification link."}), 404
 
 def forgot_password_service(email):
-    select_query = "SELECT * FROM users WHERE email = %s"
-    user = execute_query(select_query, params=(email,) ,fetch_one=True)
-    if not user:
-        return jsonify({"message": "User not found"}), 404
-    
-    token = serializer.dumps(email, salt='password-reset-salt')
-    reset_url = f"{app.config['FRONTEND_URL']}/reset-password/{token}"
-
     try:
-        msg = Message("Password Reset Request", recipients=[email])
-        msg.body = f"Click the link to reset your password: {reset_url}"
-        mail.send(msg)
+        select_query = "SELECT * FROM users WHERE email = %s"
+        user = execute_query(select_query, params=(email,) ,fetch_one=True)
+        if not user:
+            return jsonify({"message": "User not found"}), 404
+        
+        token = serializer.dumps(email, salt='password-reset-salt')
+        reset_url = f"{app.config['FRONTEND_URL']}/reset-password/{token}"
+
+        body = f"Click the link to reset your password: {reset_url}"
+        logger.info(email)
+        send_email("Password Reset Request", body, [email])
         return jsonify({"message": "Password reset link sent to your email"}), 200
     except Exception as e:
         logger.error(f"Failed to send email: {e}")

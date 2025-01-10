@@ -15,8 +15,10 @@ import ChatPage from '../pages/Chat';
 import HistoryPage from '../pages/History';
 import FavoriePage from '../pages/Favorie';
 import ProfilePage from '../pages/ProfilePage';
+import { useAuth } from '../providers/AuthProvider.tsx';
 
 const AppRoutes = () => {
+  const { payload } = useAuth();
   return (
     <Routes>
       <Route element={<PublicRoute />}>
@@ -77,8 +79,8 @@ const AppRoutes = () => {
         <Route
           path="/profile"
           element={
-            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
-              <Navbar />
+            <div className={`h-screen w-screen ${(payload?.is_complete) ? "grid grid-cols-1 grid-rows-[72px_1fr]" : ""} overflow-hidden`}>
+              {payload?.is_complete && <Navbar />}
               <div className='p-0 h-full w-screen overflow-x-hidden'>
                 <ProfilePage />
               </div>

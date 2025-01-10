@@ -35,14 +35,13 @@ def seed_users(n=100):
             random.choice(['Male', 'Female']),
             faker.text(max_nb_chars=200),
             faker.date_of_birth(minimum_age=18, maximum_age=80),
-            random.randint(0, 100),
             faker.latitude(),
             faker.longitude()
         ))
 
     cursor.executemany("""
-        INSERT INTO users (username, email, password_hash, first_name, last_name, gender, bio, birth_date, fame_rating, geolocation, is_verified)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, ST_Point(%s, %s), true)
+        INSERT INTO users (username, email, password_hash, first_name, last_name, gender, bio, birth_date, geolocation, is_verified, is_complete)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, ST_Point(%s, %s), true, true)
     """, users)
     conn.commit()
 
@@ -83,13 +82,30 @@ def seed_pictures(n=100):
     user_ids = [row[0] for row in cursor.fetchall()]
 
     pictures = [
-        (random.choice(user_ids), 'https://thispersondoesnotexist.com/')
+        (random.choice(user_ids), 'alice_profile_5e808802c5144357aeb301469720773f.jpg')
         for _ in range(n)
     ]
 
     cursor.executemany("""
         INSERT INTO pictures (user_id, file_name)
         VALUES (%s, %s)
+    """, pictures)
+    conn.commit()
+
+
+def seed_profile_pictures(n=100):
+    print("Seeding profile pictures...")
+    cursor.execute("SELECT id FROM users")
+    user_ids = [row[0] for row in cursor.fetchall()]
+
+    pictures = [
+        (user_ids[i], 'alice_profile_5e808802c5144357aeb301469720773f.jpg', True)
+        for i in range(len(user_ids))
+    ]
+
+    cursor.executemany("""
+        INSERT INTO pictures (user_id, file_name, is_profile)
+        VALUES (%s, %s, %s)
     """, pictures)
     conn.commit()
 
@@ -135,7 +151,8 @@ try:
     seed_users(100)
     seed_interests(50)
     seed_user_interests(200)
-    seed_pictures(100)
+    # seed_pictures(100)
+    # seed_profile_pictures(100)
     seed_likes(200)
     seed_views(300)
     print("Data seeding completed successfully!")

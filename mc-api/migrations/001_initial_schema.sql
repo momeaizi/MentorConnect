@@ -10,7 +10,6 @@ CREATE TABLE users (
     gender VARCHAR(50),
     bio TEXT,
     birth_date DATE,
-    fame_rating INT DEFAULT 0,
     is_logged_in BOOLEAN DEFAULT FALSE,
     last_logged_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geolocation geography(POINT, 4326),
@@ -29,16 +28,23 @@ CREATE TABLE  user_interests(
     interest_id INT NOT NULL,
     user_id INT NOT NULL,
     FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE (user_id, interest_id)
 );
 
 CREATE TABLE pictures (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
-    file_name VARCHAR(100) NOT NULL,
+    file_name VARCHAR(100) UNIQUE NOT NULL,
     is_profile BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+CREATE UNIQUE INDEX unique_profile_per_user
+ON pictures (user_id)
+WHERE is_profile = TRUE;
+
 
 CREATE TABLE notifications (
     id SERIAL PRIMARY KEY,

@@ -20,7 +20,7 @@ function App() {
   };
 
   useEffect(() => {
-    const socket = io('http://localhost:5000', { transports: ['websocket'] });
+    const socket = io('https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev', { transports: ['websocket'] });
 
     socket.on('connect', () => {
       console.log('WebSocket connected');

@@ -46,20 +46,38 @@ class ProfileSuggestionsService():
                     u.username,
                     u.email,
                     u.first_name,
-                    'https://thispersondoesnotexist.com/' AS image,
+                    p.file_name AS image,
                     u.last_name,
                     u.gender,
                     u.bio,
                     u.birth_date,
-                    u.fame_rating,
                     u.is_logged_in,
                     ST_X(ST_AsText(u.geolocation)) AS longitude,
                     ST_Y(ST_AsText(u.geolocation)) AS latitude,
                     DATE_PART('year', AGE(u.birth_date)) AS age,
                     ARRAY_AGG(t.interest) AS interests,
-                    c.common_interests_count AS common_interests,
+                    c.common_interests_count,
                     c.common_interests_array,
-                    ST_Distance(u.geolocation, (SELECT geolocation FROM user_location)) / 1000 AS distance
+                    ST_Distance(u.geolocation, (SELECT geolocation FROM user_location)) / 1000 AS distance,
+                    (
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_views pv
+                            WHERE pv.profile_owner_id = u.id
+                        ), 0) + -- Views
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl
+                            WHERE pl.liked_profile_id = u.id
+                        ), 0) + -- Likes
+                        COALESCE((
+                            SELECT COUNT(*)
+                            FROM profile_likes pl1
+                            JOIN profile_likes pl2
+                            ON pl1.liker_id = pl2.liked_profile_id AND pl1.liked_profile_id = pl2.liker_id
+                            WHERE pl1.liked_profile_id = u.id
+                        ), 0) -- Matches
+                    ) AS fame_rating
                 FROM 
                     users u
                 LEFT JOIN 
@@ -68,6 +86,8 @@ class ProfileSuggestionsService():
                     interests t ON ui.interest_id = t.id
                 LEFT JOIN 
                     common_tags c ON u.id = c.user_id
+                LEFT JOIN
+                    pictures p ON p.user_id = u.id AND p.is_profile = TRUE
                 WHERE 
                     u.id != %s
                     AND u.is_complete = TRUE
@@ -87,11 +107,11 @@ class ProfileSuggestionsService():
                             AND l.liked_profile_id = u.id
                     )
                 GROUP BY 
-                    u.id, c.common_interests_count, c.common_interests_array
+                    u.id, c.common_interests_count, c.common_interests_array, p.file_name
                 ORDER BY 
                     distance ASC, -- Prioritize by geographic proximity
                     c.common_interests_count DESC, -- Then by number of common interests
-                    u.fame_rating DESC; -- Finally by fame rating
+                    fame_rating DESC; -- Finally by fame rating
 
             """
             users = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id), fetch_all=True)

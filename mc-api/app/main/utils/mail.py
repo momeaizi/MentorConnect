@@ -13,12 +13,18 @@ def generate_verification_token(id):
     return jwt.encode(payload, app.config['JWT_PRIVATE_KEY'], algorithm=app.config['JWT_ALGORITHM'])
 
 def send_verification_email(email, id):
-    try:
-        token = quote(generate_verification_token(id))
-        verification_link = f"{app.config['FRONTEND_URL']}/verify-email/{token}"
-        msg = Message("Email Verification", recipients=[email])
-        msg.body = f"Click the link to verify your email: {verification_link}"
-        mail.send(msg)
-    except e:
-        logger.info(f"error: {e}")
+    token = quote(generate_verification_token(id))
+    verification_link = f"{app.config['FRONTEND_URL']}/verify-email/{token}"
+    body = f"Click the link to verify your email: {verification_link}"
+    send_email("Email Verification", body, [email])
 
+
+
+
+def send_email(subject, body, recipients):
+    msg = Message(
+        subject,
+        recipients=recipients,
+        body=body,
+    )
+    mail.send(msg)

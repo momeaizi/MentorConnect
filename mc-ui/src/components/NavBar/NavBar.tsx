@@ -152,7 +152,7 @@ function MobileNavBar() {
         <Menu.Item onClick={() => handleNavigation('/notification')}  className='menu-item-top-navbar-pages' icon={<div><Badge count={numberOfNotif} dot><BellOutlined className='antd-icon' /></Badge></div>} key="notif">
           Notification
         </Menu.Item>
-        <Menu.Item className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
+        <Menu.Item onClick={() => handleNavigation('/profile')} className='menu-item-top-navbar-pages' key="view-profile" icon={<UserOutlined className='antd-icon'/>}>
           View Profile
         </Menu.Item>
         <Menu.Item onClick={handleLogout}  className='menu-item-top-navbar-pages' key="logout" icon={<LogoutOutlined className='antd-icon'/>}>
@@ -177,6 +177,7 @@ function MobileNavBar() {
         className="menu-item-top-navbar"
         icon={<FireFilled style={{ color: '#eb2f96' }} className="logo-navbar-fire-icon" />}
         key="logo"
+        onClick={() => navigteTo('/home')}
       >
         <h1 className="flex items-center text-4xl font-bold text-white">
           <span className="italic text-3xl font-extrabold font-sans bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent">

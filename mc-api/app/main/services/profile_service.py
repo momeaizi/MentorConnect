@@ -87,7 +87,7 @@ def get_profile_by_username_service(user_id, username):
                 t.username,
                 t.email,
                 t.first_name,
-                'https://thispersondoesnotexist.com/' AS image,
+                p.file_name AS image,
                 t.pictures,
                 t.last_name,
                 t.gender,
@@ -110,10 +110,12 @@ def get_profile_by_username_service(user_id, username):
                     FROM user_interests ui
                     WHERE ui.user_id = t.user_id
                 )
+            LEFT JOIN
+                pictures p ON p.user_id = t.user_id AND p.is_profile = TRUE
             GROUP BY 
                 t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
                 t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
-                t.latitude, t.age, t.interests, t.geolocation, t.pictures;
+                t.latitude, t.age, t.interests, t.geolocation, t.pictures, p.file_name;
         """
         profile = execute_query(select_query, params=(user_id, username, user_id, user_id, user_id, user_id), fetch_one=True)
 
@@ -125,7 +127,6 @@ def get_profile_by_username_service(user_id, username):
     except Exception as e:
         return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
     
-
 
 def get_profile_service(user_id):
     try:
@@ -144,9 +145,14 @@ def get_profile_service(user_id):
                 u.birth_date,
                 ST_X(ST_AsText(u.geolocation)) AS longitude,
                 ST_Y(ST_AsText(u.geolocation)) AS latitude,
-                ARRAY_AGG(p.file_name) AS pictures
+                ARRAY_AGG(p.file_name) AS pictures,
+                ARRAY_AGG (i.id) AS interests
             FROM users u
             LEFT JOIN pictures p ON u.id = p.user_id
+            LEFT JOIN 
+                user_interests ui ON u.id = ui.user_id
+            LEFT JOIN 
+                interests i ON ui.interest_id = i.id
             WHERE u.id = %s
             GROUP BY u.id
         """
@@ -173,7 +179,8 @@ def get_profile_service(user_id):
 
         return jsonify({'status': 'success', 'data': profile}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
+        logger.info(f"Error retrieving notifications: {str(e)}")
+        return jsonify({'status': 'error', 'message': "something went wrong"}), 500
     
 #TODO CHANGE VALUES TO ALL DATA
 def update_profile_service(data, user):
@@ -196,7 +203,21 @@ def update_profile_service(data, user):
             RETURNING *
         """
         updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
-        logger.info(updated_profile)
+        
+        delete_query = """
+                DELETE FROM user_interests
+                WHERE user_id = %s;
+            """
+        execute_query(delete_query, params=(user_id,))
+
+        if data.get('interests', None):
+            insert_query = f"""
+                INSERT INTO user_interests (user_id, interest_id)
+                VALUES {f'({user_id}, %s), ' * (len(data['interests']) -1)} {(f'({user_id}, %s)')};
+            """
+            execute_query(insert_query, params=tuple(data['interests']))
+
+
         access_token = create_custom_access_token(identity={
             "id": user_id,
             "email": data.get('email'),
@@ -206,7 +227,8 @@ def update_profile_service(data, user):
         })
         return jsonify(access_token=access_token), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error updating user: {str(e)}"}), 500
+        logger.info(f"Error updating user: {str(e)}")
+        return jsonify({'message': "something went wrong"}), 500
 
 def handle_profile_picture_service(user, profile_file):
     if not profile_file:
@@ -228,7 +250,7 @@ def handle_profile_picture_service(user, profile_file):
 
         original_filename = secure_filename(profile_file.filename)
         file_extension = os.path.splitext(original_filename)[1]
-        unique_filename = f"{username}_profile_{uuid.uuid4().hex}{file_extension}"
+        unique_filename = f"{username}_{user_id}_profile{file_extension}"
         save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
         profile_file.save(save_path)
 
@@ -281,7 +303,7 @@ def handle_other_pictures_service(user, request):
                 continue
 
             file_extension = os.path.splitext(secure_filename(file.filename))[1]
-            unique_filename = f"{username}_{file_key}{file_extension}"
+            unique_filename = f"{username}_{user_id}_{file_key}{file_extension}"
             save_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
 
             select_query = "SELECT file_name FROM pictures WHERE user_id = %s AND file_name LIKE %s"
