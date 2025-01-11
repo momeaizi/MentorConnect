@@ -16,6 +16,7 @@ import HistoryPage from '../pages/History';
 import FavoriePage from '../pages/Favorie';
 import ProfilePage from '../pages/ProfilePage';
 import { useAuth } from '../providers/AuthProvider.tsx';
+import '../assets/styles/chat.css'
 
 const AppRoutes = () => {
   const { payload } = useAuth();
@@ -105,8 +106,10 @@ const AppRoutes = () => {
           path="/chat"
           element={
 
-            <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">
-              <Navbar />
+            <div className="chat-app-route-parent overflow-hidden">
+              <div className="chat-app-navbar">
+                <Navbar />
+              </div>
               <ChatPage />
             </div>
 
