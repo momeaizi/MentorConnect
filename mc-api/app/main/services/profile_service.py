@@ -39,7 +39,6 @@ def get_profile_by_username_service(user_id, username):
                     ST_Y(ST_AsText(u.geolocation)) AS latitude,
                     DATE_PART('year', AGE(u.birth_date)) AS age,
                     ARRAY_AGG(i.interest) AS interests,
-                    ARRAY_AGG(p.file_name) AS pictures,
                     u.geolocation,
                     (
                         COALESCE((
@@ -93,8 +92,6 @@ def get_profile_by_username_service(user_id, username):
                 FROM 
                     users u
                 LEFT JOIN 
-                    pictures p ON p.user_id = u.id
-                LEFT JOIN 
                     user_interests ui ON u.id = ui.user_id
                 LEFT JOIN 
                     interests i ON ui.interest_id = i.id
@@ -117,8 +114,7 @@ def get_profile_by_username_service(user_id, username):
                 t.username,
                 t.email,
                 t.first_name,
-                p.file_name AS image,
-                t.pictures,
+                MAX(CASE WHEN p.is_profile THEN p.file_name END) AS image,
                 t.last_name,
                 t.gender,
                 t.bio,
@@ -133,6 +129,7 @@ def get_profile_by_username_service(user_id, username):
                 t.like_status,
                 t.conversation_id,
                 ARRAY_AGG(c.interest) AS common_interests,
+                ARRAY_AGG(p.file_name) FILTER (WHERE p.file_name IS NOT NULL) AS pictures,
                 ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance -- Distance in kilometers
             FROM 
                 target_user t
@@ -143,11 +140,11 @@ def get_profile_by_username_service(user_id, username):
                     WHERE ui.user_id = t.user_id
                 )
             LEFT JOIN
-                pictures p ON p.user_id = t.user_id AND p.is_profile = TRUE
+                pictures p ON p.user_id = t.user_id
             GROUP BY 
                 t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
                 t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
-                t.latitude, t.age, t.interests, t.geolocation, t.pictures, p.file_name, t.like_status, t.conversation_id;
+                t.latitude, t.age, t.interests, t.geolocation, t.like_status, t.conversation_id;
         """
         profile = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id, username, user_id, user_id, user_id, user_id), fetch_one=True)
 
