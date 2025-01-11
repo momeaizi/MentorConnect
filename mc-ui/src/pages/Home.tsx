@@ -1,6 +1,5 @@
 import React from 'react';
 import ProfileList from '../components/ProfileList';
-import Navbar from '../components/NavBar/NavBar';
 
 
 

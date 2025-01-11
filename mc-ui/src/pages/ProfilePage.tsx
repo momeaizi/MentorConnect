@@ -606,10 +606,10 @@ function UploadPictures({profileData}:any) {
                     
                     openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
                     
-                    setFileList([]);
                 } else {
                     console.error('Upload failed:', await response.text());
                 }
+                setFileList([]);
             }
         } catch (error) {
             console.error('Error during upload:', error);
