@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import api from '../services/api';
 import NotFound from './NotFound';
 import { Profile } from '../types/profile';
-import { useAuth } from '../providers/AuthProvider';
 
 const { Content } = Layout;
 
@@ -19,7 +18,6 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [profile, setprofile] = useState<Profile>();
   const { username } = useParams();
-  const { user } = useAuth();
 
   const fetchUser = async () => {
     setLoading(true);
@@ -77,7 +75,7 @@ export default function UserProfilePage() {
     }
 
     return (
-      <>{ profile && user && <UserProfile profile={profile} currentUserId={user.id} onRefresh={fetchUser} /> }</>
+      <>{ profile && <UserProfile profile={profile}  onRefresh={fetchUser} /> }</>
     );
     
   }

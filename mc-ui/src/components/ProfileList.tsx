@@ -55,10 +55,7 @@ const ProfileList: React.FC = () => {
 
 
     useEffect(() => {
-        const loadData = async () => {
-            const fetchedProfiles: Profile[] = await fetchProfiles();
-        }
-        loadData();
+        fetchProfiles();
     }, [])
 
 

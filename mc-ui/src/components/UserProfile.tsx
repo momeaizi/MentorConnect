@@ -2,7 +2,6 @@ import { Card, Avatar, Badge, Button, Typography, Space, Tag, Image, Empty, Tool
 import { HeartOutlined, HeartFilled, MessageOutlined, StopOutlined, FlagOutlined, StarOutlined, ManOutlined, WomanOutlined, PictureOutlined, TagOutlined } from '@ant-design/icons';
 import { MapPinIcon } from 'lucide-react';
 import { Profile } from '../types/profile';
-import { useState } from 'react';
 import { Modal } from 'antd';
 import { getLastSeen } from '../utils/getLastSeen';
 import api from '../services/api';
@@ -13,7 +12,6 @@ const { Title, Text, Paragraph } = Typography;
 
 interface UserProfileProps {
   profile: Profile;
-  currentUserId: number;
   onRefresh: () => void;
 }
 
@@ -56,11 +54,11 @@ const getLikeButtonProps = (profile: Profile) => {
 };
 
 
-export default function UserProfile({ profile, currentUserId, onRefresh }: UserProfileProps) {
+export default function UserProfile({ profile, onRefresh }: UserProfileProps) {
   const initials = getInitials(profile.firstName, profile.lastName);
   const avatarColor = stringToColor(profile.username);
 
-  const [likeButtonProps, setLikeButtonProps] = useState(getLikeButtonProps(profile));
+  const likeButtonProps = getLikeButtonProps(profile);
 
   const navigate = useNavigate();
   const { setSelectedConv } = useStore();
@@ -107,7 +105,7 @@ export default function UserProfile({ profile, currentUserId, onRefresh }: UserP
 
   const handleLike = async () => {
     try {
-      const res = await api.post(`/profiles/${profile.id}/like`);
+      await api.post(`/profiles/${profile.id}/like`);
 
       onRefresh();
 
@@ -116,7 +114,7 @@ export default function UserProfile({ profile, currentUserId, onRefresh }: UserP
 
   const handleRemoveLike = async () => {
     try {
-      const res = await api.delete(`/profiles/${profile.id}/like`);
+      await api.delete(`/profiles/${profile.id}/like`);
 
       onRefresh();
 
@@ -128,7 +126,7 @@ export default function UserProfile({ profile, currentUserId, onRefresh }: UserP
 
   const handleBlock = async () => {
     try {
-      const res = await api.post(`/users/${profile.id}/block`);
+      await api.post(`/users/${profile.id}/block`);
 
       navigate(0);
 
@@ -136,8 +134,11 @@ export default function UserProfile({ profile, currentUserId, onRefresh }: UserP
   }
 
   const handleMessage = () => {
-    setSelectedConv(profile.conversationId);
-    navigate('/chat');
+    if (profile.conversationId) {
+      setSelectedConv(profile.conversationId);
+      navigate('/chat');
+    }
+
   }
 
   return (
@@ -196,7 +197,7 @@ export default function UserProfile({ profile, currentUserId, onRefresh }: UserP
           <Tooltip title={(profile.likeStatus == 'mutual') ? "You've matched!" : profile.likeStatus == 'liked-by' ? "This user likes you" : ""}>
             <Button
               className="shadow-none"
-              onClick={() => onLike(profile.id)}
+              onClick={() => onLike()}
               {...likeButtonProps}
             >
               {likeButtonProps.children}
