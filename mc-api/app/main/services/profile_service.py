@@ -188,6 +188,15 @@ def get_profile_service(user_id):
         """
         profile = execute_query(select_query, params=(user_id,), fetch_one=True)
 
+        # tags_query = f"""
+        #     SELECT interest_id
+        #     FROM user_interests 
+        #     WHERE user_id = %s;
+        # """
+        # tags = execute_query(tags_query, params=(user_id,), fetch_all=True)
+        # result = [item["interest_id"] for item in tags]
+        # profile['tags'] = result
+
         profile['birth_date'] = (
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
         )
