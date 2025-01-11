@@ -5,12 +5,12 @@ import { io } from 'socket.io-client';
 import useStore from './lib/store';
 import { MailOutlined, SoundOutlined } from '@ant-design/icons';
 import './App.css';
-// import { useAuth } from './providers/AuthProvider';
+import { useAuth } from './providers/AuthProvider';
 
 function App() {
   const { setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket, setNumberOfMessage } = useStore();
   const [api, contextHolder] = notification.useNotification();
-  // const {user} = useAuth()
+  const { token } = useAuth()
 
   const openNotification = (message: string, icons: any) => {
     api.open({
@@ -20,7 +20,14 @@ function App() {
   };
 
   useEffect(() => {
-    const socket = io('https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev', { transports: ['websocket'] });
+    const socket = io('http://localhost:5000',
+      {
+        transports: ['websocket'],
+        query: {
+          token: token,
+        },
+      }
+    );
 
     socket.on('connect', () => {
       console.log('WebSocket connected');

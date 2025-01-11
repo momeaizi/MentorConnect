@@ -71,7 +71,7 @@ const ProfileList: React.FC = () => {
                 age: Math.floor(item.age),
                 fameRating: item.fame_rating,
                 interests: item.interests.filter((interest: string | null) => (interest)),
-                image: (item.image) ? `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${item.image}` : null,
+                image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
                 gender: item.gender,
                 distance: Math.floor(item.distance),
                 username: item.username,
@@ -80,7 +80,7 @@ const ProfileList: React.FC = () => {
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
 
-            const maxFameRating = Math.max(...profiles.map(profile => profile.fameRating));
+            const maxFameRating = Math.max(...profiles.map((profile: Profile) => profile.fameRating));
 
             setMaxFameRating(maxFameRating);
     
@@ -106,7 +106,6 @@ const ProfileList: React.FC = () => {
         
             return fetchedProfiles;
         } catch (error) {
-            console.log(error);
             return [];
         } finally {
             setLoading(false);
@@ -130,8 +129,6 @@ const ProfileList: React.FC = () => {
         });
 
         setFilteredProfiles(filtered);
-        console.log("apply filters: ", profiles);
-        console.log("apply filters: ", filteredProfiles);
     }
 
     const resetFilters = () => {

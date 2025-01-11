@@ -93,11 +93,11 @@ def get_profile_by_username_service(user_id, username):
                 FROM 
                     users u
                 LEFT JOIN 
+                    pictures p ON p.user_id = u.id
+                LEFT JOIN 
                     user_interests ui ON u.id = ui.user_id
                 LEFT JOIN 
                     interests i ON ui.interest_id = i.id
-                LEFT JOIN 
-                    pictures p ON p.user_id = i.id
                 WHERE 
                     u.username = %s
                     AND u.is_complete = TRUE

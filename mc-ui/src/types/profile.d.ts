@@ -9,8 +9,6 @@ export interface Profile {
   gender: string;
   image: string | null;
   interests: string[];
-  is_logged_in: boolean;
-  last_logged_in: string;
   lastName: string;
   pictures: string[];
   id: number;

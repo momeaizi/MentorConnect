@@ -628,7 +628,7 @@ function UploadPictures({profileData}:any) {
         const files =  imageNames.map(async (fileName) => {
             try {
                 setLoading(true);
-                const url = `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${fileName}`;
+                const url = `http://localhost:5000/api/profiles/get_image/${fileName}`;
                 return {
                     uid: fileName,
                     name: 'default.png',

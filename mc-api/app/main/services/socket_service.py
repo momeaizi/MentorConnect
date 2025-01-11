@@ -22,9 +22,9 @@ class SocketService:
 
         count = int(redis_client.get(f"room:{room}:user_count") or 0)
 
-        if int(count) == 1:
-            user_service.set_user_logged_in(1)
-        emit('status', {"user_id": 1, "is_logged_in": True, "count": int(count)}, broadcast=True)
+        # if int(count) == 1:
+        user_service.set_user_logged_in(user_id)
+        emit('status', {"user_id": user_id, "is_logged_in": True}, broadcast=True)
 
 
     def handle_new_notification(self, notification_data):
@@ -46,7 +46,7 @@ class SocketService:
 
 
         count = int(redis_client.get(f"room:{room}:user_count") or 0)
-        emit('status', {"user_id": 1, "is_logged_in": False, "count": int(count)}, broadcast=True)
+        emit('status', {"user_id": user_id, "is_logged_in": False}, broadcast=True)
 
-        if count == 0:
-            user_service.set_user_logged_out(1)
+        # if count == 0:
+        user_service.set_user_logged_out(user_id)

@@ -7,11 +7,14 @@ import { getLastSeen } from '../utils/getLastSeen';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../lib/store';
+import { LoggedInData } from '../pages/UserProfilePage';
+import { useEffect, useState } from 'react';
 
 const { Title, Text, Paragraph } = Typography;
 
 interface UserProfileProps {
   profile: Profile;
+  loggedInStatus: LoggedInData;
   onRefresh: () => void;
 }
 
@@ -54,7 +57,7 @@ const getLikeButtonProps = (profile: Profile) => {
 };
 
 
-export default function UserProfile({ profile, onRefresh }: UserProfileProps) {
+export default function UserProfile({ profile, loggedInStatus, onRefresh }: UserProfileProps) {
   const initials = getInitials(profile.firstName, profile.lastName);
   const avatarColor = stringToColor(profile.username);
 
@@ -62,6 +65,7 @@ export default function UserProfile({ profile, onRefresh }: UserProfileProps) {
 
   const navigate = useNavigate();
   const { setSelectedConv } = useStore();
+  
 
 
 
@@ -147,8 +151,8 @@ export default function UserProfile({ profile, onRefresh }: UserProfileProps) {
         <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
           <Title level={4}>{profile.username}</Title>
           <Badge
-            status={profile.is_logged_in ? "success" : "default"}
-            text={profile.is_logged_in ? "Online" : getLastSeen(profile.last_logged_in)}
+            status={loggedInStatus.isLoggedIn ? "success" : "default"}
+            text={loggedInStatus.isLoggedIn ? "Online" : getLastSeen(loggedInStatus.lastLoggedIn)}
           />
         </Space>
 
