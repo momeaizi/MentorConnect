@@ -6,7 +6,7 @@ from app.main.utils.exceptions import ValidationError
 from flask_socketio import emit
 from app.main import socketio
 
-def create_conversation_service(data, user_id):
+def create_conversation_service(data):
     try:
         validate_query = "SELECT 1 FROM users WHERE id = %s"
         user_exists = execute_query(validate_query, params=(data.get("user_id_1", None),), fetch_one=True)
@@ -33,7 +33,7 @@ def get_conv_with_user_id_service(user_id):
                 u.first_name || ' ' || u.last_name AS name,
                 u.username,
                 u.email,
-                u.is_online,
+                u.is_logged_in,
                 c.see AS is_seen,
                 c.created_at AS conv_time,
                 m.id AS last_message_id,
@@ -111,12 +111,12 @@ def get_conv_with_conv_id_service(conv_id, user_id):
 
         select_user_query = "SELECT * FROM users WHERE id = %s"
 
-        user = execute_query(select_user_query, params=(str(conversation['user_id_2']) if conversation['user_id_1'] == user_id else str(conversation['user_id_1']) ), fetch_one=True)
+        user = execute_query(select_user_query, params=(str(conversation['user_id_2']) if conversation['user_id_1'] == user_id else str(conversation['user_id_1']) ,), fetch_one=True)
 
         new_conversation = {
             "image": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
             "name": user['username'],
-            "is_online": user['is_online'],
+            "is_logged_in": user['is_logged_in'],
             "id": user['id']
         }
         

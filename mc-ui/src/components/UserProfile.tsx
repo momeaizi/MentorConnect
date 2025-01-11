@@ -7,12 +7,14 @@ import { Modal } from 'antd';
 import { getLastSeen } from '../utils/getLastSeen';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import useStore from '../lib/store';
 
 const { Title, Text, Paragraph } = Typography;
 
 interface UserProfileProps {
   profile: Profile;
   currentUserId: number;
+  onRefresh: () => void;
 }
 
 function getInitials(firstName: string, lastName: string): string {
@@ -29,18 +31,18 @@ function stringToColor(str: string): string {
 }
 
 
-const getLikeButtonProps = (isLikedByCurrentUser: boolean, hasLikedCurrentUser: boolean) => {
-  if (isLikedByCurrentUser && hasLikedCurrentUser) {
+const getLikeButtonProps = (profile: Profile) => {
+  if (profile.likeStatus == 'mutual') {
     return {
       icon: <HeartFilled style={{ color: '#eb2f96' }} />,
       children: 'Matched',
     };
-  } else if (isLikedByCurrentUser) {
+  } else if (profile.likeStatus == 'one-way') {
     return {
       icon: <HeartFilled style={{ color: '#eb2f96' }} />,
       children: 'Liked',
     };
-  } else if (hasLikedCurrentUser) {
+  } else if (profile.likeStatus == 'liked-by') {
     return {
       icon: <HeartOutlined style={{ color: '#eb2f96' }} />,
       children: 'Like Back',
@@ -54,28 +56,25 @@ const getLikeButtonProps = (isLikedByCurrentUser: boolean, hasLikedCurrentUser: 
 };
 
 
-export default function UserProfile({ profile, currentUserId }: UserProfileProps) {
+export default function UserProfile({ profile, currentUserId, onRefresh }: UserProfileProps) {
   const initials = getInitials(profile.firstName, profile.lastName);
   const avatarColor = stringToColor(profile.username);
 
-  const [isLikedByCurrentUser, setIsLikedByCurrentUser] = useState(false);
-  const hasLikedCurrentUser = true;
-  const [likeButtonProps, setLikeButtonProps] = useState(getLikeButtonProps(isLikedByCurrentUser, hasLikedCurrentUser));
+  const [likeButtonProps, setLikeButtonProps] = useState(getLikeButtonProps(profile));
 
   const navigate = useNavigate();
+  const { setSelectedConv } = useStore();
 
 
 
-  const onRemoveLike = (profileId: number) => {
+  const onRemoveLike = () => {
     Modal.confirm({
       title: 'Confirm Action',
       content: 'Are you sure you want to remove your like from this profile?',
       okText: 'Yes',
       cancelText: 'No',
       onOk: () => {
-        setIsLikedByCurrentUser(false);
-        setLikeButtonProps(getLikeButtonProps(false, hasLikedCurrentUser));
-        console.log(profileId);
+        handleRemoveLike();
       },
       onCancel: () => { },
     });
@@ -83,14 +82,12 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
 
 
 
-  const onLike = async (profileId: number) => {
-    if (!isLikedByCurrentUser) {
-      setIsLikedByCurrentUser(true);
-      setLikeButtonProps(getLikeButtonProps(true, hasLikedCurrentUser));
+  const onLike = async () => {
+    if (profile.likeStatus == 'liked-by' || profile.likeStatus == 'none') {
+      handleLike();
     } else {
-      onRemoveLike(profileId);
+      onRemoveLike();
     }
-    console.log(profileId, currentUserId);
   }
 
 
@@ -107,6 +104,28 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
     });
   }
 
+
+  const handleLike = async () => {
+    try {
+      const res = await api.post(`/profiles/${profile.id}/like`);
+
+      onRefresh();
+
+    } catch (error) { }
+  }
+
+  const handleRemoveLike = async () => {
+    try {
+      const res = await api.delete(`/profiles/${profile.id}/like`);
+
+      onRefresh();
+
+
+    } catch (error) { }
+  }
+
+
+
   const handleBlock = async () => {
     try {
       const res = await api.post(`/users/${profile.id}/block`);
@@ -114,6 +133,11 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
       navigate(0);
 
     } catch (error) { }
+  }
+
+  const handleMessage = () => {
+    setSelectedConv(profile.conversationId);
+    navigate('/chat');
   }
 
   return (
@@ -169,7 +193,7 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
         </Space>
 
         <Space wrap style={{ width: '100%', justifyContent: 'center' }}>
-          <Tooltip title={(isLikedByCurrentUser && hasLikedCurrentUser) ? "You've matched!" : hasLikedCurrentUser ? "This user likes you" : ""}>
+          <Tooltip title={(profile.likeStatus == 'mutual') ? "You've matched!" : profile.likeStatus == 'liked-by' ? "This user likes you" : ""}>
             <Button
               className="shadow-none"
               onClick={() => onLike(profile.id)}
@@ -178,7 +202,7 @@ export default function UserProfile({ profile, currentUserId }: UserProfileProps
               {likeButtonProps.children}
             </Button>
           </Tooltip>
-          {profile.conversationId && <Button className="shadow-none" icon={<MessageOutlined />}>Message</Button>}
+          {profile.conversationId && <Button className="shadow-none" icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
           <Button className="shadow-none" icon={<StopOutlined />} onClick={() => onBlock()} danger>Block</Button>
           <Button className="shadow-none" icon={<FlagOutlined />}>Report</Button>
         </Space>

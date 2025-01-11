@@ -16,4 +16,5 @@ export interface Profile {
   id: number;
   username: string;
   conversationId?: number;
+  likeStatus: string;
 }

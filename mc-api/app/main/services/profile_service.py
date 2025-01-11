@@ -59,7 +59,37 @@ def get_profile_by_username_service(user_id, username):
                             ON pl1.liker_id = pl2.liked_profile_id AND pl1.liked_profile_id = pl2.liker_id
                             WHERE pl1.liked_profile_id = u.id
                         ), 0) -- Matches
-                    ) AS fame_rating
+                    ) AS fame_rating,
+                    CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = %s AND liked_profile_id = u.id
+                        ) AND EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = u.id AND liked_profile_id = %s
+                        ) THEN 'mutual'
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = %s AND liked_profile_id = u.id
+                        ) THEN 'one-way'
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = u.id AND liked_profile_id = %s
+                        ) THEN 'liked-by'
+                        ELSE 'none'
+                    END AS like_status,
+                    (
+                        SELECT c.id 
+                        FROM conversations c
+                        WHERE 
+                            (c.user_id_1 = %s AND c.user_id_2 = u.id) 
+                            OR (c.user_id_1 = u.id AND c.user_id_2 = %s)
+                        LIMIT 1
+                    ) AS conversation_id
                 FROM 
                     users u
                 LEFT JOIN 
@@ -69,7 +99,7 @@ def get_profile_by_username_service(user_id, username):
                 LEFT JOIN 
                     pictures p ON p.user_id = i.id
                 WHERE 
-                    u.username = %s -- Target user's username
+                    u.username = %s
                     AND u.is_complete = TRUE
                     AND u.id != %s
                     AND NOT EXISTS (
@@ -100,6 +130,8 @@ def get_profile_by_username_service(user_id, username):
                 t.latitude,
                 t.age,
                 t.interests,
+                t.like_status,
+                t.conversation_id,
                 ARRAY_AGG(c.interest) AS common_interests,
                 ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance -- Distance in kilometers
             FROM 
@@ -115,9 +147,9 @@ def get_profile_by_username_service(user_id, username):
             GROUP BY 
                 t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
                 t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude,
-                t.latitude, t.age, t.interests, t.geolocation, t.pictures, p.file_name;
+                t.latitude, t.age, t.interests, t.geolocation, t.pictures, p.file_name, t.like_status, t.conversation_id;
         """
-        profile = execute_query(select_query, params=(user_id, username, user_id, user_id, user_id, user_id), fetch_one=True)
+        profile = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id, username, user_id, user_id, user_id, user_id), fetch_one=True)
 
 
         if not profile:
@@ -145,10 +177,8 @@ def get_profile_service(user_id):
                 u.birth_date,
                 ST_X(ST_AsText(u.geolocation)) AS longitude,
                 ST_Y(ST_AsText(u.geolocation)) AS latitude,
-                ARRAY_AGG(p.file_name) AS pictures,
                 ARRAY_AGG (i.id) AS interests
             FROM users u
-            LEFT JOIN pictures p ON u.id = p.user_id
             LEFT JOIN 
                 user_interests ui ON u.id = ui.user_id
             LEFT JOIN 

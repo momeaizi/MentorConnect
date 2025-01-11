@@ -21,44 +21,45 @@ export default function UserProfilePage() {
   const { username } = useParams();
   const { user } = useAuth();
 
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get(`/profiles/${username}`);
-        const fetchedProfile = res.data.data;
+  const fetchUser = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/profiles/${username}`);
+      const fetchedProfile = res.data.data;
 
-        console.log(res.data);
-        setprofile({
-              age: Math.floor(fetchedProfile.age),
-              bio: fetchedProfile.bio,
-              birth_date: fetchedProfile.birth_date,
-              common_interests: fetchedProfile.common_interests.filter((common_interest: string | null) => (common_interest)),
-              distance: Math.floor(fetchedProfile.distance),
-              fameRating: fetchedProfile.fame_rating,
-              firstName: fetchedProfile.first_name,
-              gender: fetchedProfile.gender,
-              image: (fetchedProfile.image) ? `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${fetchedProfile.image}` : null,
-              interests: fetchedProfile.interests.filter((interest: string | null) => (interest)),
-              is_logged_in: fetchedProfile.is_logged_in,
-              last_logged_in: fetchedProfile.last_logged_in,
-              lastName: fetchedProfile.last_name,
-              pictures: fetchedProfile.pictures.filter((picture: string | null) => (picture)).map((picture: string) => `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${picture}`),
-              id: fetchedProfile.user_id,
-              username: fetchedProfile.username,
-      
-        });
+      setprofile({
+            age: Math.floor(fetchedProfile.age),
+            bio: fetchedProfile.bio,
+            birth_date: fetchedProfile.birth_date,
+            common_interests: fetchedProfile.common_interests.filter((common_interest: string | null) => (common_interest)),
+            distance: Math.floor(fetchedProfile.distance),
+            fameRating: fetchedProfile.fame_rating,
+            firstName: fetchedProfile.first_name,
+            gender: fetchedProfile.gender,
+            image: (fetchedProfile.image) ? `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${fetchedProfile.image}` : null,
+            interests: fetchedProfile.interests.filter((interest: string | null) => (interest)),
+            is_logged_in: fetchedProfile.is_logged_in,
+            last_logged_in: fetchedProfile.last_logged_in,
+            lastName: fetchedProfile.last_name,
+            pictures: fetchedProfile.pictures.filter((picture: string | null) => (picture)).map((picture: string) => `https://musical-space-acorn-gw9wjjpjjggf96rw-5000.app.github.dev/api/profiles/get_image/${picture}`),
+            id: fetchedProfile.user_id,
+            username: fetchedProfile.username,
+            likeStatus: fetchedProfile.like_status,
+            conversationId: fetchedProfile.conversation_id,
+    
+      });
 
-      } catch (error) {
-        console.log(error);
-        setNotFound(true);
-      } finally {
-        setLoading(false);
-      }
-
-
+    } catch (error) {
+      console.log(error);
+      setNotFound(true);
+    } finally {
+      setLoading(false);
     }
-    loadData();
+
+
+  }
+  useEffect(() => {
+    fetchUser();
   }, []);
 
 
@@ -76,7 +77,7 @@ export default function UserProfilePage() {
     }
 
     return (
-      <>{ profile && user && <UserProfile profile={profile} currentUserId={user.id} /> }</>
+      <>{ profile && user && <UserProfile profile={profile} currentUserId={user.id} onRefresh={fetchUser} /> }</>
     );
     
   }

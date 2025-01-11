@@ -29,7 +29,7 @@ interface ButtonProps {
 interface HeaderTypes{
   image: string;
   name: string;
-  is_online: boolean;
+  is_logged_in: boolean;
   id: number;
 
 }
@@ -306,7 +306,7 @@ function ConversationWindow() {
                     {chatHeader?.name}
                   </div>
                   <div className='text-gray-400 text-sm'>
-                    {(chatHeader?.is_online)?"Online":"Offline"}
+                    {(chatHeader?.is_logged_in)?"Online":"Offline"}
                   </div>
                 </div>
 

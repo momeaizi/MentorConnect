@@ -182,7 +182,7 @@ const ProfileList: React.FC = () => {
                     <h2 className="text-2xl font-semibold mb-4 text-primary">Filters</h2>
                     <div className="space-y-6">
                         <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Age Range</h3>
+                            <h3 className="text-lg font-medium mb-2 text-primary">Age</h3>
                             <Slider
                                 range
                                 min={minAge}
@@ -193,7 +193,7 @@ const ProfileList: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Distance Range</h3>
+                            <h3 className="text-lg font-medium mb-2 text-primary">Distance</h3>
                             <Slider
                                 range
                                 min={minDistance}

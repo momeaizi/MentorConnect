@@ -25,7 +25,7 @@ def create_conversation():
         return jsonify({"error": "No data provided"}), 400
     
     try:
-        return create_conversation_service(data, user.get('id', None))
+        return create_conversation_service(data,)
 
     except Exception as e:
         logger.error(f"Error occurred: {str(e)}")

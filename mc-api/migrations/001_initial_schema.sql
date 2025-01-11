@@ -66,7 +66,8 @@ CREATE TABLE conversations (
     last_message_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id_1) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id_2) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE (user_id_1, user_id_2)
 );
 
 CREATE TABLE messages (

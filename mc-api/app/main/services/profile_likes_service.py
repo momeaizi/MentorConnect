@@ -1,6 +1,7 @@
 from app.db.sql_executor import execute_query
 from app.main.utils.exceptions import UniqueConstraintError
 from app.main.services.notification_service import create_notif_service
+from app.main.services.chat_service import create_conversation_service
 from flask import jsonify
 from loguru import logger
 from datetime import datetime, timezone
@@ -49,6 +50,9 @@ class ProfilelikesService():
             execute_query(insert_query, params=(liker_id, liked_profile_id))
             select_query = "SELECT EXISTS ( SELECT 1 FROM profile_likes WHERE liker_id = %s AND liked_profile_id = %s)"
             liked_before =execute_query(select_query, params=(liked_profile_id, liker_id), fetch_one=True)
+
+            if liked_before.get('exists', None):
+                create_conversation_service({'user_id_1': liker_id,'user_id_2': liked_profile_id})
 
             create_notif_service({"notified_user_id": liked_profile_id, "actor_id": liker_id, "type": 'macth' if (liked_before) else 'like'})
 
