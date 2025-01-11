@@ -8,6 +8,7 @@ import {
  } from '@ant-design/icons';
  import { useAuth } from "../providers/AuthProvider";
 import api from '../services/api';
+import '../assets/styles/chat.css'
 
 
 interface CellData {
@@ -288,9 +289,9 @@ function ConversationWindow() {
     <>
       {
         (loadding) ?
-        <div className='h-full grid grid-cols-1 grid-rows-[auto_1fr_auto] overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
+        <div className='parent-window-chat h-full overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
 
-              <div className='box-border flex gap-4 items-center w-full h-fit p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
+              <div className='header-window-chat box-border flex gap-4 items-center w-full h-full p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
 
                 {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
                   <ArrowLeftOutlined className='w-[30px] font-extrabold font-[10px]'/> 
@@ -312,7 +313,7 @@ function ConversationWindow() {
 
               </div>
 
-              <div ref={scrollableDivRef} className='w-full h-[80vh] p-[0_4em] pt-4 flex flex-col   gap-3 overflow-y-scroll overflow-x-hidden grow'>
+              <div ref={scrollableDivRef} className='messages-window-chat w-full p-[0_4em] pt-4 flex flex-col gap-3 overflow-y-scroll overflow-x-hidden '>
                 {chatMessages.map((data:any) => (
                   (data.user_id === chatHeader?.id)?
                     <SenderMessage message={data.message}/>
@@ -321,7 +322,7 @@ function ConversationWindow() {
                 ))}
               </div>
 
-              <div className='flex justify-center items-center w-full h-fit p-[0.5em_4em]'>
+              <div className='input-window-chat flex justify-center items-center w-full h-full p-[0.5em_4em]'>
                 <Input
 
                   value={newMessage}
@@ -386,7 +387,7 @@ export default function ChatPage() {
 
 
   return (
-    <div className='h-full w-screen  flex bg-red'>
+    <div className='chat-parent w-screen  flex'>
       {lodding && 
         <>
           {(messagePages === 'both' || messagePages === 'list') && <SideNavChat />}
