@@ -60,9 +60,11 @@ export async function postData(data: ProfileData, openNotification:any, setUpdat
     } catch (error) {
         setUpdateLoading(false)
 
+        if (error.status == 409)
+            openNotification('username already exist', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        else 
         openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
 
-        console.error('Error posting data:', error);
         throw error;
     }
 }
@@ -255,10 +257,6 @@ function EditProfile({profileData}:any) {
         setGender(newGender);
     };
 
-    const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(e.target.value);
-    };
-
     async function handleSubmitProfile(e:any) {
         const file = e.target.files[0];
         setFile(file)
@@ -275,7 +273,6 @@ function EditProfile({profileData}:any) {
 
     useEffect(() => {
         form.setFieldsValue({ "username": username });
-        setUsername(profileData?.username);
     }, [username, form]);
 
     useEffect(() => {
@@ -468,9 +465,9 @@ function EditProfile({profileData}:any) {
                         >
                             <Input 
                                 className='h-[40px]'
-                                onChange={handleUsernameChange}
                                 placeholder="Enter your username"
                                 value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 // onChange={(e) => setUsername(e.target.value)}
                             />
                         </Form.Item>
@@ -606,10 +603,10 @@ function UploadPictures({profileData}:any) {
                     
                     openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
                     
+                setFileList([]);
                 } else {
                     console.error('Upload failed:', await response.text());
                 }
-                setFileList([]);
             }
         } catch (error) {
             console.error('Error during upload:', error);

@@ -162,7 +162,7 @@ def create_message_service(data):
 
         insert_query = f"INSERT INTO messages ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
         new_message = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
-        logger.info(new_message)
+        # logger.info(new_message)
         # created_at
         update_query = "UPDATE conversations SET created_at = %s, see = FALSE WHERE id = %s"
         execute_query(update_query, params=(new_message['created_at'], new_message['conversation_id']))
@@ -172,8 +172,8 @@ def create_message_service(data):
             'conv_id': new_message['conversation_id']
         }
         
-        # emit('new_message', send_message, namespace='/',  broadcast=True)
-        socketio.emit('new_message', send_message, namespace='/',  room='room_1')
+        socketio.emit('new_message', send_message, namespace='/',  room=f"room_{conversation.get('user_id_1')}")
+        socketio.emit('new_message', send_message, namespace='/',  room=f"room_{conversation.get('user_id_2')}")
         
         return jsonify({'status': 'success', 'message': 'Message created successfully'}), 201
 
