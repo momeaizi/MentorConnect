@@ -60,9 +60,11 @@ export async function postData(data: ProfileData, openNotification:any, setUpdat
     } catch (error) {
         setUpdateLoading(false)
 
+        if (error.status == 409)
+            openNotification('username already exist', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        else 
         openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
 
-        console.error('Error posting data:', error);
         throw error;
     }
 }

@@ -6,6 +6,7 @@ from app.db.sql_executor import execute_query
 from flask import send_file
 from werkzeug.utils import secure_filename
 from flask import current_app as app
+from app.main.utils.exceptions import UniqueConstraintError
 import uuid
 
 
@@ -225,6 +226,8 @@ def get_profile_service(user_id):
 def update_profile_service(data, user):
     try:
         user_id = user.get('id', None)
+        
+        # return jsonify({'message': "This username already exist"}), 403
         gender = '\'Male\'' if data.get('gender') else '\'Female\''
         update_query = f"""
             UPDATE users 
@@ -239,9 +242,8 @@ def update_profile_service(data, user):
                 geolocation = ST_Point(%s, %s),
                 is_complete = TRUE
             WHERE id = %s
-            RETURNING *
         """
-        updated_profile = execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
+        execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
         
         delete_query = """
                 DELETE FROM user_interests
@@ -265,6 +267,11 @@ def update_profile_service(data, user):
             "is_complete": True,
         })
         return jsonify(access_token=access_token), 200
+    except UniqueConstraintError as e:
+        return jsonify({
+            "status": "error",
+            "message": f"{e.field} already exists",
+        }), 409
     except Exception as e:
         logger.info(f"Error updating user: {str(e)}")
         return jsonify({'message': "something went wrong"}), 500
