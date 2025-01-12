@@ -10,7 +10,7 @@ import { useAuth } from './providers/AuthProvider';
 function App() {
   const { setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket, setNumberOfMessage } = useStore();
   const [api, contextHolder] = notification.useNotification();
-  const { token } = useAuth()
+  const { token, user } = useAuth()
 
   const openNotification = (message: string, icons: any) => {
     api.open({
@@ -36,14 +36,18 @@ function App() {
 
     socket.on('new_message', (data: any) => {
       setNewMessageSocket(data);
-      setNumberOfMessage(1);
-      openNotification("You've a new Message!", <MailOutlined style={{ color: '#ef4444' }} />);
+      if (data.user_id != user.id) {
+        setNumberOfMessage(1);
+        openNotification("You've a new Message!", <MailOutlined style={{ color: '#ef4444' }} />);
+      }
     });
     socket.on('new_notification', (data: any) => {
-      setNumberOfNotif(1);
-      openNotification("You've a new Notification!", <SoundOutlined style={{ color: '#ef4444' }} />);
       setNewNotif(data);
-
+      console.log(data)
+      if (data.user_id != user.id) {
+        setNumberOfNotif(1);
+        openNotification("You've a new Notification!", <SoundOutlined style={{ color: '#ef4444' }} />);
+      }
     });
     setSocket(socket);
 
@@ -55,7 +59,7 @@ function App() {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [token]);
 
   return (
     <ConfigProvider

@@ -189,12 +189,22 @@ def number_of_chat_service(user):
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
-        select_query = "SELECT COUNT(*) FROM conversations WHERE user_id_1 = %s OR user_id_2 = %s AND see =  FALSE"
+        select_query = """
+            SELECT COUNT(*)
+            FROM conversations
+            WHERE (user_id_1 = %s OR user_id_2 = %s) AND see = FALSE;
+        """
+        
         result = execute_query(select_query, params=(user_id,user_id,), fetch_all=True)
         
+
+        tt = "SELECT * FROM conversations WHERE user_id_2 = %s AND see =  FALSE"
+        ss = execute_query(tt, params=(user_id,), fetch_all=True)
+        logger.info(ss)
+
         chat_count = result[0].get('count', None) if result else 0
 
-        return jsonify({'status': 'success', 'number': chat_count, 'message': result}), 200
+        return jsonify({'status': 'success', 'number': chat_count}), 200
 
     except Exception as e:
         logger.error(f"Error retrieving chat: {str(e)}")
