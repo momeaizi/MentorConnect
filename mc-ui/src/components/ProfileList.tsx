@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar } from 'lucide-react'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar, FlagIcon } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -19,6 +19,7 @@ interface Profile {
     commonInterestsCount: number;
     image: string;
     gender: string;
+    isFlagged: boolean;
 }
 
 
@@ -70,12 +71,13 @@ const ProfileList: React.FC = () => {
                 lastName: item.last_name,
                 age: Math.floor(item.age),
                 fameRating: item.fame_rating,
-                interests: item.interests.filter((interest: string | null) => (interest)),
+                interests: item.interests?.filter((interest: string | null) => (interest)),
                 image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
                 gender: item.gender,
                 distance: Math.floor(item.distance),
                 username: item.username,
                 commonInterestsCount: item.common_interests_count,
+                isFlagged: item.is_flagged,
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
@@ -270,15 +272,20 @@ const ProfileList: React.FC = () => {
                                 hoverable
                                 cover={
                                     <div className="relative h-48">
-                                        <Img
-                                            src={profile.image}
-                                            alt={`${profile.firstName} ${profile.lastName}`}
-                                            className="rounded-t-lg"
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            loader={<div>Loading...</div>}
-                                        />
+                                      <Img
+                                        src={profile.image}
+                                        alt={`${profile.firstName} ${profile.lastName}`}
+                                        className="rounded-t-lg"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        loader={<div>Loading...</div>}
+                                      />
+                                      {profile.isFlagged && (
+                                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">
+                                          <FlagIcon className="w-5 h-5 text-white" />
+                                        </div>
+                                      )}
                                     </div>
-                                }
+                                  }
                                 onClick={() => { navigate(`/profiles/${profile.username}`) }}
                                 className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
                             >

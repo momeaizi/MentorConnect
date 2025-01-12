@@ -77,7 +77,15 @@ class ProfileSuggestionsService():
                             ON pl1.liker_id = pl2.liked_profile_id AND pl1.liked_profile_id = pl2.liker_id
                             WHERE pl1.liked_profile_id = u.id
                         ), 0) -- Matches
-                    ) AS fame_rating
+                    ) AS fame_rating,
+                    CASE 
+                        WHEN (
+                            SELECT COUNT(*) 
+                            FROM reported_users r 
+                            WHERE r.reported_id = u.id
+                        ) > 5 THEN TRUE
+                        ELSE FALSE
+                    END AS is_flagged
                 FROM 
                     users u
                 LEFT JOIN 
