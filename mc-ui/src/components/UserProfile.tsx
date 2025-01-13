@@ -102,6 +102,13 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
         handleBlock();
       },
       onCancel: () => { },
+      okButtonProps: {
+        style: { backgroundColor: theme.token.colorError, borderColor: theme.token.colorError }
+      },
+      cancelButtonProps: {
+        style: { borderColor: theme.token.colorBorder }
+      },
+      maskStyle: { backgroundColor: theme.token.colorBgMask }
     });
   }
 

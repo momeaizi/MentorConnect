@@ -23,7 +23,7 @@ def get_profile_by_username_service(user_id, username):
                 JOIN 
                     interests i ON ui.interest_id = i.id
                 WHERE 
-                    ui.user_id = %s -- Current user's ID
+                    ui.user_id = %s
             ),
             target_user AS (
                 SELECT 
@@ -40,7 +40,9 @@ def get_profile_by_username_service(user_id, username):
                     ST_X(ST_AsText(u.geolocation)) AS longitude,
                     ST_Y(ST_AsText(u.geolocation)) AS latitude,
                     DATE_PART('year', AGE(u.birth_date)) AS age,
-                    ARRAY_AGG(i.interest) AS interests,
+                    MAX(CASE WHEN p.is_profile THEN p.file_name END) AS image,
+                    ARRAY_AGG(DISTINCT i.interest) FILTER (WHERE i.interest IS NOT NULL) AS interests,
+                    ARRAY_AGG(DISTINCT p.file_name) FILTER (WHERE p.file_name IS NOT NULL) AS pictures,
                     u.geolocation,
                     (
                         COALESCE((
@@ -105,6 +107,8 @@ def get_profile_by_username_service(user_id, username):
                     user_interests ui ON u.id = ui.user_id
                 LEFT JOIN 
                     interests i ON ui.interest_id = i.id
+                LEFT JOIN 
+                    pictures p ON u.id = p.user_id
                 WHERE 
                     u.username = %s
                     AND u.is_complete = TRUE
@@ -122,9 +126,10 @@ def get_profile_by_username_service(user_id, username):
             SELECT 
                 t.user_id,
                 t.username,
+                t.image,
+                t.pictures,
                 t.email,
                 t.first_name,
-                MAX(CASE WHEN p.is_profile THEN p.file_name END) AS image,
                 t.last_name,
                 t.gender,
                 t.bio,
@@ -140,8 +145,7 @@ def get_profile_by_username_service(user_id, username):
                 t.like_status,
                 t.conversation_id,
                 ARRAY_AGG(c.interest) AS common_interests,
-                ARRAY_AGG(p.file_name) FILTER (WHERE p.file_name IS NOT NULL) AS pictures,
-                ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance -- Distance in kilometers
+                ST_Distance(t.geolocation, (SELECT geolocation FROM users WHERE id = %s)) / 1000 AS distance
             FROM 
                 target_user t
             LEFT JOIN 
@@ -150,10 +154,8 @@ def get_profile_by_username_service(user_id, username):
                     FROM user_interests ui
                     WHERE ui.user_id = t.user_id
                 )
-            LEFT JOIN
-                pictures p ON p.user_id = t.user_id
             GROUP BY 
-                t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
+                t.image, t.pictures, t.user_id, t.username, t.email, t.first_name, t.last_name, t.gender, t.bio, 
                 t.birth_date, t.fame_rating, t.is_logged_in, t.last_logged_in, t.longitude, t.is_flagged,
                 t.latitude, t.age, t.interests, t.geolocation, t.like_status, t.conversation_id;
         """
@@ -166,9 +168,12 @@ def get_profile_by_username_service(user_id, username):
         profile_views_service = ProfileViewsService()
         profile_views_service.log_profile_view(user_id, profile['user_id'])
 
+        logger.info("HERE!!!")
+
         return jsonify({'status': 'success', 'data': profile}), 200
     except Exception as e:
-        return jsonify({'status': 'error', 'message': f"Error retrieving notifications: {str(e)}"}), 500
+        logger.info(f"Error retrieving user data: {str(e)}")
+        return jsonify({'status': 'error', 'message': "Something went wrong"}), 500
     
 
 def get_profile_service(user_id):

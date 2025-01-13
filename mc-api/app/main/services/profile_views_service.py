@@ -25,7 +25,7 @@ class ProfileViewsService():
 
     def get_profile_views(self, profile_owner_id):
         try:
-            select_query = "SELECT * FROM profile_views WHERE profile_owner_id = %s"
+            select_query = "SELECT * FROM profile_views WHERE profile_owner_id = %s ORDER BY viewed_at DESC"
             viewers = execute_query(select_query, params=(profile_owner_id,), fetch_all=True)
             return jsonify(viewers), 200
         except Exception as e:
@@ -34,7 +34,7 @@ class ProfileViewsService():
 
     def get_viewed_profiles(self, viewer_id):
         try:
-            select_query = "SELECT * FROM profile_views WHERE viewer_id = %s"
+            select_query = "SELECT * FROM profile_views WHERE viewer_id = %s ORDER BY viewed_at DESC"
             viewers = execute_query(select_query, params=(viewer_id,), fetch_all=True)
 
             formatted_history = []
@@ -52,7 +52,6 @@ class ProfileViewsService():
                     ),
                 })
 
-            # return jsonify(viewers), 200
             return jsonify({'status': 'success', 'data': formatted_history}), 200
         except Exception as e:
             logger.error(f"Error fetching viewed profiles by viewer_id: {e}")

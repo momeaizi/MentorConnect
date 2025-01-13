@@ -129,7 +129,7 @@ const AppRoutes = () => {
         />
 
         <Route
-          path="/favorie"
+          path="/favorites"
           element={
 
             <div className="h-screen w-screen grid grid-cols-1 grid-rows-[72px_1fr] overflow-hidden">

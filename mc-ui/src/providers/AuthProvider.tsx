@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useMemo } from '
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { CustomJwtPayload } from '../utils/jwtUtils';
+import useStore from '../lib/store';
 
 interface User {
     id: number;
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         return { id, username, email, is_verified, is_complete };
     });
     const navigate = useNavigate();
+    const { socket } = useStore();
 
 
 

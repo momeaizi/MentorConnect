@@ -15,8 +15,8 @@ class RegisterUserDTO:
         username = self.data.get('username', None)
         if not username:
             raise ValidationError("username is required", "MISSING_USERNAME")
-        if len(username) > 50:
-            raise ValidationError("username must be less than 50 characters", "INVALID_USERNAME_LENGTH")
+        if len(username) > 15:
+            raise ValidationError("username must be less than 15 characters", "INVALID_USERNAME_LENGTH")
 
         email = self.data.get('email', None)
         if not email:

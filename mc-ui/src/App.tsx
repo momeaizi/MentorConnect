@@ -10,7 +10,7 @@ import { useAuth } from './providers/AuthProvider';
 function App() {
   const { setNumberOfNotif, setNewNotif, setNewMessageSocket, setSocket, setNumberOfMessage } = useStore();
   const [api, contextHolder] = notification.useNotification();
-  const { token } = useAuth()
+  const { token, user } = useAuth()
 
   const openNotification = (message: string, icons: any) => {
     api.open({
@@ -52,10 +52,14 @@ function App() {
       useStore.getState().setSocket(null);
     });
 
+    if (!user) {
+      socket.disconnect();
+    }
+
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [user]);
 
   return (
     <ConfigProvider

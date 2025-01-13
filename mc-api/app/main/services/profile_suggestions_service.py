@@ -85,7 +85,29 @@ class ProfileSuggestionsService():
                             WHERE r.reported_id = u.id
                         ) > 5 THEN TRUE
                         ELSE FALSE
-                    END AS is_flagged
+                    END AS is_flagged,
+                    CASE 
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = %s AND liked_profile_id = u.id
+                        ) AND EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = u.id AND liked_profile_id = %s
+                        ) THEN 'mutual'
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = %s AND liked_profile_id = u.id
+                        ) THEN 'one-way'
+                        WHEN EXISTS (
+                            SELECT 1 
+                            FROM profile_likes 
+                            WHERE liker_id = u.id AND liked_profile_id = %s
+                        ) THEN 'liked-by'
+                        ELSE 'none'
+                    END AS like_status
                 FROM 
                     users u
                 LEFT JOIN 
@@ -122,7 +144,7 @@ class ProfileSuggestionsService():
                     fame_rating DESC; -- Finally by fame rating
 
             """
-            users = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id), fetch_all=True)
+            users = execute_query(select_query, params=(user_id, user_id, user_id, user_id, user_id, user_id, user_id, user_id, user_id, user_id, user_id), fetch_all=True)
             return jsonify(users), 200
         except Exception as e:
             logger.error(f"Error fetching suggestions: {e}")

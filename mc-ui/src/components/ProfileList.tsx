@@ -20,6 +20,7 @@ interface Profile {
     image: string;
     gender: string;
     isFlagged: boolean;
+    likeStatus: string;
 }
 
 
@@ -32,7 +33,7 @@ const ProfileList: React.FC = () => {
     const [allInterests, setAllInterests] = useState<string[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
-    
+
     // sliders states
     const [minAge, setMinAge] = useState<number>(18);
     const [maxAge, setMaxAge] = useState<number>(100);
@@ -42,12 +43,12 @@ const ProfileList: React.FC = () => {
     const [distanceRange, setDistanceRange] = useState<[number, number]>([minDistance, maxDistance]);
     const [maxFameRating, setMaxFameRating] = useState<number>(100);
     const [fameRange, setFameRange] = useState<[number, number]>([0, maxFameRating]);
-    
+
     // sort states
     const [sortCriteria, setSortCriteria] = useState<string>('');
     const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
 
-    
+
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
     const navigate = useNavigate();
@@ -78,6 +79,7 @@ const ProfileList: React.FC = () => {
                 username: item.username,
                 commonInterestsCount: item.common_interests_count,
                 isFlagged: item.is_flagged,
+                likeStatus: item.like_status
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
@@ -85,7 +87,7 @@ const ProfileList: React.FC = () => {
             const maxFameRating = Math.max(...profiles.map((profile: Profile) => profile.fameRating));
 
             setMaxFameRating(maxFameRating);
-    
+
             if (fetchedProfiles.length > 0) {
                 const ages = fetchedProfiles.map((profile: Profile) => profile.age);
                 const minAge = Math.min(...ages);
@@ -101,11 +103,11 @@ const ProfileList: React.FC = () => {
                 setMinDistance(minDistance);
                 setMaxDistance(maxDistance);
                 setDistanceRange([minDistance, maxDistance]);
-    
+
             }
 
             setAllInterests(Array.from(new Set(fetchedProfiles.flatMap((profile: Profile) => profile.interests))));
-        
+
             return fetchedProfiles;
         } catch (error) {
             return [];
@@ -163,13 +165,23 @@ const ProfileList: React.FC = () => {
         setFilteredProfiles(prevProfiles => [...prevProfiles].reverse())
     }
 
-    const handleLike = (profileId: number) => {
-        setLikedProfiles(prev => [...prev, profileId])
-    }
+    const handleLike = async (e: React.MouseEvent<HTMLElement>, profileId: number) => {
+        e.stopPropagation();
+        try {
+          await api.post(`/profiles/${profileId}/like`);
+          setFilteredProfiles(prevProfiles => 
+            prevProfiles.map(profile => 
+              profile.id === profileId ? { ...profile, isRemoving: true } : profile
+            )
+          );
+          setTimeout(() => {
+            setFilteredProfiles(prevProfiles => prevProfiles.filter(profile => profile.id !== profileId));
+          }, 500);
+        } catch (error) {
+          console.error("Error liking profile:", error);
+        }
+      };
 
-    const handleUnlike = (profileId: number) => {
-        setLikedProfiles(prev => prev.filter(id => id !== profileId))
-    }
 
     return (
         <div className="flex flex-col lg:flex-row gap-6">
@@ -272,22 +284,22 @@ const ProfileList: React.FC = () => {
                                 hoverable
                                 cover={
                                     <div className="relative h-48">
-                                      <Img
-                                        src={profile.image}
-                                        alt={`${profile.firstName} ${profile.lastName}`}
-                                        className="rounded-t-lg"
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                        loader={<div>Loading...</div>}
-                                      />
-                                      {profile.isFlagged && (
-                                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">
-                                          <FlagIcon className="w-5 h-5 text-white" />
-                                        </div>
-                                      )}
+                                        <Img
+                                            src={profile.image}
+                                            alt={`${profile.firstName} ${profile.lastName}`}
+                                            className="rounded-t-lg"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            loader={<div>Loading...</div>}
+                                        />
+                                        {profile.isFlagged && (
+                                            <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">
+                                                <FlagIcon className="w-5 h-5 text-white" />
+                                            </div>
+                                        )}
                                     </div>
-                                  }
+                                }
                                 onClick={() => { navigate(`/profiles/${profile.username}`) }}
-                                className="bg-background border-border shadow-lg transition-all duration-300 hover:shadow-xl"
+                                className={`bg-background border-border shadow-lg transition-all duration-500 hover:shadow-xl ${profile.isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                             >
                                 <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
 
@@ -314,18 +326,10 @@ const ProfileList: React.FC = () => {
                                     type="primary"
                                     icon={<HeartIcon className="w-4 h-4" />}
                                     className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
-                                    onClick={() => handleLike(profile.id)}
-                                    disabled={likedProfiles.includes(profile.id)}
+                                    onClick={(e: React.MouseEvent<HTMLElement>) => handleLike(e, profile.id)}
+                                    disabled={profile.likeStatus === 'mutual' || profile.likeStatus === 'one-way'}
                                 >
-                                    Like
-                                </Button>
-                                <Button
-                                    type="default"
-                                    icon={<XIcon className="w-4 h-4" />}
-                                    className="w-full mt-2"
-                                    onClick={() => handleUnlike(profile.id)}
-                                >
-                                    Unlike
+                                    {profile.likeStatus === 'liked-by' ? 'Like Back' : 'Like'}
                                 </Button>
                             </Card>
                         </List.Item>

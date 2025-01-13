@@ -54,7 +54,7 @@ class ProfilelikesService():
             if liked_before.get('exists', None):
                 create_conversation_service({'user_id_1': liker_id,'user_id_2': liked_profile_id})
 
-            create_notif_service({"notified_user_id": liked_profile_id, "actor_id": liker_id, "type": 'macth' if (liked_before) else 'like'})
+            create_notif_service({"notified_user_id": liked_profile_id, "actor_id": liker_id, "type": 'match' if (liked_before.get('exists', None)) else 'like'})
 
             return jsonify({"status": "success", "message": "Profile liked successfully"}), 200
         except UniqueConstraintError as e:
