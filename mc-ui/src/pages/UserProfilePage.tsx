@@ -41,20 +41,20 @@ export default function UserProfilePage() {
         age: Math.floor(fetchedProfile.age),
         bio: fetchedProfile.bio,
         birth_date: fetchedProfile.birth_date,
-        common_interests: fetchedProfile.common_interests.filter((common_interest: string | null) => (common_interest)),
+        common_interests: fetchedProfile.common_interests?.filter((common_interest: string | null) => (common_interest)),
         distance: Math.floor(fetchedProfile.distance),
         fameRating: fetchedProfile.fame_rating,
         firstName: fetchedProfile.first_name,
         gender: fetchedProfile.gender,
         image: (fetchedProfile.image) ? `http://localhost:5000/api/profiles/get_image/${fetchedProfile.image}` : null,
-        interests: fetchedProfile.interests.filter((interest: string | null) => (interest)),
+        interests: fetchedProfile.interests?.filter((interest: string | null) => (interest)),
         lastName: fetchedProfile.last_name,
-        pictures: fetchedProfile.pictures.filter((picture: string | null) => (picture)).map((picture: string) => `http://localhost:5000/api/profiles/get_image/${picture}`),
+        pictures: fetchedProfile.pictures?.filter((picture: string | null) => (picture)).map((picture: string) => `http://localhost:5000/api/profiles/get_image/${picture}`),
         id: fetchedProfile.user_id,
         username: fetchedProfile.username,
         likeStatus: fetchedProfile.like_status,
         conversationId: fetchedProfile.conversation_id,
-
+        isFlagged: fetchedProfile.is_flagged,
       });
 
       setLoggedInStatus({

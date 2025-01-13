@@ -15,4 +15,5 @@ export interface Profile {
   username: string;
   conversationId?: number;
   likeStatus: string;
+  isFlagged: boolean;
 }

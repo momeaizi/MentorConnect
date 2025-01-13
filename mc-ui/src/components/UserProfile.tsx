@@ -1,5 +1,5 @@
 import { Card, Avatar, Badge, Button, Typography, Space, Tag, Image, Empty, Tooltip } from 'antd';
-import { HeartOutlined, HeartFilled, MessageOutlined, StopOutlined, FlagOutlined, StarOutlined, ManOutlined, WomanOutlined, PictureOutlined, TagOutlined } from '@ant-design/icons';
+import { HeartOutlined, HeartFilled, MessageOutlined, StopOutlined, FlagOutlined, StarOutlined, ManOutlined, WomanOutlined, PictureOutlined, TagOutlined, FlagFilled } from '@ant-design/icons';
 import { MapPinIcon } from 'lucide-react';
 import { Profile } from '../types/profile';
 import { Modal } from 'antd';
@@ -8,7 +8,6 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../lib/store';
 import { LoggedInData } from '../pages/UserProfilePage';
-import { useEffect, useState } from 'react';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -65,7 +64,7 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
 
   const navigate = useNavigate();
   const { setSelectedConv } = useStore();
-  
+
 
 
 
@@ -107,6 +106,20 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
   }
 
 
+  const onReport = async () => {
+    Modal.confirm({
+      title: 'Confirm Action',
+      content: 'Are you sure you want to report this profile as a fake account?',
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        handleReport();
+      },
+      onCancel: () => { },
+    });
+  }
+
+
   const handleLike = async () => {
     try {
       await api.post(`/profiles/${profile.id}/like`);
@@ -126,6 +139,14 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
     } catch (error) { }
   }
 
+  const handleReport = async () => {
+    try {
+      await api.post(`/users/${profile.id}/report`);
+
+      navigate(0);
+
+    } catch (error) { }
+  }
 
 
   const handleBlock = async () => {
@@ -164,7 +185,14 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
               {initials}
             </Avatar>
           )}
-          <Title level={3}>{`${profile.firstName} ${profile.lastName}`}</Title>
+          <Space align="center">
+            <Title level={3}>{`${profile.firstName} ${profile.lastName}`}</Title>
+            {profile.isFlagged && (
+              <Tooltip title="This account has been flagged as potentially fake">
+                <FlagFilled style={{ fontSize: '24px', color: '#ff4d4f' }} />
+              </Tooltip>
+            )}
+          </Space>
 
           <Space size="large">
             <Space direction="vertical" align="center">
@@ -209,7 +237,7 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
           </Tooltip>
           {profile.conversationId && <Button className="shadow-none" icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
           <Button className="shadow-none" icon={<StopOutlined />} onClick={() => onBlock()} danger>Block</Button>
-          <Button className="shadow-none" icon={<FlagOutlined />}>Report</Button>
+          <Button className="shadow-none" icon={<FlagOutlined />} onClick={() => onReport()} danger>Report</Button>
         </Space>
 
         <Space direction="vertical" style={{ width: '100%' }}>

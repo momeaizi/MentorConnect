@@ -12,6 +12,5 @@ user_report_service = UserReportService()
 @user_report_bp.route('/<int:id>/report', methods=['POST'])
 @token_required
 def report_user(user, id):
-    user = {'id': 5}
     return user_report_service.report_user(user.get('id'), id)
 
