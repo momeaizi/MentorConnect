@@ -40,12 +40,22 @@ interface MessageSend{
   message: string;
 }
 
-async function postMessage(data: MessageSend) {
-  await api.post('/chat/message', {
-    conversation_id: data.selectedConv,
-    user_id: data.user_id,
-    message: data.message, 
-  });
+async function postMessage(data:MessageSend, openNotification:any) {
+  try{
+    await api.post('/chat/message', {
+      conversation_id: data.selectedConv,
+      user_id: data.user_id,
+      message: data.message, 
+    });
+
+  } catch (error) {
+    if (error.status == 404)
+      openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>)
+    else 
+      openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+  }
+
+
 }
 
 // ? side nav chat 
@@ -271,21 +281,12 @@ function ConversationWindow() {
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
     if (trimmedMessage.length) {
-      try{
         postMessage({
           selectedConv: selectedConv,
           user_id: user.id,
           message: trimmedMessage,
-        })
+        }, openNotification)
 
-      } catch (error) {
-
-        if (error.status == 404)
-            openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>)
-        else 
-          openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
-
-      }
     }
   
     setNewMessage('');
