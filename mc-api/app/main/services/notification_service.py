@@ -25,9 +25,16 @@ def create_notif_service(data):
         notification_time = notif.get('notification_time')
         if notification_time.tzinfo is None:
             notification_time = notification_time.replace(tzinfo=timezone.utc)
+
+        
+        picture_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
+        image = execute_query(picture_query, params=(user.get('id'),), fetch_one=True)
+        if image:
+            file_name = image.get('file_name')
         new_notification= {
             'username': user.get('username'),
-            'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+            'user_id':user.get('id'),
+            'userPicture': file_name,
             'type': notif.get('type'),
             'time': humanize.naturaltime(
                 datetime.now(timezone.utc) - notification_time
@@ -53,7 +60,6 @@ def get_notif_by_user_service(user):
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
-        see_notification_service(user_id)
         select_query = "SELECT * FROM notifications WHERE notified_user_id = %s ORDER BY notification_time DESC"
         notifications = execute_query(select_query, params=(user_id,), fetch_all=True)
 
@@ -65,9 +71,15 @@ def get_notif_by_user_service(user):
             notification_time = notif.get('notification_time')
             if notification_time.tzinfo is None:
                 notification_time = notification_time.replace(tzinfo=timezone.utc)
+                    
+            picture_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
+            image = execute_query(picture_query, params=(user.get('id'),), fetch_one=True)
+            file_name = ''
+            if image:
+                file_name = image.get('file_name')
             formatted_notifications.append({
                 'username': user.get('username'),
-                'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+                'userPicture': file_name,
                 'type': notif.get('type'),
                 'time': humanize.naturaltime(
                     datetime.now(timezone.utc) - notification_time
@@ -76,6 +88,7 @@ def get_notif_by_user_service(user):
             })
 
         # logger.info(formatted_notifications)
+        see_notification_service(user_id)
         return jsonify({'status': 'success', 'data': formatted_notifications}), 200
 
     except Exception as e:
@@ -95,8 +108,7 @@ def see_notification_service(user_id):
             WHERE notified_user_id = %s
             RETURNING *
         """
-        params = (user_id,)
-        execute_query(update_query, params=params, fetch_all=True)
+        execute_query(update_query, params=(user_id,), fetch_all=True)
 
         return jsonify({'status': 'success', 'message': "notification is updated"}), 200
 

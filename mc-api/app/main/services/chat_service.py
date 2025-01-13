@@ -162,10 +162,10 @@ def create_message_service(data):
 
         insert_query = f"INSERT INTO messages ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
         new_message = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
-        # logger.info(new_message)
+        logger.info(new_message)
         # created_at
-        update_query = "UPDATE conversations SET created_at = %s, see = FALSE WHERE id = %s"
-        execute_query(update_query, params=(new_message['created_at'], new_message['conversation_id']))
+        update_query = "UPDATE conversations SET created_at = %s, last_message_id = %s, see = FALSE WHERE id = %s"
+        execute_query(update_query, params=(new_message['created_at'], new_message['id'], new_message['conversation_id']))
         send_message = {
             'message':new_message['message'],
             'user_id': new_message['user_id'],
@@ -189,12 +189,19 @@ def number_of_chat_service(user):
         return jsonify({'status': 'error', 'message': 'User ID is required.'}), 400
 
     try:
-        select_query = "SELECT COUNT(*) FROM conversations WHERE user_id_1 = %s OR user_id_2 = %s AND see =  FALSE"
-        result = execute_query(select_query, params=(user_id,user_id,), fetch_all=True)
+        select_query = """SELECT COUNT(*)
+                FROM conversations c
+                JOIN messages m ON c.last_message_id = m.id
+                WHERE (c.user_id_1 = %s OR c.user_id_2 = %s)
+                AND c.see = FALSE
+                AND m.user_id != %s;
+            """
         
+        result = execute_query(select_query, params=(user_id,user_id,user_id,), fetch_all=True)
+
         chat_count = result[0].get('count', None) if result else 0
 
-        return jsonify({'status': 'success', 'number': chat_count, 'message': result}), 200
+        return jsonify({'status': 'success', 'number': chat_count}), 200
 
     except Exception as e:
         logger.error(f"Error retrieving chat: {str(e)}")

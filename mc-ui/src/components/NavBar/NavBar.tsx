@@ -47,7 +47,7 @@ function FullScreen() {
     async function chat() {
       try {
         const number  = await fetchData('chat');
-
+        console.log(number)
         setNumberOfMessage(number?.number);
       } catch (error) {
         console.error('Failed to fetch chat number:', error);
@@ -55,12 +55,13 @@ function FullScreen() {
     };
     notif()
     chat()
-  },[selectedIndex, selectedConv])
+  },[selectedIndex, selectedConv, numberOfMessage, numberOfNotif])
 
   useEffect(()=>{
-  },[numberOfNotif])
-  useEffect(()=>{
-},[numberOfMessage])
+  },[numberOfMessage])
+  
+    useEffect(()=>{
+    },[numberOfNotif])
 
   const handleLogout = () => {
     logout();

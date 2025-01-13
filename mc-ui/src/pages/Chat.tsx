@@ -1,15 +1,14 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../assets/styles/globals.css'
-import { Input, Empty } from 'antd';
+import { Input, Empty, notification } from 'antd';
 import useStore from '../lib/store';
 import {
-  SearchOutlined,
+  SearchOutlined,InfoCircleOutlined,
   ArrowLeftOutlined
  } from '@ant-design/icons';
  import { useAuth } from "../providers/AuthProvider";
 import api from '../services/api';
-import '../assets/styles/chat.css'
-
+import '../assets/styles/chat.css';
 
 interface CellData {
   image:string;
@@ -35,6 +34,30 @@ interface HeaderTypes{
 
 }
 
+interface MessageSend{
+  selectedConv: number;
+  user_id: number;
+  message: string;
+}
+
+async function postMessage(data:MessageSend, openNotification:any) {
+  try{
+    await api.post('/chat/message', {
+      conversation_id: data.selectedConv,
+      user_id: data.user_id,
+      message: data.message, 
+    });
+
+  } catch (error) {
+    if (error.status == 404)
+      openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>)
+    else 
+      openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+  }
+
+
+}
+
 // ? side nav chat 
 
 function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
@@ -45,7 +68,7 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
     <div 
       onClick={onClick}
       className={`cursor-pointer w-full h-[70px] p-[8px] grid justify-center items-center grid-rows-1 grid-cols-[50px_1fr_50px] rounded-[4px] hover:bg-sky-900
-        ${isSelected && 'bg-sky-700'}`}
+        ${(isSelected == cellData.id ) && 'bg-sky-700'}`}
       >
       <div className=' flex justify-center items-center rounded-[50px]'>
         <img
@@ -87,7 +110,9 @@ function fetchData(id:string|number='') {
 
 function SideNavChat() {
   const {selectedIndex, setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket} = useStore();
-  const [cellData, setCellData] = useState<CellData[]>([])
+  const [cellData, setCellData] = useState<CellData[]>([]);
+  const [listData, setListData] = useState<CellData[]>([]);;
+  const [searchValue, setSearchValue] = useState<string>('');
 
 
 
@@ -110,6 +135,20 @@ function SideNavChat() {
     setSelectedConv(id);
   };
 
+
+  function changeValueSearchInput(event: any) {
+    setSearchValue(event.target.value)
+  }
+
+  useEffect(()=>{
+    if (searchValue?.length) {
+      const data = cellData?.filter((cell: any) => cell.name.toLowerCase().includes(searchValue?.toLocaleLowerCase()))
+      setListData(data);
+    } else {
+      setListData(cellData)
+    }
+  },[searchValue, cellData])
+
   useEffect(()=>{
     // console.log("sedenav", selectedIndex);
   },[selectedIndex])
@@ -125,7 +164,9 @@ function SideNavChat() {
                 <input
                   type="search"
                   id="default-search"
-                  className="block w-full h-[1.0em] p-[1em] ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  value={searchValue}
+                  onChange={changeValueSearchInput}
+                  className="block w-full h-[40px] p-[1em] ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Search"/>
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                   <SearchOutlined style={{"color":"white"}}/>
@@ -137,10 +178,10 @@ function SideNavChat() {
 
       {/* Cell navbar */}
       <div className='overflow-scroll flex flex-col h-full p-[12px]'>
-        {cellData.map((cell:CellData, index:number) => (
+        {listData.map((cell:CellData, index:number) => (
           <ChatCell
             key={index}
-            isSelected={selectedIndex === index}
+            isSelected={selectedConv}
             onClick={() => handleChatCellClick(index, cell.id)}
             cellData={cell}
           />
@@ -208,6 +249,15 @@ function ConversationWindow() {
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const scrollableDivRef = useRef<HTMLDivElement | null>(null);
+  const [api, contextHolder] = notification.useNotification();
+
+    
+  const openNotification = (message:string, icon:any) => {
+      api.open({
+        message: message,
+        icon: icon,
+      });
+  };
 
 
   useEffect(() => {
@@ -222,20 +272,21 @@ function ConversationWindow() {
 
 
   useEffect(() => {
-    if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
-        setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
-        setNewMessageSocket(null); // Clear the socket message after processing
-    }
-}, [newMessageSocket]);
+      if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
+          setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
+          setNewMessageSocket(null); // Clear the socket message after processing
+      }
+  }, [newMessageSocket]);
 
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
     if (trimmedMessage.length) {
-      await api.post('/chat/message', {
-        conversation_id: selectedConv,
-        user_id: user.id,
-        message: trimmedMessage, 
-      });
+        postMessage({
+          selectedConv: selectedConv,
+          user_id: user.id,
+          message: trimmedMessage,
+        }, openNotification)
+
     }
   
     setNewMessage('');
@@ -287,10 +338,10 @@ function ConversationWindow() {
 
   return(
     <>
+      {contextHolder}
       {
         (loadding) ?
         <div className='parent-window-chat h-full overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
-
               <div className='header-window-chat box-border flex gap-4 items-center w-full h-full p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
 
                 {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
@@ -355,7 +406,7 @@ function ConversationWindow() {
 export default function ChatPage() {
   const {messagePages, setMessagePages} = useStore();
   const [lodding, setLodding] = useState<boolean>(false);
-  const {selectedIndex} = useStore();
+  const {selectedIndex, selectedConv} = useStore();
 
   useEffect(() => {
     const handleResize = () => {
@@ -378,12 +429,12 @@ export default function ChatPage() {
   }, [messagePages, setMessagePages]);
 
   useEffect(()=>{
-    if (selectedIndex && window.innerWidth <= 768)
+    if (selectedConv && window.innerWidth <= 768)
       setMessagePages('window');
-    else if (!selectedIndex && window.innerWidth <= 768)
+    else if (!selectedConv && window.innerWidth <= 768)
       setMessagePages('list');
       
-  },[selectedIndex])
+  },[selectedConv, window, selectedIndex])
 
 
   return (
