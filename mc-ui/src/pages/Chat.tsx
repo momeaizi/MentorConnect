@@ -1,15 +1,14 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../assets/styles/globals.css'
-import { Input, Empty } from 'antd';
+import { Input, Empty, notification } from 'antd';
 import useStore from '../lib/store';
 import {
-  SearchOutlined,
+  SearchOutlined,InfoCircleOutlined,
   ArrowLeftOutlined
  } from '@ant-design/icons';
  import { useAuth } from "../providers/AuthProvider";
 import api from '../services/api';
-import '../assets/styles/chat.css'
-
+import '../assets/styles/chat.css';
 
 interface CellData {
   image:string;
@@ -35,6 +34,20 @@ interface HeaderTypes{
 
 }
 
+interface MessageSend{
+  selectedConv: number;
+  user_id: number;
+  message: string;
+}
+
+async function postMessage(data: MessageSend) {
+  await api.post('/chat/message', {
+    conversation_id: data.selectedConv,
+    user_id: data.user_id,
+    message: data.message, 
+  });
+}
+
 // ? side nav chat 
 
 function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
@@ -45,7 +58,7 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
     <div 
       onClick={onClick}
       className={`cursor-pointer w-full h-[70px] p-[8px] grid justify-center items-center grid-rows-1 grid-cols-[50px_1fr_50px] rounded-[4px] hover:bg-sky-900
-        ${isSelected && 'bg-sky-700'}`}
+        ${(isSelected == cellData.id ) && 'bg-sky-700'}`}
       >
       <div className=' flex justify-center items-center rounded-[50px]'>
         <img
@@ -158,7 +171,7 @@ function SideNavChat() {
         {listData.map((cell:CellData, index:number) => (
           <ChatCell
             key={index}
-            isSelected={selectedIndex === index}
+            isSelected={selectedConv}
             onClick={() => handleChatCellClick(index, cell.id)}
             cellData={cell}
           />
@@ -226,6 +239,15 @@ function ConversationWindow() {
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const scrollableDivRef = useRef<HTMLDivElement | null>(null);
+  const [api, contextHolder] = notification.useNotification();
+
+    
+  const openNotification = (message:string, icon:any) => {
+      api.open({
+        message: message,
+        icon: icon,
+      });
+  };
 
 
   useEffect(() => {
@@ -240,20 +262,30 @@ function ConversationWindow() {
 
 
   useEffect(() => {
-    if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
-        setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
-        setNewMessageSocket(null); // Clear the socket message after processing
-    }
-}, [newMessageSocket]);
+      if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
+          setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
+          setNewMessageSocket(null); // Clear the socket message after processing
+      }
+  }, [newMessageSocket]);
 
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
     if (trimmedMessage.length) {
-      await api.post('/chat/message', {
-        conversation_id: selectedConv,
-        user_id: user.id,
-        message: trimmedMessage, 
-      });
+      try{
+        postMessage({
+          selectedConv: selectedConv,
+          user_id: user.id,
+          message: trimmedMessage,
+        })
+
+      } catch (error) {
+
+        if (error.status == 404)
+            openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        else 
+          openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+
+      }
     }
   
     setNewMessage('');
@@ -305,10 +337,10 @@ function ConversationWindow() {
 
   return(
     <>
+      {contextHolder}
       {
         (loadding) ?
         <div className='parent-window-chat h-full overflow-hidden w-2/3 bg-[#232736] md:w-2/3 w-full'>
-
               <div className='header-window-chat box-border flex gap-4 items-center w-full h-full p-[0.5em] pl-10 border-b-[#616060] border-b-[0.1px]'>
 
                 {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
@@ -373,7 +405,7 @@ function ConversationWindow() {
 export default function ChatPage() {
   const {messagePages, setMessagePages} = useStore();
   const [lodding, setLodding] = useState<boolean>(false);
-  const {selectedIndex} = useStore();
+  const {selectedIndex, selectedConv} = useStore();
 
   useEffect(() => {
     const handleResize = () => {
@@ -396,12 +428,12 @@ export default function ChatPage() {
   }, [messagePages, setMessagePages]);
 
   useEffect(()=>{
-    if (selectedIndex && window.innerWidth <= 768)
+    if (selectedConv && window.innerWidth <= 768)
       setMessagePages('window');
-    else if (!selectedIndex && window.innerWidth <= 768)
+    else if (!selectedConv && window.innerWidth <= 768)
       setMessagePages('list');
       
-  },[selectedIndex])
+  },[selectedConv, window, selectedIndex])
 
 
   return (
