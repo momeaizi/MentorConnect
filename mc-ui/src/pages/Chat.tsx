@@ -87,7 +87,9 @@ function fetchData(id:string|number='') {
 
 function SideNavChat() {
   const {selectedIndex, setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket} = useStore();
-  const [cellData, setCellData] = useState<CellData[]>([])
+  const [cellData, setCellData] = useState<CellData[]>([]);
+  const [listData, setListData] = useState<CellData[]>([]);;
+  const [searchValue, setSearchValue] = useState<string>('');
 
 
 
@@ -110,6 +112,20 @@ function SideNavChat() {
     setSelectedConv(id);
   };
 
+
+  function changeValueSearchInput(event: any) {
+    setSearchValue(event.target.value)
+  }
+
+  useEffect(()=>{
+    if (searchValue?.length) {
+      const data = cellData?.filter((cell: any) => cell.name.toLowerCase().includes(searchValue?.toLocaleLowerCase()))
+      setListData(data);
+    } else {
+      setListData(cellData)
+    }
+  },[searchValue, cellData])
+
   useEffect(()=>{
     // console.log("sedenav", selectedIndex);
   },[selectedIndex])
@@ -125,7 +141,9 @@ function SideNavChat() {
                 <input
                   type="search"
                   id="default-search"
-                  className="block w-full h-[1.0em] p-[1em] ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  value={searchValue}
+                  onChange={changeValueSearchInput}
+                  className="block w-full h-[40px] p-[1em] ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   placeholder="Search"/>
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                   <SearchOutlined style={{"color":"white"}}/>
@@ -137,7 +155,7 @@ function SideNavChat() {
 
       {/* Cell navbar */}
       <div className='overflow-scroll flex flex-col h-full p-[12px]'>
-        {cellData.map((cell:CellData, index:number) => (
+        {listData.map((cell:CellData, index:number) => (
           <ChatCell
             key={index}
             isSelected={selectedIndex === index}
