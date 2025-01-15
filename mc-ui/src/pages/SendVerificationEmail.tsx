@@ -83,7 +83,7 @@ const SendVerificationEmail: React.FC = () => {
         <Paragraph className="text-center">
           <Text strong>{email}</Text>
         </Paragraph><Button
-          className="w-full max-w-96 h-10 text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+          className="w-full max-w-96 h-10 text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 "
           type="primary"
           icon={loading ? <LoadingOutlined /> : <MailOutlined />}
           loading={loading}

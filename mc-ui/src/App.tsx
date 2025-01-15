@@ -36,7 +36,7 @@ function App() {
 
     socket.on('new_message', (data: any) => {
       setNewMessageSocket(data);
-      if (data.user_id != user.id) {
+      if (data.user_id != user?.id) {
         setNumberOfMessage(1);
         openNotification("You've a new Message!", <MailOutlined style={{ color: '#ef4444' }} />);
       }
@@ -44,7 +44,7 @@ function App() {
     socket.on('new_notification', (data: any) => {
       setNewNotif(data);
       console.log(data)
-      if (data.user_id != user.id) {
+      if (data.user_id != user?.id) {
         setNumberOfNotif(1);
         openNotification("You've a new Notification!", <SoundOutlined style={{ color: '#ef4444' }} />);
       }
@@ -69,18 +69,30 @@ function App() {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#232735',
-          colorBgBase: '#1a1b27',
           colorText: "#FAFAFA",
-          colorTextBase: '#ffffff',
+          colorTextPlaceholder: "#70707B",
+          colorPrimary: '#ec4899',
+          colorBgBase: '#1a1b27',
           colorBorder: "#70707B",
           colorBorderSecondary: "#3F3F46",
-          borderRadius: 8,
+          colorIcon: '#70707B',
+          colorPrimaryBorderHover: '#4A5568',
+          // Additional customizations for input fields
+          controlOutline: 'rgba(236, 72, 153, 0.2)', // Subtle outline based on colorPrimary
+          controlOutlineWidth: 1,
+          controlTmpOutline: 'rgba(236, 72, 153, 0.4)', // Slightly more visible when clicked
+        },
+        components: {
+          Input: {
+            activeBorderColor: '#ec4899', // Use colorPrimary for active state
+            hoverBorderColor: '#4A5568', // Use colorPrimaryBorderHover for hover state
+            addonBg: '#1a1b27', // Match the background color
+          },
         },
       }}
     >
       {contextHolder}
-      <AppRoutes></AppRoutes>
+      <AppRoutes />
     </ConfigProvider>
   )
 }

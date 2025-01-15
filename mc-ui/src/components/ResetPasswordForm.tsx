@@ -41,7 +41,7 @@ export const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onFinish, 
           type="primary"
           htmlType="submit"
           disabled={loading}
-          className={`w-full h-10 text-lg rounded-lg shadow-none bg-gradient-to-r from-pink-500 to-red-500 text-custom font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ${
+          className={`w-full h-10 text-lg rounded-lg  bg-gradient-to-r from-pink-500 to-red-500 text-custom font-bold py-2 px-4 focus:outline-none focus:shadow-outline transition duration-300 ${
             loading ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'
           }`}
         >

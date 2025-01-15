@@ -27,7 +27,7 @@ export default function UserProfilePage() {
   const [notFound, setNotFound] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [profile, setprofile] = useState<Profile | null>(null);
-  const [loggedInStatus, setLoggedInStatus] = useState<LoggedInData>({});
+  const [loggedInStatus, setLoggedInStatus] = useState<LoggedInData | null>(null);
   const { username } = useParams();
   const { socket } = useStore();
 
@@ -117,7 +117,7 @@ export default function UserProfilePage() {
     }
 
     return (
-      <>{profile && <UserProfile profile={profile} onRefresh={fetchUser} loggedInStatus={loggedInStatus} />}</>
+      <>{profile && loggedInStatus && <UserProfile profile={profile} onRefresh={fetchUser} loggedInStatus={loggedInStatus} />}</>
     );
 
   }

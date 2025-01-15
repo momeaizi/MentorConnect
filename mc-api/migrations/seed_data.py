@@ -27,12 +27,12 @@ def seed_users(n=100):
     users = []
     for _ in range(n):
         users.append((
-            faker.user_name(),
+            faker.user_name()[:15],
             faker.email(),
             hashed_password,
             faker.first_name(),
             faker.last_name(),
-            random.choice(['Male', 'Female']),
+            random.choice(['male', 'female']),
             faker.text(max_nb_chars=200),
             faker.date_of_birth(minimum_age=18, maximum_age=80),
             faker.latitude(),

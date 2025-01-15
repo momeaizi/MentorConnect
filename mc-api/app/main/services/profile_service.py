@@ -217,7 +217,7 @@ def get_profile_service(user_id):
             profile['birth_date'].strftime('%Y-%m-%d') if profile['birth_date'] else ''
         )
 
-        profile['gender'] = (True) if profile.get('gender', None) == 'Male' else (False)
+        profile['gender'] = (True) if profile.get('gender', None) == 'male' else (False)
 
         profile_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
         image = execute_query(profile_query, params=(user_id,), fetch_one=True)
@@ -243,7 +243,7 @@ def update_profile_service(data, user):
         user_id = user.get('id', None)
         
         # return jsonify({'message': "This username already exist"}), 403
-        gender = '\'Male\'' if data.get('gender') else '\'Female\''
+        gender = '\'male\'' if data.get('gender') else '\'female\''
         update_query = f"""
             UPDATE users 
             SET

@@ -8,6 +8,7 @@ import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import useStore from '../lib/store';
 import { LoggedInData } from '../pages/UserProfilePage';
+import { useState } from 'react';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -57,6 +58,11 @@ const getLikeButtonProps = (profile: Profile) => {
 
 
 export default function UserProfile({ profile, loggedInStatus, onRefresh }: UserProfileProps) {
+  const [isRemoveLikeModalOpen, setIsRemoveLikeModalOpen] = useState(false);
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+
   const initials = getInitials(profile.firstName, profile.lastName);
   const avatarColor = stringToColor(profile.username);
 
@@ -69,16 +75,7 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
 
 
   const onRemoveLike = () => {
-    Modal.confirm({
-      title: 'Confirm Action',
-      content: 'Are you sure you want to remove your like from this profile?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: () => {
-        handleRemoveLike();
-      },
-      onCancel: () => { },
-    });
+    setIsRemoveLikeModalOpen(true);
   };
 
 
@@ -91,40 +88,6 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
     }
   }
 
-
-  const onBlock = async () => {
-    Modal.confirm({
-      title: 'Confirm Action',
-      content: 'Are you sure you want to block this profile?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: () => {
-        handleBlock();
-      },
-      onCancel: () => { },
-      okButtonProps: {
-        style: { backgroundColor: theme.token.colorError, borderColor: theme.token.colorError }
-      },
-      cancelButtonProps: {
-        style: { borderColor: theme.token.colorBorder }
-      },
-      maskStyle: { backgroundColor: theme.token.colorBgMask }
-    });
-  }
-
-
-  const onReport = async () => {
-    Modal.confirm({
-      title: 'Confirm Action',
-      content: 'Are you sure you want to report this profile as a fake account?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: () => {
-        handleReport();
-      },
-      onCancel: () => { },
-    });
-  }
 
 
   const handleLike = async () => {
@@ -235,16 +198,15 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
         <Space wrap style={{ width: '100%', justifyContent: 'center' }}>
           <Tooltip title={(profile.likeStatus == 'mutual') ? "You've matched!" : profile.likeStatus == 'liked-by' ? "This user likes you" : ""}>
             <Button
-              className="shadow-none"
               onClick={() => onLike()}
               {...likeButtonProps}
             >
               {likeButtonProps.children}
             </Button>
           </Tooltip>
-          {profile.conversationId && <Button className="shadow-none" icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
-          <Button className="shadow-none" icon={<StopOutlined />} onClick={() => onBlock()} danger>Block</Button>
-          <Button className="shadow-none" icon={<FlagOutlined />} onClick={() => onReport()} danger>Report</Button>
+          {profile.conversationId && <Button icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
+          <Button icon={<StopOutlined />} onClick={() => setIsBlockModalOpen(true)} danger>Block</Button>
+          <Button icon={<FlagOutlined />} onClick={() => setIsReportModalOpen(true)} danger>Report</Button>
         </Space>
 
         <Space direction="vertical" style={{ width: '100%' }}>
@@ -325,6 +287,48 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
           )}
         </Space>
       </Space>
+      <Modal
+        title="Confirm Action"
+        open={isRemoveLikeModalOpen}
+        onOk={() => {
+          handleRemoveLike();
+          setIsRemoveLikeModalOpen(false);
+        }}
+        onCancel={() => setIsRemoveLikeModalOpen(false)}
+        okText="Yes"
+        cancelText="No"
+      >
+        <p>Are you sure you want to remove your like from this profile?</p>
+      </Modal>
+
+      <Modal
+        title="Confirm Action"
+        open={isBlockModalOpen}
+        onOk={() => {
+          handleBlock();
+          setIsBlockModalOpen(false);
+        }}
+        onCancel={() => setIsBlockModalOpen(false)}
+        okText="Yes"
+        cancelText="No"
+      >
+        <p>Are you sure you want to block this user?</p>
+      </Modal>
+
+      <Modal
+        title="Confirm Action"
+        open={isReportModalOpen}
+        onOk={() => {
+          handleReport();
+          setIsReportModalOpen(false);
+        }}
+        onCancel={() => setIsReportModalOpen(false)}
+        okText="Yes"
+        cancelText="No"
+        
+      >
+        <p>Are you sure you want to report this user as fake account?</p>
+      </Modal>
     </Card>
   )
 }

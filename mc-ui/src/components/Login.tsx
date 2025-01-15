@@ -102,7 +102,7 @@ const LoginForm = ({ closeModal }: LoginProps) => {
 
       <Form.Item>
         <Button
-          className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+          className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 "
           icon={loading ? <LoadingOutlined /> : null}
           loading={loading}
           disabled={loading}

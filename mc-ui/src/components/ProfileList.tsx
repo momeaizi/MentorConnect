@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, XIcon, Calendar, FlagIcon } from 'lucide-react'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -21,6 +21,7 @@ interface Profile {
     gender: string;
     isFlagged: boolean;
     likeStatus: string;
+    isRemoving: boolean;
 }
 
 
@@ -29,7 +30,6 @@ const ProfileList: React.FC = () => {
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [filteredProfiles, setFilteredProfiles] = useState<Profile[]>([]);
 
-    const [likedProfiles, setLikedProfiles] = useState<number[]>([]);
     const [allInterests, setAllInterests] = useState<string[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
@@ -45,7 +45,7 @@ const ProfileList: React.FC = () => {
     const [fameRange, setFameRange] = useState<[number, number]>([0, maxFameRating]);
 
     // sort states
-    const [sortCriteria, setSortCriteria] = useState<string>('');
+    const [sortCriteria, setSortCriteria] = useState<string>('distance');
     const [sortOrder, setSortOrder] = useState<'ascend' | 'descend'>('descend');
 
 
@@ -79,14 +79,16 @@ const ProfileList: React.FC = () => {
                 username: item.username,
                 commonInterestsCount: item.common_interests_count,
                 isFlagged: item.is_flagged,
-                likeStatus: item.like_status
+                likeStatus: item.like_status,
+                isRemoving: false,
             }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
 
-            const maxFameRating = Math.max(...profiles.map((profile: Profile) => profile.fameRating));
+            const maxFameRatingVal = Math.max(...fetchedProfiles.map((profile: Profile) => profile.fameRating));
 
-            setMaxFameRating(maxFameRating);
+            setMaxFameRating(maxFameRatingVal);
+
 
             if (fetchedProfiles.length > 0) {
                 const ages = fetchedProfiles.map((profile: Profile) => profile.age);
@@ -119,36 +121,28 @@ const ProfileList: React.FC = () => {
 
     const applyFilters = () => {
 
-        let filtered = profiles.filter(profile =>
+        let filtered = profiles.filter((profile: Profile) =>
             profile.age >= ageRange[0] && profile.age <= ageRange[1] &&
             profile.distance >= distanceRange[0] && profile.distance <= distanceRange[1] &&
             profile.fameRating >= fameRange[0] && profile.fameRating <= fameRange[1] &&
-            (selectedInterests.length === 0 || selectedInterests.some(interest => profile.interests.includes(interest)))
+            (selectedInterests.length === 0 || selectedInterests.some((interest: string) => profile.interests.includes(interest)))
         )
-
-        setSortCriteria('commonTags');
-
-        filtered.sort((a, b) => {
-            return a.commonInterestsCount - b.commonInterestsCount;
-        });
 
         setFilteredProfiles(filtered);
     }
 
     const resetFilters = () => {
-        setAgeRange([minAge, maxAge])
-        setFameRange([0, maxFameRating])
-        setSelectedInterests([])
-        setSortOrder('descend')
-        setLikedProfiles([])
-        setSortCriteria('fameRating');
-        applyFilters()
-        handleSort('fameRating');
+        setAgeRange([minAge, maxAge]);
+        setFameRange([0, maxFameRating]);
+        setDistanceRange([minDistance, maxDistance]);
+        setSelectedInterests([]);
+        applyFilters();
+        handleSort('distance');
     }
 
     const handleSort = (value: string) => {
         setSortCriteria(value);
-        setFilteredProfiles(prevProfiles => {
+        setFilteredProfiles((prevProfiles: Profile[]) => {
             const sorted = [...prevProfiles].sort((a, b) => {
                 if (value === 'age') return b.age - a.age;
                 if (value === 'fameRating') return a.fameRating - b.fameRating;
@@ -161,26 +155,28 @@ const ProfileList: React.FC = () => {
     };
 
     const toggleSortOrder = () => {
-        setSortOrder(prevOrder => prevOrder === 'ascend' ? 'descend' : 'ascend')
-        setFilteredProfiles(prevProfiles => [...prevProfiles].reverse())
+        setSortOrder((prevOrder: string) => prevOrder === 'ascend' ? 'descend' : 'ascend')
+        setFilteredProfiles((prevProfiles: Profile[]) => [...prevProfiles].reverse())
     }
 
     const handleLike = async (e: React.MouseEvent<HTMLElement>, profileId: number) => {
         e.stopPropagation();
         try {
-          await api.post(`/profiles/${profileId}/like`);
-          setFilteredProfiles(prevProfiles => 
-            prevProfiles.map(profile => 
-              profile.id === profileId ? { ...profile, isRemoving: true } : profile
-            )
-          );
-          setTimeout(() => {
-            setFilteredProfiles(prevProfiles => prevProfiles.filter(profile => profile.id !== profileId));
-          }, 500);
+            await api.post(`/profiles/${profileId}/like`);
+            setFilteredProfiles((prevProfiles: Profile[]) =>
+                prevProfiles.map(profile =>
+                    profile.id === profileId ? { ...profile, isRemoving: true } : profile
+                )
+            );
+            setProfiles((prevProfiles: Profile[]) => prevProfiles.filter(profile => profile.id !== profileId));
+
+            setTimeout(() => {
+                setFilteredProfiles((prevProfiles: Profile[]) => prevProfiles.filter(profile => profile.id !== profileId));
+            }, 500);
         } catch (error) {
-          console.error("Error liking profile:", error);
+            console.error("Error liking profile:", error);
         }
-      };
+    };
 
 
     return (
@@ -237,7 +233,7 @@ const ProfileList: React.FC = () => {
                             </Select>
                         </div>
                         <div className="flex gap-2">
-                            <Button className="bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+                            <Button className="bg-gradient-to-r from-pink-500 to-red-500 "
                                 onClick={applyFilters}
                                 type="primary"
                                 disabled={loading}
@@ -325,7 +321,7 @@ const ProfileList: React.FC = () => {
                                 <Button
                                     type="primary"
                                     icon={<HeartIcon className="w-4 h-4" />}
-                                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+                                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 "
                                     onClick={(e: React.MouseEvent<HTMLElement>) => handleLike(e, profile.id)}
                                     disabled={profile.likeStatus === 'mutual' || profile.likeStatus === 'one-way'}
                                 >

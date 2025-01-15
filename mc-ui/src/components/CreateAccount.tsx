@@ -173,7 +173,7 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
 
       <Form.Item>
         <Button
-          className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 shadow-none"
+          className="w-full h-[40px] text-lg rounded-lg bg-gradient-to-r from-pink-500 to-red-500 "
           type="primary"
           htmlType="submit"
           icon={loading ? <LoadingOutlined /> : null}

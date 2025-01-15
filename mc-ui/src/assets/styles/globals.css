@@ -77,3 +77,6 @@ body {
 }
 
 
+.ant-btn {
+  box-shadow: none;
+}
