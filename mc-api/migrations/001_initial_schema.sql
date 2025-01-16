@@ -10,6 +10,7 @@ CREATE TABLE users (
     gender VARCHAR(50),
     bio TEXT,
     birth_date DATE,
+    picture_name VARCHAR(100),
     is_logged_in BOOLEAN DEFAULT FALSE,
     last_logged_in TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     geolocation geography(POINT, 4326),

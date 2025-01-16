@@ -26,15 +26,10 @@ def create_notif_service(data):
         if notification_time.tzinfo is None:
             notification_time = notification_time.replace(tzinfo=timezone.utc)
 
-        
-        picture_query = "SELECT * FROM pictures WHERE user_id = %s AND is_profile = TRUE;"
-        image = execute_query(picture_query, params=(user.get('id'),), fetch_one=True)
-        if image:
-            file_name = image.get('file_name')
         new_notification= {
             'username': user.get('username'),
             'user_id':user.get('id'),
-            'userPicture': file_name,
+            'userPicture': user.get('picture_name'),
             'type': notif.get('type'),
             'time': humanize.naturaltime(
                 datetime.now(timezone.utc) - notification_time

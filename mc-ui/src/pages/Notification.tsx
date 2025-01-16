@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import useStore from "../lib/store";
 import { useAuth } from "../providers/AuthProvider";
 import api from "../services/api";
+import { useNavigate } from 'react-router-dom';
+import { Empty } from 'antd';
+import { BellOutlined } from '@ant-design/icons';
+
 
 
 interface Notification {
@@ -44,6 +48,7 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
   const { userPicture, username, type, time, isRead } = notification;
   const title = notificationMap[type]?.title;
   const subtitle = notificationMap[type]?.subtitle;
+  const navigteTo = useNavigate();
   
   useEffect(() => {
     const handleResize = () => {
@@ -60,10 +65,15 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [mobileNotif, setMobileNotif]);
 
-
+  const handleClickNotifCard = ()=> {
+    navigteTo(`/profiles/${notification?.username}`);
+  }
 
   return (
-    <div className={`grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${!isRead && "bg-sky-900"}`}>
+    <div
+      onClick={handleClickNotifCard}
+      className={`cursor-pointer grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${!isRead && "bg-sky-900"}`}
+    >
       <div className="w-12 h-12 md:w-15 md:h-15 ">
         <img src={`http://localhost:5000/api/profiles/get_image/${userPicture}`} alt="Image" className="w-full h-full object-cover rounded-lg" />
       </div>
@@ -146,11 +156,24 @@ const NotificationPage = () => {
 
   return (
     <div className="w-screen h-full p-[12px_0_0_0] md:p-[12px_2em_0_2em] flex items-center justify-center box-border overflow-x-scroll bg-[#232735]">
-      <div className="w-full  h-full flex flex-col items-center gap-2 ">
+      {(notificationsData.length) ?
+        <div className="w-full  h-full flex flex-col items-center gap-2 ">
         {notificationsData.map((notif, index) => (
           <NotificationCard key={index} notification={notif} />
         ))}
-      </div>
+        </div> :
+          <Empty
+            image={<BellOutlined style={{ fontSize: 64, color: '#bfbfbf' }} />}
+            imageStyle={{ height: 60 }}
+            description={
+              <span>
+                No notifications at the moment
+              </span>
+            }
+          >
+            <p style={{ color: '#8c8c8c' }}>When you have notifications, they'll appear here.</p>
+          </Empty>
+      }
     </div>
   );
 };

@@ -46,7 +46,7 @@ class ProfileViewsService():
                     history_time = history_time.replace(tzinfo=timezone.utc)
                 formatted_history.append({
                     'username': user.get('username'),
-                    'userPicture': 'https://randomuser.me/api/portraits/men/32.jpg', # TODO GET THE PICTURE FROM USER PITURES
+                    'userPicture': user.get('picture_name'),
                     'time': humanize.naturaltime(
                         datetime.now(timezone.utc) - history_time
                     ),

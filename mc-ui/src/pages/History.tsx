@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import api from "../services/api";
+import { useNavigate } from 'react-router-dom';
+import { Empty } from 'antd';
+import { HistoryOutlined } from '@ant-design/icons';
 
 
 interface History {
@@ -13,9 +16,13 @@ interface History {
 const HistoryCard = ({ history }: { history: History }) => {
   const [mobileNotif, setMobileNotif] = useState<boolean>(false);
   const { userPicture, username, time } = history;
+  const navigteTo = useNavigate();
   const title = "Profile Visit Tracking";
   const subtitle = "Ensure Every Profile View is Logged in the User’s Visit History";
   
+  const handleClickHistoryCard = ()=> {
+    navigteTo(`/profiles/${history?.username}`);
+  }
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 560) {
@@ -34,9 +41,15 @@ const HistoryCard = ({ history }: { history: History }) => {
 
 
   return (
-    <div className='grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 '>
-      <div className="w-12 h-12 md:w-15 md:h-15 ">
-        <img src={userPicture} alt="Image" className="w-full h-full object-cover rounded-lg" />
+    <div onClick={handleClickHistoryCard}
+      className='cursor-pointer grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 '
+    >
+        <div className="w-12 h-12 md:w-15 md:h-15 ">
+        <img
+          src={`http://localhost:5000/api/profiles/get_image/${userPicture}`}
+          alt="Image"
+          className="w-full h-full object-cover rounded-lg"
+        />
       </div>
     
       <div className="h-full w-full flex flex-col">
@@ -90,11 +103,24 @@ const HistoryPage = () => {
 
   return (
     <div className="w-screen h-full p-[12px_0_0_0] md:p-[12px_2em_0_2em] flex items-center justify-center box-border overflow-x-scroll bg-[#232735]">
-      <div className="w-full  h-full flex flex-col items-center gap-2 ">
+      { (historyData.length) ?
+        <div className="w-full  h-full flex flex-col items-center gap-2 ">
         {historyData.map((history, index) => (
           <HistoryCard key={index} history={history} />
         ))}
-      </div>
+        </div> :
+        <Empty
+          image={<HistoryOutlined style={{ fontSize: 64, color: '#8c8c8c' }} />}
+          imageStyle={{ height: 60 }}
+          description={
+            <span>
+              No history available
+            </span>
+          }
+        >
+          <p style={{ color: '#8c8c8c' }}>Your activity history will appear here as you use the application.</p>
+        </Empty>
+      }
     </div>
   );
 };

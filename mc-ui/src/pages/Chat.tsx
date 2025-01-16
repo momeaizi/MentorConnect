@@ -72,9 +72,9 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
       >
       <div className=' flex justify-center items-center rounded-[50px]'>
         <img
-          className='rounded-[50px]'
+          className='rounded-[50px] w-[40px] h-[40px]'
           width={50}
-          src={cellData.image}
+          src={`http://localhost:5000/api/profiles/get_image/${cellData.image}`}
           // preview={false}
         />
       </div>
@@ -245,12 +245,12 @@ function ConversationWindow() {
   const [chatHeader, setChatHeader] = useState<HeaderTypes|null>(null)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [loadding, setLodding] = useState<boolean>(false)
-  const {setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket, setNewMessageSocket} = useStore();
+  const {setSelectedIndex, setSelectedConv, selectedConv, newMessageSocket, setNewMessageSocket, socket} = useStore();
   const [newMessage, setNewMessage] = useState('');
+  const [status, setStatus] = useState<boolean>(true);
   const { user } = useAuth();
   const scrollableDivRef = useRef<HTMLDivElement | null>(null);
   const [api, contextHolder] = notification.useNotification();
-
     
   const openNotification = (message:string, icon:any) => {
       api.open({
@@ -270,11 +270,10 @@ function ConversationWindow() {
     setNewMessage(event.target.value);
   };
 
-
   useEffect(() => {
       if (newMessageSocket && newMessageSocket.conv_id === selectedConv) {
           setChatMessages((prevMessages) => [...prevMessages, newMessageSocket]);
-          setNewMessageSocket(null); // Clear the socket message after processing
+          setNewMessageSocket(null);
       }
   }, [newMessageSocket]);
 
@@ -323,7 +322,7 @@ function ConversationWindow() {
       }
     };
     
-    setLodding(false)
+    setLodding(false);
     
     if (selectedConv) {
       getChatWindow();
@@ -335,6 +334,33 @@ function ConversationWindow() {
     setSelectedIndex(0);
     setSelectedConv(0);
   }
+
+  useEffect(()=>{
+    setStatus(chatHeader?.is_logged_in);
+  },[chatHeader])
+
+
+
+  useEffect(() => {
+    const handleStatusEvent = (data: StatusEventData) => {
+      const { user_id, is_logged_in } = data;
+
+      if (user_id === chatHeader?.id) {
+        setStatus(is_logged_in);
+      }
+
+    };
+
+    if (socket) {
+      socket.on('status', handleStatusEvent);
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('status', handleStatusEvent);
+      }
+    };
+  }, [socket]);
 
   return(
     <>
@@ -348,17 +374,16 @@ function ConversationWindow() {
                   <ArrowLeftOutlined className='w-[30px] font-extrabold font-[10px]'/> 
                 </div>}
                 <img
-                  className='rounded-[50px]'
+                  className='rounded-[50px] w-[40px] h-[40px]'
                   width={40}
-                  src={chatHeader?.image}
-                  // preview={false}
+                  src={`http://localhost:5000/api/profiles/get_image/${chatHeader?.image}`}
                 />
                 <div className='flex flex-col gap-0'>
                   <div className='font-bold	'>
                     {chatHeader?.name}
                   </div>
                   <div className='text-gray-400 text-sm'>
-                    {(chatHeader?.is_logged_in)?"Online":"Offline"}
+                    {(status)?"Online":"Offline"}
                   </div>
                 </div>
 
