@@ -69,13 +69,14 @@ function App() {
     <ConfigProvider
       theme={{
         token: {
-          colorText: "#FAFAFA",
           colorTextPlaceholder: "#70707B",
           colorPrimary: '#ec4899',
           colorBgBase: '#1a1b27',
+          colorText: "#FAFAFA",
           colorBorder: "#70707B",
           colorBorderSecondary: "#3F3F46",
           colorIcon: '#70707B',
+          colorTextBase: '#ffffff',
           colorPrimaryBorderHover: '#4A5568',
           // Additional customizations for input fields
           controlOutline: 'rgba(236, 72, 153, 0.2)', // Subtle outline based on colorPrimary

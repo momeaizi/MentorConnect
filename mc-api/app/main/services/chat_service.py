@@ -32,6 +32,7 @@ def get_conv_with_user_id_service(user_id):
                 c.id AS conversation_id,
                 u.first_name || ' ' || u.last_name AS name,
                 u.username,
+                u.picture_name AS picture_name,
                 u.email,
                 u.is_logged_in,
                 c.see AS is_seen,
@@ -71,7 +72,7 @@ def get_conv_with_user_id_service(user_id):
                 "lastMessage": conv["last_message_content"] or "", 
                 "time": conv["last_message_time"].strftime("%I:%M%p") if conv.get("last_message_time") else conv["conv_time"].strftime("%I:%M%p") if conv.get("conv_time") else "",
                 "isSeen": conv["is_seen"],
-                "image": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+                "image": conv['picture_name'],
             }
             for conv in conversations
         ]
@@ -98,23 +99,17 @@ def get_conv_with_conv_id_service(conv_id, user_id):
         if messages:
             last_message = messages[-1]
         
-        logger.info("_____________________________________________")
-        logger.info(user_id)
-        logger.info(last_message)
-        logger.info("_____________________________________________")
         if messages and user_id != last_message.get('user_id', None):
-            logger.info("******************")
             update_query = "UPDATE conversations SET see = TRUE WHERE id = %s RETURNING *"
             execute_query(update_query, params=(last_message.get('conversation_id', None),))
             conversation = execute_query(select_conversation_query, params=(conv_id,), fetch_one=True)
-            logger.info(f"=======> {conversation}")
 
         select_user_query = "SELECT * FROM users WHERE id = %s"
 
         user = execute_query(select_user_query, params=(str(conversation['user_id_2']) if conversation['user_id_1'] == user_id else str(conversation['user_id_1']) ,), fetch_one=True)
 
         new_conversation = {
-            "image": "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
+            "image": user['picture_name'],
             "name": user['username'],
             "is_logged_in": user['is_logged_in'],
             "id": user['id']

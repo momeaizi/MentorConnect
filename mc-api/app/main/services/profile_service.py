@@ -320,6 +320,16 @@ def handle_profile_picture_service(user, profile_file):
         """
         execute_query(insert_query, params=(user_id, unique_filename, True), fetch_one=True)
 
+        update_query = f"""
+            UPDATE users 
+            SET
+                picture_name = %s 
+            WHERE id = %s
+        """
+        execute_query(update_query, params=(unique_filename, user_id,))
+
+        
+
         return jsonify({'status': 'success', 'message': 'Profile picture uploaded/updated successfully', 'filename': unique_filename}), 200
     except Exception as e:
         logger.error(f"Error handling profile picture: {e}")

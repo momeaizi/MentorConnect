@@ -59,9 +59,11 @@ export async function postData(data: ProfileData, openNotification:any, setUpdat
         return await response.data.access_token;
     } catch (error) {
         setUpdateLoading(false)
-
+        console.log(error)
         if (error.status == 409)
             openNotification('username already exist', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        else if (error.status == 400)
+            openNotification(error?.response?.data.message, <InfoCircleOutlined style={{ color: 'red' }}/>)
         else 
         openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
 

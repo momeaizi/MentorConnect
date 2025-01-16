@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../providers/AuthProvider";
 import api from "../services/api";
+import { useNavigate } from 'react-router-dom';
+import { Empty } from 'antd';
+import { StarOutlined } from '@ant-design/icons';
 
 
 interface Favorie {
@@ -13,6 +16,7 @@ interface Favorie {
 const FavorieCard = ({ favorie }: { favorie: Favorie }) => {
   const [mobileNotif, setMobileNotif] = useState<boolean>(false);
   const { userPicture, username, time } = favorie;
+  const navigteTo = useNavigate();
   const title = " Behind the Likes!" ;
   const subtitle = "Unveiling Who Engages and Why!";
   
@@ -31,12 +35,21 @@ const FavorieCard = ({ favorie }: { favorie: Favorie }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, [mobileNotif, setMobileNotif]);
 
-
+  const handleClickFavorieCard = ()=> {
+    navigteTo(`/profiles/${favorie?.username}`);
+  }
 
   return (
-    <div className='grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 '>
+    <div
+      onClick={handleClickFavorieCard}
+      className='cursor-pointer grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 '
+    >
       <div className="w-12 h-12 md:w-15 md:h-15 ">
-        <img src={userPicture} alt="Image" className="w-full h-full object-cover rounded-lg" />
+        <img
+          alt="Image"
+          className="w-full h-full object-cover rounded-lg"
+          src={`http://localhost:5000/api/profiles/get_image/${userPicture}`}
+        />
       </div>
     
       <div className="h-full w-full flex flex-col">
@@ -90,11 +103,24 @@ const FavoriePage = () => {
 
   return (
     <div className="w-screen h-full p-[12px_0_0_0] md:p-[12px_2em_0_2em] flex items-center justify-center box-border overflow-x-scroll bg-[#232735]">
-      <div className="w-full  h-full flex flex-col items-center gap-2 ">
-        {favoriesData.map((favorie, index) => (
-          <FavorieCard key={index} favorie={favorie} />
-        ))}
-      </div>
+      {(favoriesData.length) ?
+        <div className="w-full  h-full flex flex-col items-center gap-2 ">
+          {favoriesData.map((favorie, index) => (
+            <FavorieCard key={index} favorie={favorie} />
+          ))}
+        </div> : 
+        <Empty
+        image={<StarOutlined style={{ fontSize: 64, color: '#ffd666' }} />}
+        imageStyle={{ height: 60 }}
+        description={
+          <span>
+            You haven't added any favorites yet
+          </span>
+        }
+        >
+          <p style={{ color: '#8c8c8c' }}>Profiles you favorite will appear here for quick access.</p>
+        </Empty>
+      }
     </div>
   );
 };

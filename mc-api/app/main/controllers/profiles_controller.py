@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.main.services.profile_views_service import ProfileViewsService
 from app.main.services.profile_likes_service import ProfilelikesService
 from app.main.services.profile_suggestions_service import ProfileSuggestionsService
-from app.main.utils.decorators import token_required
+from app.main.utils.decorators import token_required, expect_dto
 from loguru import logger
 from app.main.services.profile_service import (
     get_profile_service, update_profile_service,
@@ -10,6 +10,7 @@ from app.main.services.profile_service import (
     get_image_service,
     get_profile_by_username_service
 )
+from app.main.utils.dtos.profile_dto import ProfileUpdateDTO
 
 profile_bp = Blueprint('profile_bp', __name__)
 
@@ -78,12 +79,12 @@ def unlike_profile(user, unliked_profile_id):
 #*****************************************************
 
 
-# TODO ADD DTO
 #? Update Profile
 @profile_bp.route('/', methods=['PATCH'])
 @token_required
-def update_profile(user):
-    data = request.json
+@expect_dto(ProfileUpdateDTO, validate=True)
+def update_profile(user, data):
+    # data = request.json
     return update_profile_service(data, user)
 
 
