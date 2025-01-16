@@ -8,7 +8,7 @@ from app.main.services.socket_service import SocketService
 socket_service = SocketService()
 
 
-def can_send_notification(liker_id, liked_profile_id) -> bool:
+def can_send_notification(actor_id, notified_user_id) -> bool:
     """
     Checks if a notification can be sent based on the profile_removed_likes table.
     
@@ -21,16 +21,16 @@ def can_send_notification(liker_id, liked_profile_id) -> bool:
         bool: True if the notification can be sent, False otherwise.
     """
     query = """
-        SELECT NOT EXISTS (
+        SELECT EXISTS (
             SELECT 1 
             FROM profile_removed_likes
             WHERE liker_id = %s AND liked_profile_id = %s
         );
     """
     try:
-        result = execute_query(query, params=(liker_id, liked_profile_id), fetch_one=True)
-        logger.info(result)
-        return result
+        result = execute_query(query, params=(notified_user_id, actor_id), fetch_one=True)
+        logger.info(not result.get('exists', None))
+        return not result.get('exists', None)
     except Exception as e:
         logger.info(f"Error checking notification eligibility: {e}")
         return False
@@ -40,6 +40,10 @@ def can_send_notification(liker_id, liked_profile_id) -> bool:
 def create_notif_service(data):
 
     try:
+
+        # if not can_send_notification(data.get('notified_user_id', None), data.get('actor_id', None)):
+        #     return jsonify({'status': 'error', 'message': 'this profile has removed his like'}), 400
+
         validate_query = "SELECT 1 FROM users WHERE id = %s"
         user_exists = execute_query(validate_query, params=(data.get("notified_user_id", None),), fetch_one=True)
 

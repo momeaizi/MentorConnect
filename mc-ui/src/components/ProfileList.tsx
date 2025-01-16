@@ -78,23 +78,22 @@ const ProfileList: React.FC = () => {
         setLoading(true);
         try {
             const res = await api.get('/profiles/suggestions');
-            // const fetchedProfiles = res.data?.map((item: any) => ({
-            //     id: item.id,
-            //     firstName: item.first_name,
-            //     lastName: item.last_name,
-            //     age: Math.floor(item.age),
-            //     fameRating: item.fame_rating,
-            //     interests: item.interests?.filter((interest: string | null) => (interest)),
-            //     image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
-            //     gender: item.gender,
-            //     distance: Math.floor(item.distance),
-            //     username: item.username,
-            //     commonInterestsCount: item.common_interests_count,
-            //     isFlagged: item.is_flagged,
-            //     likeStatus: item.like_status,
-            //     isRemoving: false,
-            // }));
-            const fetchedProfiles: profile[] = [];
+            const fetchedProfiles = res.data?.map((item: any) => ({
+                id: item.id,
+                firstName: item.first_name,
+                lastName: item.last_name,
+                age: Math.floor(item.age),
+                fameRating: item.fame_rating,
+                interests: item.interests?.filter((interest: string | null) => (interest)),
+                image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
+                gender: item.gender,
+                distance: Math.floor(item.distance),
+                username: item.username,
+                commonInterestsCount: item.common_interests_count,
+                isFlagged: item.is_flagged,
+                likeStatus: item.like_status,
+                isRemoving: false,
+            }));
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
 
