@@ -1,5 +1,5 @@
-import { Card, Avatar, Badge, Button, Typography, Space, Tag, Image, Empty, Tooltip } from 'antd';
-import { HeartOutlined, HeartFilled, MessageOutlined, StopOutlined, FlagOutlined, StarOutlined, ManOutlined, WomanOutlined, PictureOutlined, TagOutlined, FlagFilled } from '@ant-design/icons';
+import { Card, notification, Avatar, Badge, Button, Typography, Space, Tag, Image, Empty, Tooltip } from 'antd';
+import { HeartOutlined, HeartFilled, CloseCircleFilled, MessageOutlined, StopOutlined, FlagOutlined, StarOutlined, ManOutlined, WomanOutlined, PictureOutlined, TagOutlined, FlagFilled } from '@ant-design/icons';
 import { MapPinIcon } from 'lucide-react';
 import { Profile } from '../types/profile';
 import { Modal } from 'antd';
@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import useStore from '../lib/store';
 import { LoggedInData } from '../pages/UserProfilePage';
 import { useState } from 'react';
+import { isAxiosError } from '../types/api';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -70,6 +71,14 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
 
   const navigate = useNavigate();
   const { setSelectedConv } = useStore();
+  const [notifApi, contextHolder] = notification.useNotification();
+
+  const openNotification = (message: string, icons: any) => {
+    notifApi.open({
+      message: message,
+      icon: icons
+    });
+  };
 
 
 
@@ -96,7 +105,13 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
 
       onRefresh();
 
-    } catch (error) { }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      } else {
+        openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      }
+    }
   }
 
   const handleRemoveLike = async () => {
@@ -106,26 +121,43 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
       onRefresh();
 
 
-    } catch (error) { }
+
+    } catch (error) {
+      if (isAxiosError(error)) {
+        openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      } else {
+        openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      }
+    }
   }
 
   const handleReport = async () => {
     try {
       await api.post(`/users/${profile.id}/report`);
-
       navigate(0);
 
-    } catch (error) { }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      } else {
+        openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      }
+    }
   }
 
 
   const handleBlock = async () => {
     try {
       await api.post(`/users/${profile.id}/block`);
-
       navigate(0);
 
-    } catch (error) { }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      } else {
+        openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      }
+    }
   }
 
   const handleMessage = () => {
@@ -137,199 +169,202 @@ export default function UserProfile({ profile, loggedInStatus, onRefresh }: User
   }
 
   return (
-    <Card style={{ maxWidth: 600, margin: '0 auto' }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>
-        <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
-          <Title level={4}>{profile.username}</Title>
-          <Badge
-            status={loggedInStatus.isLoggedIn ? "success" : "default"}
-            text={loggedInStatus.isLoggedIn ? "Online" : getLastSeen(loggedInStatus.lastLoggedIn)}
-          />
-        </Space>
+    <>
+      {contextHolder}
+      <Card style={{ maxWidth: 600, margin: '0 auto' }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space align="center" style={{ width: '100%', justifyContent: 'space-between' }}>
+            <Title level={4}>{profile.username}</Title>
+            <Badge
+              status={loggedInStatus.isLoggedIn ? "success" : "default"}
+              text={loggedInStatus.isLoggedIn ? "Online" : getLastSeen(loggedInStatus.lastLoggedIn)}
+            />
+          </Space>
 
-        <Space direction="vertical" align="center" style={{ width: '100%' }}>
-          {profile.image ? (
-            <Avatar size={128} src={profile.image} alt={profile.username} />
-          ) : (
-            <Avatar size={128} style={{ backgroundColor: avatarColor, fontSize: '3rem', fontWeight: 'bold' }}>
-              {initials}
-            </Avatar>
-          )}
-          <Space align="center">
-            <Title level={3}>{`${profile.firstName} ${profile.lastName}`}</Title>
-            {profile.isFlagged && (
-              <Tooltip title="This account has been flagged as potentially fake">
-                <FlagFilled style={{ fontSize: '24px', color: '#ff4d4f' }} />
-              </Tooltip>
+          <Space direction="vertical" align="center" style={{ width: '100%' }}>
+            {profile.image ? (
+              <Avatar size={128} src={profile.image} alt={profile.username} />
+            ) : (
+              <Avatar size={128} style={{ backgroundColor: avatarColor, fontSize: '3rem', fontWeight: 'bold' }}>
+                {initials}
+              </Avatar>
+            )}
+            <Space align="center">
+              <Title level={3}>{`${profile.firstName} ${profile.lastName}`}</Title>
+              {profile.isFlagged && (
+                <Tooltip title="This account has been flagged as potentially fake">
+                  <FlagFilled style={{ fontSize: '24px', color: '#ff4d4f' }} />
+                </Tooltip>
+              )}
+            </Space>
+
+            <Space size="large">
+              <Space direction="vertical" align="center">
+                <Text strong>Fame Rating</Text>
+                <Space>
+                  <StarOutlined style={{ fontSize: '18px', color: '#faad14' }} />
+                  <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.fameRating}</Text>
+                </Space>
+              </Space>
+              <Space direction="vertical" align="center">
+                <Text strong>Distance</Text>
+                <Space>
+                  <MapPinIcon size={18} />
+                  <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.distance} km</Text>
+                </Space>
+              </Space>
+              <Space direction="vertical" align="center">
+                <Text strong>Gender</Text>
+                <Space>
+                  {profile.gender.toLowerCase() === 'male' ? (
+                    <ManOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
+                  ) : profile.gender.toLowerCase() === 'female' ? (
+                    <WomanOutlined style={{ fontSize: '18px', color: '#eb2f96' }} />
+                  ) : (
+                    <span style={{ fontSize: '18px' }}>⚧</span>
+                  )}
+                  <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.gender}</Text>
+                </Space>
+              </Space>
+            </Space>
+          </Space>
+
+          <Space wrap style={{ width: '100%', justifyContent: 'center' }}>
+            <Tooltip title={(profile.likeStatus == 'mutual') ? "You've matched!" : profile.likeStatus == 'liked-by' ? "This user likes you" : ""}>
+              <Button
+                onClick={() => onLike()}
+                {...likeButtonProps}
+              >
+                {likeButtonProps.children}
+              </Button>
+            </Tooltip>
+            {profile.conversationId && <Button icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
+            <Button icon={<StopOutlined />} onClick={() => setIsBlockModalOpen(true)} danger>Block</Button>
+            <Button icon={<FlagOutlined />} onClick={() => setIsReportModalOpen(true)} danger>Report</Button>
+          </Space>
+
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Title level={4}>About Me</Title>
+            <Paragraph>{profile.bio || "No bio provided."}</Paragraph>
+          </Space>
+
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Title level={4}>Common Interests</Title>
+            {profile.common_interests && profile.common_interests.length > 0 ? (
+              <Space wrap>
+                {profile.common_interests.map((interest: string, index: number) => (
+                  <Tag key={index} color="blue">{interest}</Tag>
+                ))}
+              </Space>
+            ) : (
+              <Empty
+                image={<TagOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
+                imageStyle={{ height: 60 }}
+                description={
+                  <Space direction="vertical" align="center">
+                    <Text strong>No common interests found</Text>
+                    <Text type="secondary">You don't share any interests with this user yet.</Text>
+                  </Space>
+                }
+              />
             )}
           </Space>
 
-          <Space size="large">
-            <Space direction="vertical" align="center">
-              <Text strong>Fame Rating</Text>
-              <Space>
-                <StarOutlined style={{ fontSize: '18px', color: '#faad14' }} />
-                <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.fameRating}</Text>
-              </Space>
-            </Space>
-            <Space direction="vertical" align="center">
-              <Text strong>Distance</Text>
-              <Space>
-                <MapPinIcon size={18} />
-                <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.distance} km</Text>
-              </Space>
-            </Space>
-            <Space direction="vertical" align="center">
-              <Text strong>Gender</Text>
-              <Space>
-                {profile.gender.toLowerCase() === 'male' ? (
-                  <ManOutlined style={{ fontSize: '18px', color: '#1890ff' }} />
-                ) : profile.gender.toLowerCase() === 'female' ? (
-                  <WomanOutlined style={{ fontSize: '18px', color: '#eb2f96' }} />
-                ) : (
-                  <span style={{ fontSize: '18px' }}>⚧</span>
-                )}
-                <Text style={{ fontSize: '18px', fontWeight: 'bold' }}>{profile.gender}</Text>
-              </Space>
-            </Space>
-          </Space>
-        </Space>
-
-        <Space wrap style={{ width: '100%', justifyContent: 'center' }}>
-          <Tooltip title={(profile.likeStatus == 'mutual') ? "You've matched!" : profile.likeStatus == 'liked-by' ? "This user likes you" : ""}>
-            <Button
-              onClick={() => onLike()}
-              {...likeButtonProps}
-            >
-              {likeButtonProps.children}
-            </Button>
-          </Tooltip>
-          {profile.conversationId && <Button icon={<MessageOutlined />} onClick={() => handleMessage()}>Message</Button>}
-          <Button icon={<StopOutlined />} onClick={() => setIsBlockModalOpen(true)} danger>Block</Button>
-          <Button icon={<FlagOutlined />} onClick={() => setIsReportModalOpen(true)} danger>Report</Button>
-        </Space>
-
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Title level={4}>About Me</Title>
-          <Paragraph>{profile.bio || "No bio provided."}</Paragraph>
-        </Space>
-
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Title level={4}>Common Interests</Title>
-          {profile.common_interests && profile.common_interests.length > 0 ? (
-            <Space wrap>
-              {profile.common_interests.map((interest: string, index: number) => (
-                <Tag key={index} color="blue">{interest}</Tag>
-              ))}
-            </Space>
-          ) : (
-            <Empty
-              image={<TagOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
-              imageStyle={{ height: 60 }}
-              description={
-                <Space direction="vertical" align="center">
-                  <Text strong>No common interests found</Text>
-                  <Text type="secondary">You don't share any interests with this user yet.</Text>
-                </Space>
-              }
-            />
-          )}
-        </Space>
-
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Title level={4}>Interests</Title>
-          {profile.interests && profile.interests.length > 0 ? (
-            <Space wrap>
-              {profile.interests.map((interest: string, index: number) => (
-                <Tag key={index} color="blue">{interest}</Tag>
-              ))}
-            </Space>
-          ) : (
-            <Empty
-              image={<TagOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
-              imageStyle={{ height: 60 }}
-              description={
-                <Space direction="vertical" align="center">
-                  <Text strong>No interests listed</Text>
-                  <Text type="secondary">This user hasn't added any interests to their profile.</Text>
-                </Space>
-              }
-            />
-          )}
-        </Space>
-
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Title level={4}>Photos</Title>
-          {profile.pictures && profile.pictures.length > 0 ? (
-            <Image.PreviewGroup>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Title level={4}>Interests</Title>
+            {profile.interests && profile.interests.length > 0 ? (
               <Space wrap>
-                {profile.pictures.map((picture: string, index: number) => (
-                  <Image
-                    key={index}
-                    width={150}
-                    src={picture}
-                    alt={`${profile.username}'s photo ${index + 1}`}
-                  />
+                {profile.interests.map((interest: string, index: number) => (
+                  <Tag key={index} color="blue">{interest}</Tag>
                 ))}
               </Space>
-            </Image.PreviewGroup>
-          ) : (
-            <Empty
-              image={<PictureOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
-              imageStyle={{ height: 60 }}
-              description={
-                <Space direction="vertical" align="center">
-                  <Text strong>No photos uploaded</Text>
-                  <Text type="secondary">This user hasn't added any photos to their profile yet.</Text>
+            ) : (
+              <Empty
+                image={<TagOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
+                imageStyle={{ height: 60 }}
+                description={
+                  <Space direction="vertical" align="center">
+                    <Text strong>No interests listed</Text>
+                    <Text type="secondary">This user hasn't added any interests to their profile.</Text>
+                  </Space>
+                }
+              />
+            )}
+          </Space>
+
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Title level={4}>Photos</Title>
+            {profile.pictures && profile.pictures.length > 0 ? (
+              <Image.PreviewGroup>
+                <Space wrap>
+                  {profile.pictures.map((picture: string, index: number) => (
+                    <Image
+                      key={index}
+                      width={150}
+                      src={picture}
+                      alt={`${profile.username}'s photo ${index + 1}`}
+                    />
+                  ))}
                 </Space>
-              }
-            />
-          )}
+              </Image.PreviewGroup>
+            ) : (
+              <Empty
+                image={<PictureOutlined style={{ fontSize: 60, color: '#1890ff' }} />}
+                imageStyle={{ height: 60 }}
+                description={
+                  <Space direction="vertical" align="center">
+                    <Text strong>No photos uploaded</Text>
+                    <Text type="secondary">This user hasn't added any photos to their profile yet.</Text>
+                  </Space>
+                }
+              />
+            )}
+          </Space>
         </Space>
-      </Space>
-      <Modal
-        title="Confirm Action"
-        open={isRemoveLikeModalOpen}
-        onOk={() => {
-          handleRemoveLike();
-          setIsRemoveLikeModalOpen(false);
-        }}
-        onCancel={() => setIsRemoveLikeModalOpen(false)}
-        okText="Yes"
-        cancelText="No"
-      >
-        <p>Are you sure you want to remove your like from this profile?</p>
-      </Modal>
+        <Modal
+          title="Confirm Action"
+          open={isRemoveLikeModalOpen}
+          onOk={() => {
+            handleRemoveLike();
+            setIsRemoveLikeModalOpen(false);
+          }}
+          onCancel={() => setIsRemoveLikeModalOpen(false)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <p>Are you sure you want to remove your like from this profile?</p>
+        </Modal>
 
-      <Modal
-        title="Confirm Action"
-        open={isBlockModalOpen}
-        onOk={() => {
-          handleBlock();
-          setIsBlockModalOpen(false);
-        }}
-        onCancel={() => setIsBlockModalOpen(false)}
-        okText="Yes"
-        cancelText="No"
-      >
-        <p>Are you sure you want to block this user?</p>
-      </Modal>
+        <Modal
+          title="Confirm Action"
+          open={isBlockModalOpen}
+          onOk={() => {
+            handleBlock();
+            setIsBlockModalOpen(false);
+          }}
+          onCancel={() => setIsBlockModalOpen(false)}
+          okText="Yes"
+          cancelText="No"
+        >
+          <p>Are you sure you want to block this user?</p>
+        </Modal>
 
-      <Modal
-        title="Confirm Action"
-        open={isReportModalOpen}
-        onOk={() => {
-          handleReport();
-          setIsReportModalOpen(false);
-        }}
-        onCancel={() => setIsReportModalOpen(false)}
-        okText="Yes"
-        cancelText="No"
-        
-      >
-        <p>Are you sure you want to report this user as fake account?</p>
-      </Modal>
-    </Card>
+        <Modal
+          title="Confirm Action"
+          open={isReportModalOpen}
+          onOk={() => {
+            handleReport();
+            setIsReportModalOpen(false);
+          }}
+          onCancel={() => setIsReportModalOpen(false)}
+          okText="Yes"
+          cancelText="No"
+
+        >
+          <p>Are you sure you want to report this user as fake account?</p>
+        </Modal>
+      </Card>
+    </>
   )
 }
 

@@ -46,8 +46,22 @@ class ProfilelikesService():
                     "status": "error",
                     "message": "You cannot like your own profile."
                 }), 400
-            insert_query = "INSERT INTO profile_likes (liker_id, liked_profile_id) VALUES (%s, %s)"
-            execute_query(insert_query, params=(liker_id, liked_profile_id))
+            query = """
+                BEGIN;
+
+                -- Remove profile like
+                DELETE FROM profile_removed_likes
+                WHERE liker_id = %s AND liked_profile_id = %s;
+
+
+                -- Add profile like
+                INSERT INTO profile_likes
+                (liker_id, liked_profile_id) VALUES (%s, %s);
+
+
+                COMMIT;
+            """
+            execute_query(query, params=(liker_id, liked_profile_id, liker_id, liked_profile_id))
             select_query = "SELECT EXISTS ( SELECT 1 FROM profile_likes WHERE liker_id = %s AND liked_profile_id = %s)"
             liked_before =execute_query(select_query, params=(liked_profile_id, liker_id), fetch_one=True)
 
@@ -75,12 +89,28 @@ class ProfilelikesService():
                 "status": "error",
                 "message": "You cannot unlike your own profile."
             }), 400
-            delete_query = """
-            DELETE FROM profile_likes
-            WHERE liker_id = %s AND liked_profile_id = %s
+
+            query = """
+                BEGIN;
+
+                -- Remove profile likes between the two users
+                DELETE FROM profile_likes
+                WHERE liker_id = %s AND liked_profile_id = %s;
+
+
+                -- Add profile removed likes
+                INSERT INTO profile_removed_likes
+                (liker_id, liked_profile_id) VALUES (%s, %s);
+
+                -- Remove conversations between the two users
+                DELETE FROM conversations
+                WHERE (user_id_1 = %s AND user_id_2 = %s)
+                OR (user_id_1 = %s AND user_id_2 = %s);
+
+                COMMIT;
             """
-            execute_query(delete_query, params=(unliker_id, unliked_profile_id))
-            create_notif_service({"notified_user_id": unliked_profile_id, "actor_id": unliker_id, "type": 'unlike'})
+            execute_query(query, params=(unliker_id, unliked_profile_id, unliker_id, unliked_profile_id, unliker_id, unliked_profile_id, unliked_profile_id, unliker_id))
+            create_notif_service({"notified_user_id": unliked_profile_id, "actor_id": unliker_id, "type": 'unliked'})
             return jsonify({"status": "success", "message": "Profile unliked successfully"}), 200
         except Exception as e:
             logger.error(f"Error unliking user: {e}")

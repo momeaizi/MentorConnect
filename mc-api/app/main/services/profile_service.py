@@ -168,8 +168,6 @@ def get_profile_by_username_service(user_id, username):
         profile_views_service = ProfileViewsService()
         profile_views_service.log_profile_view(user_id, profile['user_id'])
 
-        logger.info("HERE!!!")
-
         return jsonify({'status': 'success', 'data': profile}), 200
     except Exception as e:
         logger.info(f"Error retrieving user data: {str(e)}")

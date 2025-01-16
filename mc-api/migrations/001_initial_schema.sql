@@ -113,6 +113,23 @@ CREATE TABLE profile_likes (
         ON DELETE CASCADE
 );
 
+CREATE TABLE profile_removed_likes (
+    id SERIAL PRIMARY KEY,
+    liker_id INT NOT NULL,
+    liked_profile_id INT NOT NULL,
+    removed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(liker_id, liked_profile_id),
+    CONSTRAINT fk_liker
+        FOREIGN KEY(liker_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_liked_profile
+        FOREIGN KEY(liked_profile_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_removed_likes_liker_liked ON profile_removed_likes (liker_id, liked_profile_id);
 
 CREATE TABLE blocked_users (
     id SERIAL PRIMARY KEY,

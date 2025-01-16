@@ -3,6 +3,7 @@ from flask import jsonify
 from loguru import logger
 from datetime import datetime, timezone
 import humanize
+from app.main.services.notification_service import create_notif_service
 
 
 class ProfileViewsService():
@@ -16,6 +17,10 @@ class ProfileViewsService():
                 }), 400
             insert_query = "INSERT INTO profile_views (viewer_id, profile_owner_id) VALUES (%s, %s)"
             execute_query(insert_query, params=(viewer_id, profile_owner_id))
+
+            create_notif_service({"notified_user_id": profile_owner_id, "actor_id": viewer_id, "type": 'viewed'})
+
+
             return jsonify({"status": "success", "message": "Profile view logged successfully"}), 200
         except Exception as e:
             logger.error(f"Error logging profile view: {e}")

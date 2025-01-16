@@ -1,4 +1,4 @@
-import { Layout } from 'antd';
+import { Layout, notification } from 'antd';
 import UserProfile from '../components/UserProfile';
 import { useParams } from 'react-router-dom';
 import LoadingProfile from '../components/LoadingProfile';
@@ -7,6 +7,8 @@ import api from '../services/api';
 import NotFound from './NotFound';
 import { Profile } from '../types/profile';
 import useStore from '../lib/store';
+import { isAxiosError } from '../types/api';
+import { CloseCircleFilled } from '@ant-design/icons';
 
 const { Content } = Layout;
 
@@ -30,6 +32,15 @@ export default function UserProfilePage() {
   const [loggedInStatus, setLoggedInStatus] = useState<LoggedInData | null>(null);
   const { username } = useParams();
   const { socket } = useStore();
+  const [notifApi, contextHolder] = notification.useNotification();
+
+  const openNotification = (message: string, icons: any) => {
+    notifApi.open({
+      message: message,
+      icon: icons
+    });
+  };
+
 
   const fetchUser = async () => {
     setLoading(true);
@@ -63,7 +74,15 @@ export default function UserProfilePage() {
       });
 
     } catch (error) {
-      setNotFound(true);
+      if (isAxiosError(error)) {
+        if (error.status === 404) {
+          setNotFound(true);
+        } else {
+          openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+        }
+      } else {
+        openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+      }
     } finally {
       setLoading(false);
     }
@@ -123,12 +142,15 @@ export default function UserProfilePage() {
   }
 
   return (
-    notFound ?
-      <NotFound />
-      :
-      <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
-        {renderContent()}
-      </Content>
+    <>
+      {contextHolder}
+      {(notFound) ?
+        <NotFound />
+        :
+        <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          {renderContent()}
+        </Content>}
+    </>
   )
 }
 

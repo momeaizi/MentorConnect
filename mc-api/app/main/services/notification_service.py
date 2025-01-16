@@ -7,6 +7,35 @@ from app.main.services.socket_service import SocketService
 
 socket_service = SocketService()
 
+
+def can_send_notification(liker_id, liked_profile_id) -> bool:
+    """
+    Checks if a notification can be sent based on the profile_removed_likes table.
+    
+    Args:
+        liker_id (int): The ID of the user who might trigger the notification.
+        liked_profile_id (int): The ID of the user who might receive the notification.
+        connection: The psycopg2 database connection object.
+
+    Returns:
+        bool: True if the notification can be sent, False otherwise.
+    """
+    query = """
+        SELECT NOT EXISTS (
+            SELECT 1 
+            FROM profile_removed_likes
+            WHERE liker_id = %s AND liked_profile_id = %s
+        );
+    """
+    try:
+        result = execute_query(query, params=(liker_id, liked_profile_id), fetch_one=True)
+        logger.info(result)
+        return result
+    except Exception as e:
+        logger.info(f"Error checking notification eligibility: {e}")
+        return False
+
+
 #{ notified_user_id, actor_id, type}
 def create_notif_service(data):
 

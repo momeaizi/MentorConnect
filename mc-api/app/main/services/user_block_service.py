@@ -27,15 +27,6 @@ class UserBlockService:
                 WHERE (user_id_1 = %s AND user_id_2 = %s)
                 OR (user_id_1 = %s AND user_id_2 = %s);
 
-                -- Remove messages related to conversations between the two users
-                DELETE FROM messages
-                WHERE conversation_id IN (
-                    SELECT id
-                    FROM conversations
-                    WHERE (user_id_1 = %s AND user_id_2 = %s)
-                    OR (user_id_1 = %s AND user_id_2 = %s)
-                );
-
                 -- Remove mutual notifications between the two users
                 DELETE FROM notifications
                 WHERE (notified_user_id = %s AND actor_id = %s)
@@ -44,7 +35,7 @@ class UserBlockService:
                 COMMIT;
             """
 
-            execute_query(query, params=(blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id))
+            execute_query(query, params=(blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id, blocker_id, blocked_id, blocked_id, blocker_id))
 
             return jsonify({'status': 'success', 'message': 'user blocked successfully'}), 200
         except UniqueConstraintError as e:

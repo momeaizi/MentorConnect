@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Select, Slider, Button, Tag, List, Radio } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon } from 'lucide-react'
+import { Card, Select, Slider, Button, Tag, List, Radio, notification, Empty } from 'antd'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon, UserX } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { isAxiosError } from '../types/api';
+import { CloseCircleFilled } from '@ant-design/icons';
+import NoProfiles from './NoProfiles';
+
 
 const { Option } = Select
 
@@ -52,6 +56,14 @@ const ProfileList: React.FC = () => {
     const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
     const navigate = useNavigate();
+    const [notifApi, contextHolder] = notification.useNotification();
+
+    const openNotification = (message: string, icons: any) => {
+        notifApi.open({
+            message: message,
+            icon: icons
+        });
+    };
 
 
 
@@ -66,22 +78,23 @@ const ProfileList: React.FC = () => {
         setLoading(true);
         try {
             const res = await api.get('/profiles/suggestions');
-            const fetchedProfiles = res.data?.map((item: any) => ({
-                id: item.id,
-                firstName: item.first_name,
-                lastName: item.last_name,
-                age: Math.floor(item.age),
-                fameRating: item.fame_rating,
-                interests: item.interests?.filter((interest: string | null) => (interest)),
-                image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
-                gender: item.gender,
-                distance: Math.floor(item.distance),
-                username: item.username,
-                commonInterestsCount: item.common_interests_count,
-                isFlagged: item.is_flagged,
-                likeStatus: item.like_status,
-                isRemoving: false,
-            }));
+            // const fetchedProfiles = res.data?.map((item: any) => ({
+            //     id: item.id,
+            //     firstName: item.first_name,
+            //     lastName: item.last_name,
+            //     age: Math.floor(item.age),
+            //     fameRating: item.fame_rating,
+            //     interests: item.interests?.filter((interest: string | null) => (interest)),
+            //     image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
+            //     gender: item.gender,
+            //     distance: Math.floor(item.distance),
+            //     username: item.username,
+            //     commonInterestsCount: item.common_interests_count,
+            //     isFlagged: item.is_flagged,
+            //     likeStatus: item.like_status,
+            //     isRemoving: false,
+            // }));
+            const fetchedProfiles: profile[] = [];
             setProfiles(fetchedProfiles);
             setFilteredProfiles(fetchedProfiles);
 
@@ -112,6 +125,11 @@ const ProfileList: React.FC = () => {
 
             return fetchedProfiles;
         } catch (error) {
+            if (isAxiosError(error)) {
+                openNotification(error.response?.data?.message || 'An error occurred.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+            } else {
+                openNotification('An unexpected error occurred. Please try again.', <CloseCircleFilled style={{ color: '#ff4d4f' }} />);
+            }
             return [];
         } finally {
             setLoading(false);
@@ -180,159 +198,167 @@ const ProfileList: React.FC = () => {
 
 
     return (
-        <div className="flex flex-col lg:flex-row gap-6">
-            <div className="lg:w-1/4">
-                <Card className="sticky top-4 bg-background border-border shadow-md">
-                    <h2 className="text-2xl font-semibold mb-4 text-primary">Filters</h2>
-                    <div className="space-y-6">
-                        <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Age</h3>
-                            <Slider
-                                range
-                                min={minAge}
-                                max={maxAge}
-                                value={ageRange}
-                                onChange={(value: number[]) => setAgeRange(value as [number, number])}
-                                className="text-primary"
-                            />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Distance</h3>
-                            <Slider
-                                range
-                                min={minDistance}
-                                max={maxDistance}
-                                value={distanceRange}
-                                onChange={(value: number[]) => setDistanceRange(value as [number, number])}
-                                className="text-primary"
-                            />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Fame Rating</h3>
-                            <Slider
-                                range
-                                min={0}
-                                max={maxFameRating}
-                                value={fameRange}
-                                onChange={(value: number[]) => setFameRange(value as [number, number])}
-                                className="text-primary"
-                            />
-                        </div>
-                        <div>
-                            <h3 className="text-lg font-medium mb-2 text-primary">Interests</h3>
-                            <Select
-                                mode="multiple"
-                                placeholder="Select interests"
-                                style={{ width: '100%' }}
-                                value={selectedInterests}
-                                onChange={setSelectedInterests}
-                            >
-                                {allInterests.map(interest => (
-                                    <Option key={interest} value={interest}>{interest}</Option>
-                                ))}
-                            </Select>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button className="bg-gradient-to-r from-pink-500 to-red-500 "
-                                onClick={applyFilters}
-                                type="primary"
-                                disabled={loading}
-                                block
-                            >
-                                Apply Filters
-                            </Button>
-                            <Button onClick={resetFilters} block>
-                                Reset
-                            </Button>
-                        </div>
-                        {loading && <div className="mt-4 text-center">Loading profiles...</div>}
-                    </div>
-                </Card>
-
-            </div>
-            <div className="lg:w-3/4">
-                <div className="flex justify-end items-center mb-4">
-                    <Radio.Group value={sortCriteria} onChange={(e) => handleSort(e.target.value)}>
-                        <Radio.Button value="age">Age</Radio.Button>
-                        <Radio.Button value="distance">Distance</Radio.Button>
-                        <Radio.Button value="fameRating">Fame Rating</Radio.Button>
-                        <Radio.Button value="commonTags">Common Tags</Radio.Button>
-                    </Radio.Group>
-                    <Button onClick={toggleSortOrder} className="ml-2">
-                        {sortOrder === 'ascend' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />}
-                    </Button>
-                </div>
-                <List
-                    grid={{
-                        gutter: 16,
-                        xs: 1,
-                        sm: 2,
-                        md: 2,
-                        lg: 3,
-                        xl: 3,
-                        xxl: 4,
-                    }}
-                    dataSource={filteredProfiles}
-                    loading={loading}
-                    renderItem={profile => (
-                        <List.Item>
-                            <Card
-                                hoverable
-                                cover={
-                                    <div className="relative h-48">
-                                        <Img
-                                            src={profile.image}
-                                            alt={`${profile.firstName} ${profile.lastName}`}
-                                            className="rounded-t-lg"
-                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            loader={<div>Loading...</div>}
-                                        />
-                                        {profile.isFlagged && (
-                                            <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">
-                                                <FlagIcon className="w-5 h-5 text-white" />
-                                            </div>
-                                        )}
-                                    </div>
-                                }
-                                onClick={() => { navigate(`/profiles/${profile.username}`) }}
-                                className={`bg-background border-border shadow-lg transition-all duration-500 hover:shadow-xl ${profile.isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-                            >
-                                <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
-
-                                <div className="flex items-center mb-2 text-secondary">
-                                    <MapPinIcon className="w-4 h-4 mr-1" />
-                                    <span>{profile.distance} Km</span>
-                                </div>
-                                <div className="flex items-center mb-2 text-secondary">
-                                    <StarIcon className="w-4 h-4 mr-1" />
-                                    <span>Fame: {profile.fameRating}</span>
-                                </div>
-                                <div className="flex items-center mb-2 text-secondary">
-                                    <Calendar className="w-4 h-4 mr-1" />
-                                    <span>Age: {profile.age}</span>
-                                </div>
-                                <div className="flex gap-1 mt-2 overflow-y-auto max-h-20">
-                                    {profile.interests.map(interest => (
-                                        <Tag key={interest} color="blue" className="text-xs">
-                                            {interest}
-                                        </Tag>
-                                    ))}
-                                </div>
-                                <Button
-                                    type="primary"
-                                    icon={<HeartIcon className="w-4 h-4" />}
-                                    className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 "
-                                    onClick={(e: React.MouseEvent<HTMLElement>) => handleLike(e, profile.id)}
-                                    disabled={profile.likeStatus === 'mutual' || profile.likeStatus === 'one-way'}
+        <>
+            {contextHolder}
+            <div className="flex flex-col lg:flex-row gap-6">
+                <div className="lg:w-1/4">
+                    <Card className="sticky top-4 bg-background border-border shadow-md">
+                        <h2 className="text-2xl font-semibold mb-4 text-primary">Filters</h2>
+                        <div className="space-y-6">
+                            <div>
+                                <h3 className="text-lg font-medium mb-2 text-primary">Age</h3>
+                                <Slider
+                                    range
+                                    min={minAge}
+                                    max={maxAge}
+                                    value={ageRange}
+                                    onChange={(value: number[]) => setAgeRange(value as [number, number])}
+                                    className="text-primary"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium mb-2 text-primary">Distance</h3>
+                                <Slider
+                                    range
+                                    min={minDistance}
+                                    max={maxDistance}
+                                    value={distanceRange}
+                                    onChange={(value: number[]) => setDistanceRange(value as [number, number])}
+                                    className="text-primary"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium mb-2 text-primary">Fame Rating</h3>
+                                <Slider
+                                    range
+                                    min={0}
+                                    max={maxFameRating}
+                                    value={fameRange}
+                                    onChange={(value: number[]) => setFameRange(value as [number, number])}
+                                    className="text-primary"
+                                />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium mb-2 text-primary">Interests</h3>
+                                <Select
+                                    mode="multiple"
+                                    placeholder="Select interests"
+                                    style={{ width: '100%' }}
+                                    value={selectedInterests}
+                                    onChange={setSelectedInterests}
                                 >
-                                    {profile.likeStatus === 'liked-by' ? 'Like Back' : 'Like'}
+                                    {allInterests.map(interest => (
+                                        <Option key={interest} value={interest}>{interest}</Option>
+                                    ))}
+                                </Select>
+                            </div>
+                            <div className="flex gap-2">
+                                <Button className="bg-gradient-to-r from-pink-500 to-red-500 "
+                                    onClick={applyFilters}
+                                    type="primary"
+                                    disabled={loading}
+                                    block
+                                >
+                                    Apply Filters
                                 </Button>
-                            </Card>
-                        </List.Item>
-                    )}
-                />
-            </div>
-        </div >
+                                <Button onClick={resetFilters} block>
+                                    Reset
+                                </Button>
+                            </div>
+                            {loading && <div className="mt-4 text-center">Loading profiles...</div>}
+                        </div>
+                    </Card>
+
+                </div>
+                <div className="lg:w-3/4">
+                    <div className="flex justify-end items-center mb-4">
+                        <Radio.Group value={sortCriteria} onChange={(e) => handleSort(e.target.value)}>
+                            <Radio.Button value="age">Age</Radio.Button>
+                            <Radio.Button value="distance">Distance</Radio.Button>
+                            <Radio.Button value="fameRating">Fame Rating</Radio.Button>
+                            <Radio.Button value="commonTags">Common Tags</Radio.Button>
+                        </Radio.Group>
+                        <Button onClick={toggleSortOrder} className="ml-2">
+                            {sortOrder === 'ascend' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />}
+                        </Button>
+                    </div>
+                    {
+                        (filteredProfiles.length === 0) ?
+                            <NoProfiles onRefresh={fetchProfiles} />
+                            :
+                            <List
+                                grid={{
+                                    gutter: 16,
+                                    xs: 1,
+                                    sm: 2,
+                                    md: 2,
+                                    lg: 3,
+                                    xl: 3,
+                                    xxl: 4,
+                                }}
+                                dataSource={filteredProfiles}
+                                loading={loading}
+                                renderItem={profile => (
+                                    <List.Item>
+                                        <Card
+                                            hoverable
+                                            cover={
+                                                <div className="relative h-48">
+                                                    <Img
+                                                        src={profile.image}
+                                                        alt={`${profile.firstName} ${profile.lastName}`}
+                                                        className="rounded-t-lg"
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        loader={<div>Loading...</div>}
+                                                    />
+                                                    {profile.isFlagged && (
+                                                        <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">
+                                                            <FlagIcon className="w-5 h-5 text-white" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            }
+                                            onClick={() => { navigate(`/profiles/${profile.username}`) }}
+                                            className={`bg-background border-border shadow-lg transition-all duration-500 hover:shadow-xl ${profile.isRemoving ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+                                        >
+                                            <h3 className="text-xl font-semibold mb-2 text-primary w-full truncate">{profile.firstName} {profile.lastName}</h3>
+
+                                            <div className="flex items-center mb-2 text-secondary">
+                                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                                <span>{profile.distance} Km</span>
+                                            </div>
+                                            <div className="flex items-center mb-2 text-secondary">
+                                                <StarIcon className="w-4 h-4 mr-1" />
+                                                <span>Fame: {profile.fameRating}</span>
+                                            </div>
+                                            <div className="flex items-center mb-2 text-secondary">
+                                                <Calendar className="w-4 h-4 mr-1" />
+                                                <span>Age: {profile.age}</span>
+                                            </div>
+                                            <div className="flex gap-1 mt-2 overflow-y-auto max-h-20">
+                                                {profile.interests.map(interest => (
+                                                    <Tag key={interest} color="blue" className="text-xs">
+                                                        {interest}
+                                                    </Tag>
+                                                ))}
+                                            </div>
+                                            <Button
+                                                type="primary"
+                                                icon={<HeartIcon className="w-4 h-4" />}
+                                                className="w-full mt-4 bg-gradient-to-r from-pink-500 to-red-500 "
+                                                onClick={(e: React.MouseEvent<HTMLElement>) => handleLike(e, profile.id)}
+                                                disabled={profile.likeStatus === 'mutual' || profile.likeStatus === 'one-way'}
+                                            >
+                                                {profile.likeStatus === 'liked-by' ? 'Like Back' : 'Like'}
+                                            </Button>
+                                        </Card>
+                                    </List.Item>
+                                )}
+                            />
+                    }
+                </div>
+            </div >
+        </>
     )
 }
 
