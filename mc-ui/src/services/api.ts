@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { CustomJwtPayload, isTokenExpired } from '../utils/jwtUtils';
 import { jwtDecode } from 'jwt-decode';
-import { useNavigate } from 'react-router-dom';
 
-const baseURL = 'http://localhost:5000/api';
+const baseURL = 'http://localhost:7777/api';
 
 
 export const publicApi = axios.create({

@@ -48,7 +48,7 @@ const FavorieCard = ({ favorie }: { favorie: Favorie }) => {
         <img
           alt="Image"
           className="w-full h-full object-cover rounded-lg"
-          src={`http://localhost:5000/api/profiles/get_image/${userPicture}`}
+          src={`http://localhost:7777/api/profiles/get_image/${userPicture}`}
         />
       </div>
     

@@ -38,15 +38,13 @@ services:
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
       - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
       - FRONTEND_URL=${FRONTEND_URL}
-    ports:
-      - "5000:5000"
     depends_on:
       - mc-postgres
       - mc-redis
-    networks:
-      - internal_network
     volumes:
       - ./mc-api:/mc-api
+    networks:
+      - internal_network
 
 
   nginx:
@@ -67,14 +65,12 @@ services:
     container_name: mc-ui
     image: mc-ui:latest
     build: ./mc-ui
-    ports:
-      - "3000:3000"
     depends_on:
       - mc-api
-    networks:
-      - internal_network
     volumes:
       - ./mc-ui/src:/app/src
+    networks:
+      - internal_network
 
 networks:
   internal_network:

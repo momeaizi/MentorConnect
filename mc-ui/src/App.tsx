@@ -20,7 +20,7 @@ function App() {
   };
 
   useEffect(() => {
-    const socket = io('http://localhost:5000',
+    const socket = io('http://localhost:7777',
       {
         transports: ['websocket'],
         query: {

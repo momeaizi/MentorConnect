@@ -77,7 +77,7 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
         <img
           className='rounded-[50px] w-[40px] h-[40px]'
           width={50}
-          src={`http://localhost:5000/api/profiles/get_image/${cellData.image}`}
+          src={`http://localhost:7777/api/profiles/get_image/${cellData.image}`}
           // preview={false}
         />
       </div>
@@ -380,7 +380,7 @@ function ConversationWindow() {
                 <img
                   className='rounded-[50px] w-[40px] h-[40px]'
                   width={40}
-                  src={`http://localhost:5000/api/profiles/get_image/${chatHeader?.image}`}
+                  src={`http://localhost:7777/api/profiles/get_image/${chatHeader?.image}`}
                 />
                 <div className='flex flex-col gap-0'>
                   <div className='font-bold	'>

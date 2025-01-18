@@ -630,7 +630,7 @@ function UploadPictures({profileData}:any) {
         const files =  imageNames.map(async (fileName) => {
             try {
                 setLoading(true);
-                const url = `http://localhost:5000/api/profiles/get_image/${fileName}`;
+                const url = `http://localhost:7777/api/profiles/get_image/${fileName}`;
                 return {
                     uid: fileName,
                     name: 'default.png',

@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import Login from '../components/Login'
 import CreateAccount from '../components/CreateAccount'
 import { FireFilled } from '@ant-design/icons';
+import backgroundImage from '../assets/images/11.png';
 
 
 export default function LandingPage() {
@@ -28,7 +29,8 @@ export default function LandingPage() {
         {modalChildren}
       </MyModal>
       <div
-        className="bg-[url('./src/assets/images/11.png')] h-screen bg-cover bg-center grid grid-cols-1 grid-rows-[72px_1fr] gap-0"
+        className="h-screen bg-cover bg-center grid grid-cols-1 grid-rows-[72px_1fr] gap-0"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
       >
         <div className="flex flex-row justify-between	items-center	px-8">
 

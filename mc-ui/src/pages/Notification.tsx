@@ -75,7 +75,7 @@ const NotificationCard = ({ notification }: { notification: Notification }) => {
       className={`cursor-pointer grid grid-rows-1 grid-cols-[auto_1fr_auto] gap-4 w-full lg:w-[768px]  border-[#2e3f5a] items-center border-b-[1px] rounded-md p-[4px_12px] cursor-default  hover:bg-sky-950 ${!isRead && "bg-sky-900"}`}
     >
       <div className="w-12 h-12 md:w-15 md:h-15 ">
-        <img src={`http://localhost:5000/api/profiles/get_image/${userPicture}`} alt="Image" className="w-full h-full object-cover rounded-lg" />
+        <img src={`http://localhost:7777/api/profiles/get_image/${userPicture}`} alt="Image" className="w-full h-full object-cover rounded-lg" />
       </div>
     
       <div className="h-full w-full flex flex-col">

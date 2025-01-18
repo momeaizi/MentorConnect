@@ -85,7 +85,7 @@ const ProfileList: React.FC = () => {
                 age: Math.floor(item.age),
                 fameRating: item.fame_rating,
                 interests: item.interests?.filter((interest: string | null) => (interest)),
-                image: (item.image) ? `http://localhost:5000/api/profiles/get_image/${item.image}` : null,
+                image: (item.image) ? `http://localhost:7777/api/profiles/get_image/${item.image}` : null,
                 gender: item.gender,
                 distance: Math.floor(item.distance),
                 username: item.username,

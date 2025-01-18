@@ -46,7 +46,7 @@ const HistoryCard = ({ history }: { history: History }) => {
     >
         <div className="w-12 h-12 md:w-15 md:h-15 ">
         <img
-          src={`http://localhost:5000/api/profiles/get_image/${userPicture}`}
+          src={`http://localhost:7777/api/profiles/get_image/${userPicture}`}
           alt="Image"
           className="w-full h-full object-cover rounded-lg"
         />
