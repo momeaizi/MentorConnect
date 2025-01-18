@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Select, Slider, Button, Tag, List, Radio, notification, Empty } from 'antd'
+import { Card, Select, Slider, Button, Tag, List, Radio, notification, Skeleton } from 'antd'
 import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon, UserX } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
@@ -282,7 +282,7 @@ const ProfileList: React.FC = () => {
                         </Button>
                     </div>
                     {
-                        (filteredProfiles.length === 0) ?
+                        (filteredProfiles.length === 0 && loading === false) ?
                             <NoProfiles onRefresh={fetchProfiles} />
                             :
                             <List
@@ -297,7 +297,7 @@ const ProfileList: React.FC = () => {
                                 }}
                                 dataSource={filteredProfiles}
                                 loading={loading}
-                                renderItem={profile => (
+                                renderItem={(profile: Profile) => (
                                     <List.Item>
                                         <Card
                                             hoverable
@@ -308,7 +308,7 @@ const ProfileList: React.FC = () => {
                                                         alt={`${profile.firstName} ${profile.lastName}`}
                                                         className="rounded-t-lg"
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                        loader={<div>Loading...</div>}
+                                                        loader={<Skeleton.Avatar active  />}
                                                     />
                                                     {profile.isFlagged && (
                                                         <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">

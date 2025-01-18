@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { CustomJwtPayload, isTokenExpired } from '../utils/jwtUtils';
 import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = 'http://localhost:5000/api';
 
@@ -27,9 +28,19 @@ api.interceptors.request.use((config) => {
 
 
     config.headers.Authorization = `Bearer ${token}`;
-  } catch (err) {
-  }
+  } catch (err) { }
   return config;
+});
+
+
+api.interceptors.response.use(
+  (response: any) => response,
+  async (error: any) => {
+    if (error.response.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/';
+    }
+    return Promise.reject(error);
 });
 
 export default api;
