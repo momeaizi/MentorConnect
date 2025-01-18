@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Select, Slider, Button, Tag, List, Radio, notification, Skeleton } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon, UserX } from 'lucide-react'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -308,7 +308,11 @@ const ProfileList: React.FC = () => {
                                                         alt={`${profile.firstName} ${profile.lastName}`}
                                                         className="rounded-t-lg"
                                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                        loader={<Skeleton.Avatar active  />}
+                                                        loader={<Skeleton.Image
+                                                            active
+                                                            className="rounded-t-lg !h-full !w-full"
+                                                            style={{ position: 'absolute', top: 0, left: 0 }}
+                                                        />}
                                                     />
                                                     {profile.isFlagged && (
                                                         <div className="absolute top-2 right-2 bg-red-500 rounded-full p-1" title="This account has been flagged as potentially fake">

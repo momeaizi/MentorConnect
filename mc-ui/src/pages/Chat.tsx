@@ -9,6 +9,7 @@ import {
  import { useAuth } from "../providers/AuthProvider";
 import api from '../services/api';
 import '../assets/styles/chat.css';
+import { isAxiosError } from '../types/api';
 
 interface CellData {
   image:string;
@@ -21,7 +22,7 @@ interface CellData {
 }
 
 interface ButtonProps {
-  isSelected: boolean;
+  isSelected: number;
   onClick: () => void;
   cellData: CellData;
 }
@@ -49,10 +50,12 @@ async function postMessage(data:MessageSend, openNotification:any) {
     });
 
   } catch (error) {
-    if (error.status == 404)
-      openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>)
-    else 
-      openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+    if (isAxiosError(error)) {
+      if (error.status == 404)
+        openNotification('This conversation already blocked', <InfoCircleOutlined style={{ color: 'red' }}/>);
+      else 
+        openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>);
+    }
   }
 
 
@@ -62,7 +65,7 @@ async function postMessage(data:MessageSend, openNotification:any) {
 
 function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
   const {user} = useAuth();
-  const is_read = !cellData.isSeen && cellData?.user_id != user.id
+  const is_read = !cellData.isSeen && user && cellData?.user_id != user.id
   
   return (
     <div 
@@ -279,7 +282,7 @@ function ConversationWindow() {
 
   const sendMessage = async () => {
     const trimmedMessage = newMessage.trim();
-    if (trimmedMessage.length) {
+    if (trimmedMessage.length && user) {
         postMessage({
           selectedConv: selectedConv,
           user_id: user.id,
@@ -336,13 +339,14 @@ function ConversationWindow() {
   }
 
   useEffect(()=>{
-    setStatus(chatHeader?.is_logged_in);
+    if (chatHeader)
+      setStatus(chatHeader?.is_logged_in);
   },[chatHeader])
 
 
 
   useEffect(() => {
-    const handleStatusEvent = (data: StatusEventData) => {
+    const handleStatusEvent = (data:any) => {
       const { user_id, is_logged_in } = data;
 
       if (user_id === chatHeader?.id) {

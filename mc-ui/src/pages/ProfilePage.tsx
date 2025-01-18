@@ -1,8 +1,8 @@
-import React, {useEffect, useState, useRef} from "react";
+import {useEffect, useState, useRef} from "react";
 import {
   DatePicker, Form, Input,
   Radio, Upload, Skeleton
-  ,notification, Select
+  ,notification, Select, RadioChangeEvent
 } from "antd";
 import { PlusOutlined,CheckCircleOutlined,
     InfoCircleOutlined
@@ -15,6 +15,7 @@ import 'leaflet/dist/leaflet.css';
 import '../assets/styles/globals.css';
 import api from "../services/api";
 import { useAuth } from "../providers/AuthProvider";
+import { isAxiosError } from "../types/api";
 
 const { Option } = Select
 
@@ -59,13 +60,14 @@ export async function postData(data: ProfileData, openNotification:any, setUpdat
         return await response.data.access_token;
     } catch (error) {
         setUpdateLoading(false)
-        console.log(error)
-        if (error.status == 409)
-            openNotification('username already exist', <InfoCircleOutlined style={{ color: 'red' }}/>)
-        else if (error.status == 400)
-            openNotification(error?.response?.data.message, <InfoCircleOutlined style={{ color: 'red' }}/>)
-        else 
-        openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        if (isAxiosError(error)) {
+            if (error.status == 409)
+                openNotification('username already exist', <InfoCircleOutlined style={{ color: 'red' }}/>)
+            else if (error.status == 400)
+                openNotification(error?.response?.data.message, <InfoCircleOutlined style={{ color: 'red' }}/>)
+            else 
+            openNotification('Error posting data', <InfoCircleOutlined style={{ color: 'red' }}/>)
+        }
 
         throw error;
     }
@@ -221,8 +223,8 @@ function EditProfile({profileData}:any) {
     const [birthDate, setBirthDate] = useState();
     const [bio, setBio] = useState<string>(profileData?.bio);
     const [allInterests, setAllInterests] = useState<string[]>([]);
-    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-    const [defaultInterests, setDefaultInterests] = useState<string[] | null>(null);
+    const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
+    const [defaultInterests, setDefaultInterests] = useState<number[] | null>(null);
 
 
     useEffect(() => {
@@ -253,9 +255,10 @@ function EditProfile({profileData}:any) {
     useEffect(()=>{
         console.log(userPosition);
     },[userPosition]);
-
-    const handleGenderChange = (e: React.ChangeEvent) => {
-        const newGender: boolean = (e.target.value == true) ?true:false;
+    const handleGenderChange = (e: RadioChangeEvent) => {
+        // const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement> ) => {
+        // const newGender: boolean = (e.target.value == true) ?true:false;
+        const newGender: boolean = e.target.value === "true";
         setGender(newGender);
     };
 
@@ -503,8 +506,8 @@ function EditProfile({profileData}:any) {
                         defaultValue={defaultInterests}
                         onChange={setSelectedInterests}
                     >
-                        {allInterests.map(interest => (
-                            <Option key={interest.id} value={interest.id}>{interest.interest}</Option>
+                        {allInterests.map((interest:any) => (
+                            <Option key={interest?.id} value={interest?.id}>{interest?.interest}</Option>
                         ))}
                     </Select> }
                 </Form.Item>
