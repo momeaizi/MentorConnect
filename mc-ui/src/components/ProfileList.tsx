@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Select, Slider, Button, Tag, List, Radio, notification, Empty } from 'antd'
-import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon, UserX } from 'lucide-react'
+import { Card, Select, Slider, Button, Tag, List, Radio, notification } from 'antd'
+import { HeartIcon, MapPinIcon, StarIcon, ArrowUpIcon, ArrowDownIcon, Calendar, FlagIcon } from 'lucide-react'
 import { Img } from 'react-image';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
