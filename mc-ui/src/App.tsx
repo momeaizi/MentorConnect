@@ -30,7 +30,6 @@ function App() {
     );
 
     socket.on('connect', () => {
-      console.log('WebSocket connected');
       useStore.getState().setSocket(socket);
     });
 
