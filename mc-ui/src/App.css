@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #1a1b27;
+  --foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1b27;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.log_in_button {
+  font-family: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.cell-user-name {
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.cell-last-message {
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #888888;
+}
+
+.cell-last-message-time {
+  display: flex;
+  color: #838383;
+  font-size: "Proxima Nova", "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.cell-no-viewd-message-icon {
+  background-color: rgb(106, 106, 240);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+}
+
+:hover::-webkit-scrollbar-thumb {
+  cursor: pointer;
+  box-shadow: inset 0 0 5px white;
+  border-radius: 10px;
+}
+
+
+
+.photo-modal-profile {
+  display: flex;
+  /* justify-content: center;
+  align-items: center; */
+
+  width: 113px;
+  height: 118px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.photo-modal-profile img {
+  border-radius: 50%;
+  width: 113px;
+  height: 118px;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+.upload-icon {
+  position: relative;
+  font-size: 40px; 
+  z-index: 2;
+  color: #ff5722
+}
+
+.upload-icon:hover {
+  font-size: 50px; 
+}

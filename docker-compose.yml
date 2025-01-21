@@ -1,32 +1,77 @@
 services:
-  # mc-postgres:
-  #   container_name: mc-postgres
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_USER=${POSTGRES_USER}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - pgdata_vol:/var/lib/postgresql/data
-  #   networks:
-  #     - internal_network
+  mc-postgres:
+    container_name: mc-postgres
+    image: postgis/postgis:15-3.3
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata_vol:/var/lib/postgresql/data
+    networks:
+      - internal_network
+
+
+  mc-redis:
+    container_name: mc-redis
+    image: redis:latest
+    restart: always
+    networks:
+      - internal_network
+
 
   mc-api:
     container_name: mc-api
     image: mc-api:latest
     build: ./mc-api
+    restart: always
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=mc-postgres
-    ports:
-      - "5000:5000"
-    # depends_on:
-    #   - mc-postgres
-    networks:
-      - internal_network
+      - SECRET_KEY=${SECRET_KEY}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - APP_ENV=${APP_ENV}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      - mc-postgres
+      - mc-redis
     volumes:
       - ./mc-api:/mc-api
+    networks:
+      - internal_network
+
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "7777:80"
+    depends_on:
+      - mc-api
+    networks:
+      - internal_network
+
+
+  mc-ui:
+    container_name: mc-ui
+    image: mc-ui:latest
+    build: ./mc-ui
+    depends_on:
+      - mc-api
+    volumes:
+      - ./mc-ui/src:/app/src
+    networks:
+      - internal_network
 
 networks:
   internal_network:
