@@ -75,7 +75,7 @@ export async function postData(data: ProfileData, openNotification:any, setUpdat
 
 export async function postImage(formData: any) {
     try {
-        const response = await api.post('profiles/picture', formData, {
+        await api.post('profiles/picture', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -601,7 +601,7 @@ function UploadPictures({profileData}:any) {
             const response:any = await postImages(formData, openNotification)
             if (response) {
                 if (response?.ok) {
-                    const result = await response.json();
+                    await response.json();
                     
                     openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
                     
