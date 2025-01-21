@@ -29,7 +29,6 @@ def can_send_notification(actor_id, notified_user_id) -> bool:
     """
     try:
         result = execute_query(query, params=(notified_user_id, actor_id), fetch_one=True)
-        logger.info(not result.get('exists', None))
         return not result.get('exists', None)
     except Exception as e:
         logger.info(f"Error checking notification eligibility: {e}")
@@ -41,8 +40,9 @@ def create_notif_service(data):
 
     try:
 
-        # if not can_send_notification(data.get('notified_user_id', None), data.get('actor_id', None)):
-        #     return jsonify({'status': 'error', 'message': 'this profile has removed his like'}), 400
+        if data.get('type', None) != 'unliked' and not can_send_notification(data.get('actor_id', None), data.get('notified_user_id', None)):
+            logger.info("can't send notification")
+            return jsonify({'status': 'error', 'message': 'this profile has removed his like'}), 400
 
         validate_query = "SELECT 1 FROM users WHERE id = %s"
         user_exists = execute_query(validate_query, params=(data.get("notified_user_id", None),), fetch_one=True)
@@ -69,9 +69,7 @@ def create_notif_service(data):
             ),
             'isRead': notif['is_seen']
         }
-        socket_service.handle_new_notification(new_notification)
-
-        logger.info(new_notification)
+        socket_service.handle_new_notification(data.get('notified_user_id', None), new_notification)
 
         return jsonify({'status': 'success', 'message': 'Notification created successfully'}), 201
 

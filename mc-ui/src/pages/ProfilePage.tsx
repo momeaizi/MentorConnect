@@ -80,7 +80,6 @@ export async function postImage(formData: any) {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        console.log("----> ", response)
     } catch (error) {
         console.error("----> ", error)
     }
@@ -253,7 +252,6 @@ function EditProfile({profileData}:any) {
     };
     
     useEffect(()=>{
-        console.log(userPosition);
     },[userPosition]);
     const handleGenderChange = (e: RadioChangeEvent) => {
         // const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement> ) => {
@@ -604,7 +602,6 @@ function UploadPictures({profileData}:any) {
             if (response) {
                 if (response?.ok) {
                     const result = await response.json();
-                    console.log('Upload successful:', result);
                     
                     openNotification("Upload successful", <CheckCircleOutlined style={{ color: 'green' }}/>)
                     
@@ -842,7 +839,6 @@ function fetchData() {
           return response.data;
         })
         .catch((error: any) => {
-            console.log('Error fetching data:', error);
             throw error;
         });
 }

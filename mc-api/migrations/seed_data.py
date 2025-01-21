@@ -149,7 +149,7 @@ def seed_views(n=300):
 # Call the seed functions
 try:
     seed_users(100)
-    seed_interests(50)
+    # seed_interests(50)
     seed_user_interests(200)
     # seed_pictures(100)
     # seed_profile_pictures(100)

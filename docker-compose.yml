@@ -33,6 +33,7 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
+      - APP_ENV=${APP_ENV}
       - REDIS_URL=${REDIS_URL}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}

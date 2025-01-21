@@ -47,7 +47,6 @@ function FullScreen() {
     async function chat() {
       try {
         const number  = await fetchData('chat');
-        console.log(number)
         setNumberOfMessage(number?.number);
       } catch (error) {
         console.error('Failed to fetch chat number:', error);

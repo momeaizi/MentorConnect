@@ -42,7 +42,6 @@ function App() {
     });
     socket.on('new_notification', (data: any) => {
       setNewNotif(data);
-      console.log(data)
       if (data.user_id != user?.id) {
         setNumberOfNotif(1);
         openNotification("You've a new Notification!", <SoundOutlined style={{ color: '#ef4444' }} />);
@@ -51,7 +50,6 @@ function App() {
     setSocket(socket);
 
     socket.on('disconnect', () => {
-      console.log('WebSocket disconnected');
       useStore.getState().setSocket(null);
     });
 

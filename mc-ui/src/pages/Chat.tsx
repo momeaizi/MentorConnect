@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import '../assets/styles/globals.css'
-import { Input, Empty, notification } from 'antd';
+import { Input, Empty, notification, Avatar } from 'antd';
 import useStore from '../lib/store';
 import {
   SearchOutlined,InfoCircleOutlined,
@@ -74,12 +74,7 @@ function ChatCell({ isSelected, onClick, cellData }: ButtonProps) {
         ${(isSelected == cellData.id ) && 'bg-sky-700'}`}
       >
       <div className=' flex justify-center items-center rounded-[50px]'>
-        <img
-          className='rounded-[50px] w-[40px] h-[40px]'
-          width={50}
-          src={`http://localhost:7777/api/profiles/get_image/${cellData.image}`}
-          // preview={false}
-        />
+        <Avatar size={40} src={`http://localhost:7777/api/profiles/get_image/${cellData.image}`} alt={cellData.name} />
       </div>
       <div className=' pl-2 flex flex-col g-0'>
         <div className='cell-user-name'>
@@ -153,7 +148,6 @@ function SideNavChat() {
   },[searchValue, cellData])
 
   useEffect(()=>{
-    // console.log("sedenav", selectedIndex);
   },[selectedIndex])
 
   return (
@@ -377,11 +371,7 @@ function ConversationWindow() {
                 {returnToSide && <div className='cursor-pointer' onClick={handleReturnClick}>
                   <ArrowLeftOutlined className='w-[30px] font-extrabold font-[10px]'/> 
                 </div>}
-                <img
-                  className='rounded-[50px] w-[40px] h-[40px]'
-                  width={40}
-                  src={`http://localhost:7777/api/profiles/get_image/${chatHeader?.image}`}
-                />
+                <Avatar size={40} src={`http://localhost:7777/api/profiles/get_image/${chatHeader?.image}`} alt={chatHeader?.name} />
                 <div className='flex flex-col gap-0'>
                   <div className='font-bold	'>
                     {chatHeader?.name}
