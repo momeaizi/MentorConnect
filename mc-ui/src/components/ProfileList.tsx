@@ -338,7 +338,7 @@ const ProfileList: React.FC = () => {
                                                 <Calendar className="w-4 h-4 mr-1" />
                                                 <span>Age: {profile.age}</span>
                                             </div>
-                                            <div className="flex gap-1 mt-2 overflow-y-auto max-h-20">
+                                            <div className="flex gap-1 pb-[2px] mt-2 overflow-y-auto max-h-20">
                                                 {profile.interests.map(interest => (
                                                     <Tag key={interest} color="blue" className="text-xs">
                                                         {interest}
