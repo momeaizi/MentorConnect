@@ -13,6 +13,8 @@ import { FireFilled, LoadingOutlined } from '@ant-design/icons';
 
 
 interface CreateAccountFormValues {
+  firstname: string;
+  lastname: string;
   username: string;
   email: string;
   password: string;
@@ -31,6 +33,8 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
     setLoading(true);
     try {
       const res = await publicApi.post('/auth/register', {
+        first_name: values.firstname,
+        last_name: values.lastname,
         username: values.username,
         email: values.email,
         password: values.password,
@@ -69,6 +73,38 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
       autoComplete="off"
       scrollToFirstError
     >
+      <div className="text-base text-[#D1D1D6] mb-2">Firstname</div>
+      <Form.Item
+        name="firstname"
+        rules={[{ required: true, message: 'Please input your first name!', whitespace: true }]}
+      >
+        <Input
+          placeholder="first name"
+          style={{
+            width: '100%',
+            height: '40px',
+            fontSize: '18px',
+            borderRadius: '10px'
+          }}
+        />
+      </Form.Item>
+
+      <div className="text-base text-[#D1D1D6] mb-2">Lastname</div>
+      <Form.Item
+        name="lastname"
+        rules={[{ required: true, message: 'Please input your last name!', whitespace: true }]}
+      >
+        <Input
+          placeholder="last name"
+          style={{
+            width: '100%',
+            height: '40px',
+            fontSize: '18px',
+            borderRadius: '10px'
+          }}
+        />
+      </Form.Item>
+    
       <div className="text-base text-[#D1D1D6] mb-2">Username</div>
       <Form.Item
         name="username"
@@ -101,7 +137,7 @@ const CreateAccountForm = ({ closeModal }: CreateAccountProps) => {
         ]}
       >
         <Input
-          placeholder="E-mail"
+          placeholder="Email"
           style={{
             width: '100%',
             height: '40px',
