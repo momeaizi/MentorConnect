@@ -4,6 +4,34 @@ from app.db.sql_executor import execute_query
 from flask import jsonify
 
 
+def is_user_blocked(user1_id, user2_id):
+    """
+    Checks if either user1 has blocked user2 or user2 has blocked user1.
+
+    Args:
+        user1_id (int): The ID of the first user.
+        user2_id (int): The ID of the second user.
+
+    Returns:
+        bool: True if one of the users has blocked the other, False otherwise.
+    """
+    try:
+        query = """
+            SELECT EXISTS (
+                SELECT 1 
+                FROM blocked_users 
+                WHERE 
+                    (blocker_id = %s AND blocked_id = %s)
+                    OR (blocker_id = %s AND blocked_id = %s)
+            );
+        """
+        result = execute_query(query, (user1_id, user2_id, user2_id, user1_id), fetch_one=True)
+        return result.get('exists', False)
+    except Exception as e:
+        logger.error(f"Error checking blocked status: {e}")
+        return False
+
+
 class UserBlockService:
     def block_user(self, blocker_id, blocked_id):
         try:

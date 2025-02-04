@@ -3,3 +3,4 @@ __pycache__
 mc-api/core
 mc-api/uploads/*
 node_modules
+pgdata

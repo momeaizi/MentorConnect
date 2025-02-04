@@ -1,7 +1,7 @@
 from app.db.sql_executor import execute_query
 from flask import jsonify
 from loguru import logger
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import humanize
 from app.main.services.notification_service import create_notif_service
 
@@ -15,11 +15,23 @@ class ProfileViewsService():
                     "status": "error",
                     "message": "You cannot log a view for your own profile."
                 }), 400
-            insert_query = "INSERT INTO profile_views (viewer_id, profile_owner_id) VALUES (%s, %s)"
-            execute_query(insert_query, params=(viewer_id, profile_owner_id))
 
-            create_notif_service({"notified_user_id": profile_owner_id, "actor_id": viewer_id, "type": 'viewed'})
+            # Fetch the last view timestamp
+            query_check = """
+                SELECT MAX(viewed_at)
+                FROM profile_views
+                WHERE viewer_id = %s AND profile_owner_id = %s;
+            """
+            last_view = execute_query(query_check, (viewer_id, profile_owner_id), fetch_one=True)
 
+            last_view = last_view.get('max', None)
+
+            # Check if the view can be logged
+            if last_view is None or last_view < datetime.utcnow() - timedelta(minutes=10):
+                insert_query = "INSERT INTO profile_views (viewer_id, profile_owner_id) VALUES (%s, %s)"
+                execute_query(insert_query, params=(viewer_id, profile_owner_id))
+
+                create_notif_service({"notified_user_id": profile_owner_id, "actor_id": viewer_id, "type": 'viewed'})
 
             return jsonify({"status": "success", "message": "Profile view logged successfully"}), 200
         except Exception as e:

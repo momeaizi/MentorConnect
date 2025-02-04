@@ -2,6 +2,7 @@ from app.db.sql_executor import execute_query
 from app.main.utils.exceptions import UniqueConstraintError
 from app.main.services.notification_service import create_notif_service
 from app.main.services.chat_service import create_conversation_service
+from app.main.services.user_block_service import is_user_blocked
 from flask import jsonify
 from loguru import logger
 from datetime import datetime, timezone
@@ -46,6 +47,14 @@ class ProfilelikesService():
                     "status": "error",
                     "message": "You cannot like your own profile."
                 }), 400
+            
+            if is_user_blocked(liker_id, liked_profile_id):
+                return jsonify({
+                    "status": "error",
+                    "message": "You cannot like your this profile."
+                }), 403
+
+
             query = """
                 BEGIN;
 
@@ -89,6 +98,13 @@ class ProfilelikesService():
                 "status": "error",
                 "message": "You cannot unlike your own profile."
             }), 400
+
+
+            if is_user_blocked(unliker_id, unliked_profile_id):
+                return jsonify({
+                    "status": "error",
+                    "message": "You cannot unlike your this profile."
+                }), 403
 
             query = """
                 BEGIN;
