@@ -19,16 +19,16 @@ class ProfileUpdateDTO:
 
         first_name = self.data.get('first_name', None)
         if not first_name:
-            raise ValidationError("first_name is required", "MISSING_FIRST_NAME")
-        if len(first_name) > 100:
-            raise ValidationError("first_name must be less than 15 characters", "INVALID_FIRST_NAME_LENGTH")
+            raise ValidationError("first name is required", "MISSING_FIRST_NAME")
+        if len(first_name) > 15:
+            raise ValidationError("first name must be less than 15 characters", "INVALID_FIRST_NAME_LENGTH")
         
 
         last_name = self.data.get('last_name', None)
         if not last_name:
-            raise ValidationError("last_name is required", "MISSING_LAST_NAME")
-        if len(last_name) > 100:
-            raise ValidationError("last_name must be less than 15 characters", "INVALID_LAST_NAME_LENGTH")
+            raise ValidationError("last name is required", "MISSING_LAST_NAME")
+        if len(last_name) > 15:
+            raise ValidationError("last name must be less than 15 characters", "INVALID_LAST_NAME_LENGTH")
         
         email = self.data.get('email', None)
         if not email:

@@ -14,7 +14,7 @@ serializer = URLSafeTimedSerializer("secret_key")
 
 def register_user(data):
     try:
-        insert_query = f"INSERT INTO users ({', '.join(data.keys())}) VALUES (%s, %s, %s) RETURNING *"
+        insert_query = f"INSERT INTO users ({', '.join(data.keys())}) VALUES (%s, %s, %s, %s, %s) RETURNING *"
         new_user = execute_query(insert_query, params=tuple(data.values()), fetch_one=True)
         if not new_user.get('is_verified', None):
             return jsonify({'status': 'error', 'message': 'Verify Your Email', 'email': new_user.get('email')}), 401

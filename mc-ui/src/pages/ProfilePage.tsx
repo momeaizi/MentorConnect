@@ -579,7 +579,7 @@ function UploadPictures({ profileData }: any) {
     const handleChange = ({ fileList }: any) => setFileList(fileList);
 
     const beforeUpload = () => {
-        if (fileList.length >= 5)
+        if (fileList.length >= 4)
             return false;
         return true;
     };
@@ -678,7 +678,7 @@ function UploadPictures({ profileData }: any) {
                         fileList={fileList}
                         onChange={handleChange}
                         beforeUpload={beforeUpload}
-                        maxCount={5}
+                        maxCount={4}
                         accept="image/*"
                         showUploadList={{
                             showPreviewIcon: false,
@@ -688,7 +688,7 @@ function UploadPictures({ profileData }: any) {
                             setFileList((prevFileList) => prevFileList.filter((f) => f.uid !== file.uid));
                         }}
                     >
-                        {fileList.length < 5 && (
+                        {fileList.length < 4 && (
                             <button style={{ border: 0, background: 'none' }} type="button">
                                 <PlusOutlined />
                                 <div style={{ marginTop: 8 }}>Upload</div>

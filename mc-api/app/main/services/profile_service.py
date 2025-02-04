@@ -235,13 +235,18 @@ def get_profile_service(user_id):
         logger.info(f"Error retrieving notifications: {str(e)}")
         return jsonify({'status': 'error', 'message': "something went wrong"}), 500
     
-#TODO CHANGE VALUES TO ALL DATA
 def update_profile_service(data, user):
     try:
         user_id = user.get('id', None)
         
         # return jsonify({'message': "This username already exist"}), 403
+        get_picture_query = f"""
+            SELECT picture_name FROM users WHERE id = %s ;
+        """
+        picture_name = execute_query(get_picture_query, params=(user_id,), fetch_one=True)        
+        
         gender = '\'male\'' if data.get('gender') else '\'female\''
+        is_complete = True if picture_name else False
         update_query = f"""
             UPDATE users 
             SET
@@ -253,10 +258,10 @@ def update_profile_service(data, user):
                 gender = {gender},
                 birth_date = %s ,
                 geolocation = ST_Point(%s, %s),
-                is_complete = TRUE
+                is_complete = %s
             WHERE id = %s
         """
-        execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), str(user_id)))
+        execute_query(update_query, params=(data.get('first_name'), data.get('last_name'), data.get('email'), data.get('username'), data.get('bio'), data.get('birth_date'), data.get('latitude'), data.get('longitude'), is_complete, str(user_id)))
         
         delete_query = """
                 DELETE FROM user_interests
