@@ -193,7 +193,7 @@ def download_random_image(upload_dir, user_id, username, is_profile=False, file_
 
 
 # Run the seeding process
-n = 500
+n = 515
 try:
     seed_users(n)
     seed_user_interests(n * 5)
