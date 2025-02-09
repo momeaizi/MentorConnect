@@ -102,6 +102,7 @@ export async function postImages(formData: any, openNotification: any) {
         console.error("----> ", error)
     }
 }
+
 export async function getImage(fileName: string, setSelectAvatar: any, setLoading: any) {
     api.get(`profiles/get_image/${fileName}`, { responseType: 'blob' })
         .then((response: any) => {
@@ -727,7 +728,13 @@ function ChangePassword() {
     const [password, setPassword] = useState<string>();
     const [newPassword, setNewPassword] = useState<string>();
     const [confirmPassword, setConfirmPassword] = useState<string>();
+    const [disabledButton, setDisabledButton] = useState<boolean>(true)
     const [api, contextHolder] = notification.useNotification();
+
+    const validatePassword = (password:string) => {
+        const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return pattern.test(password);
+    };
 
     const openNotification = (message: string, icon: any) => {
         api.open({
@@ -761,6 +768,13 @@ function ChangePassword() {
             openNotification("All fields is requiered", <InfoCircleOutlined style={{ color: 'red' }} />)
 
     }
+
+    useEffect(()=>{
+        if (newPassword && confirmPassword && newPassword === confirmPassword && validatePassword(newPassword))
+            setDisabledButton(false);
+        else
+            setDisabledButton(true);
+    },[newPassword, confirmPassword])
 
     return (
         <div className="w-full flex flex-col gap-4 ">
@@ -834,6 +848,7 @@ function ChangePassword() {
                 {/* Submit Button */}
                 <Form.Item>
                     <Button
+                        disabled={disabledButton}
                         onclick={handleSubmit}
                         text="Save Changes"
                         className="w-fit font-bold text-sl p-[8px_20px] rounded-2xl bg-gradient-to-r from-pink-500 to-red-500 cursor-pointer"

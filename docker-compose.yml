@@ -68,6 +68,8 @@ services:
     build: ./mc-ui
     depends_on:
       - mc-api
+    ports:
+      - "3000:3000"
     volumes:
       - ./mc-ui/src:/app/src
     networks:
