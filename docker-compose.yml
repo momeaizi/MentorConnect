@@ -8,7 +8,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
-      - pgdata_vol:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
     networks:
       - internal_network
 
@@ -44,6 +44,7 @@ services:
       - mc-redis
     volumes:
       - ./mc-api:/mc-api
+      - ./mc-api/uploads:/mc-api/uploads
     networks:
       - internal_network
 
@@ -76,5 +77,3 @@ services:
 networks:
   internal_network:
 
-volumes:
-  pgdata_vol:
